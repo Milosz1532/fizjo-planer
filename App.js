@@ -2,10 +2,31 @@ import React from 'react'
 import BottomTabNavigation from './BottomTabNavigation'
 import { NavigationContainer } from '@react-navigation/native'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
+import { Text } from 'react-native'
+import {
+	useFonts,
+	Poppins_400Regular,
+	Poppins_700Bold,
+	Poppins_600SemiBold,
+} from '@expo-google-fonts/poppins'
 
 const Stack = createNativeStackNavigator()
 
 export default function App() {
+	let [fontsLoaded] = useFonts({
+		'Poppins-Regular': Poppins_400Regular,
+		'Poppins-SemiBold': Poppins_600SemiBold,
+		'Poppins-Bold': Poppins_700Bold,
+	})
+
+	if (!fontsLoaded) {
+		return (
+			<>
+				<Text>Ładowanie</Text>
+			</>
+		)
+	}
+
 	return (
 		<NavigationContainer>
 			<Stack.Navigator>

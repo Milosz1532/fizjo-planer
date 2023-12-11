@@ -1,5 +1,6 @@
 export const COLORS = {
 	main: '#676DFF',
+	primary: '#A4A7FF',
 	app_background: '#F4F6FA',
 	element_background: '#FFF',
 	nav_element_color: '#2C3A63',
@@ -8,4 +9,11 @@ export const COLORS = {
 	text_gray_color: '#B7B7B7',
 	header_text_gray_color: '#BDC2CE',
 	tab_gray_element_color: '#A1A1A1',
+	icon_color: '#787878',
+
+	element_color_1: '#3E8DF9',
+	element_color_2: '#00B792',
+	element_color_3: '#FFC75C',
+	element_color_4: '#A167FF',
+	element_color_5: '#FC8282',
 }
