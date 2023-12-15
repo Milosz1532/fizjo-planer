@@ -11,6 +11,8 @@ export const COLORS = {
 	tab_gray_element_color: '#A1A1A1',
 	icon_color: '#787878',
 	light_icon_color: '#A8A8A8',
+	placeholder_color: '#ADADAD',
+	border_color: '#D6D6D6',
 
 	element_color_1: '#3E8DF9',
 	element_color_2: '#00B792',
