@@ -10,6 +10,8 @@ import {
 	Poppins_600SemiBold,
 } from '@expo-google-fonts/poppins'
 
+import ManagePatient from './screens/ManagementScreens/ManagePatient'
+
 const Stack = createNativeStackNavigator()
 
 export default function App() {
@@ -34,6 +36,11 @@ export default function App() {
 					name='BottomNavigation'
 					options={{ headerShown: false }}
 					component={BottomTabNavigation}
+				/>
+				<Stack.Screen
+					name='ManagePatient'
+					options={{ headerShown: false }}
+					component={ManagePatient}
 				/>
 				{/* <Stack.Screen
 					name='RecipeDetails'

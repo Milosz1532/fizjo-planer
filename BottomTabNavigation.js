@@ -1,16 +1,14 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
-
-import { View } from 'react-native'
-
-import { SafeAreaView } from 'react-native-safe-area-context'
+import { useNavigation } from '@react-navigation/native'
 
 import { Entypo } from '@expo/vector-icons'
 import FontAwesome from '@expo/vector-icons/FontAwesome5'
 
 import HomeScreen from './screens/HomeScreen'
 import CalendarScreen from './screens/CalendarScreen'
-import AddVisitScreen from './screens/AddVisitScreen'
 import PatientsCreen from './screens/PatientsScreen'
+import MoreScreen from './screens/MoreScreen'
+import ManageVisit from './screens/ManagementScreens/ManageVisit'
 
 import { COLORS } from './assets/colors'
 import { TouchableOpacity } from 'react-native'
@@ -28,6 +26,8 @@ const screenOptions = {
 }
 
 const BottomTabNavigation = () => {
+	const { navigate } = useNavigation()
+
 	return (
 		<Tab.Navigator screenOptions={screenOptions}>
 			<Tab.Screen
@@ -61,13 +61,14 @@ const BottomTabNavigation = () => {
 				}}
 			/>
 			<Tab.Screen
-				name='Dodaj wizyte'
-				component={AddVisitScreen}
+				name='manageVisit'
+				component={ManageVisit}
 				options={{
 					tabBarIcon: ({ focused }) => {
 						return (
 							<>
 								<TouchableOpacity
+									onPress={() => navigate('manageVisit')}
 									style={{
 										backgroundColor: COLORS.main,
 										display: 'flex',
@@ -102,7 +103,7 @@ const BottomTabNavigation = () => {
 			/>
 			<Tab.Screen
 				name='Więcej'
-				component={PatientsCreen}
+				component={MoreScreen}
 				options={{
 					tabBarIcon: ({ focused }) => {
 						return (

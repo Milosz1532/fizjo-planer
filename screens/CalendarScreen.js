@@ -8,6 +8,10 @@ import { COLORS } from '../assets/colors'
 
 import CustomStatusBar from '../components/CustomStatusBar'
 
+import { SafeAreaView } from 'react-native-safe-area-context'
+
+import { StatusBar } from 'expo-status-bar'
+
 const ScheduleComponent = ({ item, color }) => {
 	return (
 		<View style={[styles.scheduleComponent, { backgroundColor: color }]}>
@@ -90,7 +94,7 @@ export default function CalendaScreen() {
 		},
 		{
 			id: 5,
-			date: new Date(2023, 11, 7),
+			date: new Date(2023, 11, 8),
 			time_start: '13:00',
 			time_end: '14:00',
 		},
@@ -126,53 +130,57 @@ export default function CalendaScreen() {
 	}
 
 	return (
-		<View style={[globalStyles.screenContainer, { backgroundColor: COLORS.main }]}>
-			<CustomStatusBar backgroundColor={COLORS.main} barStyle='light-content' />
-			<View style={globalStyles.topHeader}>
-				<Text style={globalStyles.topHeaderText}>Kalendarz</Text>
+		<View style={{ flex: 1, backgroundColor: COLORS.main }}>
+			<StatusBar style='dark' />
+			<SafeAreaView edges={['right', 'left', 'top']} style={{ flex: 1 }}>
+				<View style={[globalStyles.screenContainer, { backgroundColor: COLORS.main }]}>
+					<View style={globalStyles.topHeader}>
+						<Text style={globalStyles.topHeaderText}>Kalendarz</Text>
 
-				<View style={globalStyles.plusIconContainer}>
-					<FontAwesome name={'plus'} size={14} color={COLORS.main_text_light_color} />
-				</View>
-			</View>
-
-			<ScrollView style={globalStyles.roundedContainer}>
-				<View>
-					<Calendar
-						markedDates={markedDates}
-						theme={{
-							backgroundColor: 'transparent',
-							calendarBackground: 'transparent',
-							textDayFontFamily: 'Poppins-Regular',
-							textMonthFontFamily: 'Poppins-Regular',
-							textDayHeaderFontFamily: 'Poppins-Regular',
-						}}
-					/>
-				</View>
-				<View style={{ marginTop: 10 }}>
-					{scheduleList.map((item, index, array) => (
-						<View key={index}>
-							{index === 0 || item.time_start !== array[index - 1].time_start ? (
-								item.time_start.endsWith(':00') ? (
-									<Text style={[styles.calendarScheduleHours, { marginTop: 10 }]}>
-										{item.time_start}
-									</Text>
-								) : null
-							) : null}
-
-							<View style={styles.calendarScheduleElements}>
-								<ScheduleComponent item={item} color={getColorForGroup(item.id)} />
-							</View>
-
-							{index === array.length - 1 || item.time_end !== array[index + 1].time_start ? (
-								item.time_end.endsWith(':00') ? (
-									<Text style={styles.calendarScheduleHours}>{item.time_end}</Text>
-								) : null
-							) : null}
+						<View style={globalStyles.plusIconContainer}>
+							<FontAwesome name={'plus'} size={14} color={COLORS.main_text_light_color} />
 						</View>
-					))}
+					</View>
+
+					<ScrollView style={globalStyles.roundedContainer}>
+						<View>
+							<Calendar
+								markedDates={markedDates}
+								theme={{
+									backgroundColor: 'transparent',
+									calendarBackground: 'transparent',
+									textDayFontFamily: 'Poppins-Regular',
+									textMonthFontFamily: 'Poppins-Regular',
+									textDayHeaderFontFamily: 'Poppins-Regular',
+								}}
+							/>
+						</View>
+						<View style={{ marginTop: 10 }}>
+							{scheduleList.map((item, index, array) => (
+								<View key={index}>
+									{index === 0 || item.time_start !== array[index - 1].time_start ? (
+										item.time_start.endsWith(':00') ? (
+											<Text style={[styles.calendarScheduleHours, { marginTop: 10 }]}>
+												{item.time_start}
+											</Text>
+										) : null
+									) : null}
+
+									<View style={styles.calendarScheduleElements}>
+										<ScheduleComponent item={item} color={getColorForGroup(item.id)} />
+									</View>
+
+									{index === array.length - 1 || item.time_end !== array[index + 1].time_start ? (
+										item.time_end.endsWith(':00') ? (
+											<Text style={styles.calendarScheduleHours}>{item.time_end}</Text>
+										) : null
+									) : null}
+								</View>
+							))}
+						</View>
+					</ScrollView>
 				</View>
-			</ScrollView>
+			</SafeAreaView>
 		</View>
 	)
 }

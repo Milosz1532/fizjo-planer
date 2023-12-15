@@ -6,6 +6,9 @@ import { COLORS } from '../assets/colors'
 import { globalStyles } from '../assets/styles'
 
 import CustomStatusBar from '../components/CustomStatusBar'
+import { SafeAreaView } from 'react-native-safe-area-context'
+
+import { StatusBar } from 'expo-status-bar'
 
 const VisitCard = () => {
 	return (
@@ -84,59 +87,62 @@ export default function HomeScreen() {
 	const [selectedWeekDay, setSelectedWeekDay] = useState(weekCalendarDays[0])
 
 	return (
-		<ScrollView style={globalStyles.screenContainer}>
-			<CustomStatusBar backgroundColor={COLORS.app_background} barStyle='dark-content' />
-
-			<View style={globalStyles.container}>
-				<View style={styles.titleText}>
-					<Text style={globalStyles.containerTitle}>Witaj Tamara </Text>
-					<TouchableOpacity>
-						<View style={styles.notificationsBox}>
-							<FontAwesome name={'bell'} size={18} color={COLORS.icon_color} />
+		<View style={{ flex: 1, backgroundColor: COLORS.app_background }}>
+			<StatusBar style='dark' />
+			<SafeAreaView edges={['right', 'left', 'top']} style={{ flex: 1 }}>
+				<ScrollView style={globalStyles.screenContainer}>
+					<View style={globalStyles.container}>
+						<View style={styles.titleText}>
+							<Text style={globalStyles.containerTitle}>Witaj Tamara </Text>
+							<TouchableOpacity>
+								<View style={styles.notificationsBox}>
+									<FontAwesome name={'bell'} size={18} color={COLORS.icon_color} />
+								</View>
+							</TouchableOpacity>
 						</View>
-					</TouchableOpacity>
-				</View>
 
-				<View style={{ marginTop: 20 }}>
-					<Text style={globalStyles.containerTitle}>Aktualny tydzień</Text>
-					<ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
-						<View style={styles.weekCalendar}>
-							{weekCalendarDays.map(d => (
-								<TouchableOpacity
-									key={d.id}
-									style={[
-										styles.dateBox,
-										selectedWeekDay && selectedWeekDay.id === d.id && styles.selectedDateBox,
-									]}
-									onPress={() => setSelectedWeekDay(d)}>
-									<Text style={styles.dateBoxDay}>{d.day}</Text>
-									<Text style={styles.dateBoxWeek}>{d.name}</Text>
-								</TouchableOpacity>
-							))}
+						<View style={{ marginTop: 20 }}>
+							<Text style={globalStyles.containerTitle}>Aktualny tydzień</Text>
+							<ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
+								<View style={styles.weekCalendar}>
+									{weekCalendarDays.map(d => (
+										<TouchableOpacity
+											key={d.id}
+											style={[
+												styles.dateBox,
+												selectedWeekDay && selectedWeekDay.id === d.id && styles.selectedDateBox,
+											]}
+											onPress={() => setSelectedWeekDay(d)}>
+											<Text style={styles.dateBoxDay}>{d.day}</Text>
+											<Text style={styles.dateBoxWeek}>{d.name}</Text>
+										</TouchableOpacity>
+									))}
+								</View>
+							</ScrollView>
 						</View>
-					</ScrollView>
-				</View>
 
-				<View style={{ marginTop: 20 }}>
-					<Text style={globalStyles.containerTitle}>Zaplanowane wizyty</Text>
-					<View>
-						<VisitCard />
-						<VisitCard />
-						<VisitCard />
-						<VisitCard />
+						<View style={{ marginTop: 20 }}>
+							<Text style={globalStyles.containerTitle}>Zaplanowane wizyty</Text>
+							<View>
+								<VisitCard />
+								<VisitCard />
+								<VisitCard />
+								<VisitCard />
+							</View>
+						</View>
+						<View style={{ marginTop: 20 }}>
+							<Text style={globalStyles.containerTitle}>Nadchodzące wizyty</Text>
+							<View style={[globalStyles.cardBox, globalStyles.cardShadow]}>
+								<Text style={styles.tabTitle}>6 grudnia 2023</Text>
+								<UpcomingVisit />
+								<UpcomingVisit />
+								<UpcomingVisit />
+							</View>
+						</View>
 					</View>
-				</View>
-				<View style={{ marginTop: 20 }}>
-					<Text style={globalStyles.containerTitle}>Nadchodzące wizyty</Text>
-					<View style={[globalStyles.cardBox, globalStyles.cardShadow]}>
-						<Text style={styles.tabTitle}>6 grudnia 2023</Text>
-						<UpcomingVisit />
-						<UpcomingVisit />
-						<UpcomingVisit />
-					</View>
-				</View>
-			</View>
-		</ScrollView>
+				</ScrollView>
+			</SafeAreaView>
+		</View>
 	)
 }
 

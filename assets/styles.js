@@ -1,4 +1,4 @@
-import { StyleSheet } from 'react-native'
+import { Platform, StyleSheet } from 'react-native'
 
 import { COLORS } from './colors'
 
@@ -31,6 +31,7 @@ export const globalStyles = StyleSheet.create({
 		paddingHorizontal: 20,
 		alignItems: 'center',
 		justifyContent: 'center',
+		marginTop: Platform.OS === 'android' ? 20 : 0,
 	},
 
 	topHeaderText: {
@@ -39,10 +40,22 @@ export const globalStyles = StyleSheet.create({
 		fontSize: 20,
 	},
 
+	topHeaderTextDark: {
+		fontFamily: 'Poppins-Bold',
+		color: COLORS.main_text_dark_color,
+		fontSize: 20,
+	},
+
 	plusIconContainer: {
 		position: 'absolute',
 		top: 10,
 		right: 25,
+	},
+
+	backIconContainer: {
+		position: 'absolute',
+		top: 5,
+		left: 25,
 	},
 
 	cardShadow: Platform.select({
