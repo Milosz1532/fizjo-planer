@@ -19,6 +19,11 @@ export const globalStyles = StyleSheet.create({
 		fontSize: 22,
 	},
 
+	containerMediumText: {
+		fontFamily: 'Poppins-Bold',
+		fontSize: 18,
+	},
+
 	cardBox: {
 		backgroundColor: COLORS.element_background,
 		padding: 10,

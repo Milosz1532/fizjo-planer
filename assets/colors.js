@@ -13,6 +13,8 @@ export const COLORS = {
 	light_icon_color: '#A8A8A8',
 	placeholder_color: '#ADADAD',
 	border_color: '#D6D6D6',
+	warning_color: '#F5AB93',
+	light_border_color: '#E4E4E4',
 
 	element_color_1: '#3E8DF9',
 	element_color_2: '#00B792',
