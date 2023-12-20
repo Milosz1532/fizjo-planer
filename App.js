@@ -10,7 +10,10 @@ import {
 	Poppins_600SemiBold,
 } from '@expo-google-fonts/poppins'
 
+import { AlertNotificationRoot } from 'react-native-alert-notification'
+
 import ManagePatient from './screens/ManagementScreens/ManagePatient'
+import ManageVisit from './screens/ManagementScreens/ManageVisit'
 
 const Stack = createNativeStackNavigator()
 
@@ -30,24 +33,26 @@ export default function App() {
 	}
 
 	return (
-		<NavigationContainer>
-			<Stack.Navigator>
-				<Stack.Screen
-					name='BottomNavigation'
-					options={{ headerShown: false }}
-					component={BottomTabNavigation}
-				/>
-				<Stack.Screen
-					name='ManagePatient'
-					options={{ headerShown: false }}
-					component={ManagePatient}
-				/>
-				{/* <Stack.Screen
-					name='RecipeDetails'
-					options={{ headerShown: false }}
-					component={RecipeDetailsScreen}
-				/> */}
-			</Stack.Navigator>
-		</NavigationContainer>
+		<AlertNotificationRoot>
+			<NavigationContainer>
+				<Stack.Navigator>
+					<Stack.Screen
+						name='BottomNavigation'
+						options={{ headerShown: false }}
+						component={BottomTabNavigation}
+					/>
+					<Stack.Screen
+						name='ManagePatient'
+						options={{ headerShown: false }}
+						component={ManagePatient}
+					/>
+					<Stack.Screen
+						name='manageVisit'
+						options={{ headerShown: false }}
+						component={ManageVisit}
+					/>
+				</Stack.Navigator>
+			</NavigationContainer>
+		</AlertNotificationRoot>
 	)
 }

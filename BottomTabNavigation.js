@@ -25,6 +25,10 @@ const screenOptions = {
 	},
 }
 
+const CustomTabBarButton = ({ onPress }) => {
+	return <TouchableOpacity onPress={onPress}></TouchableOpacity>
+}
+
 const BottomTabNavigation = () => {
 	const { navigate } = useNavigation()
 
@@ -61,30 +65,32 @@ const BottomTabNavigation = () => {
 				}}
 			/>
 			<Tab.Screen
-				name='manageVisit'
-				component={ManageVisit}
+				name='PlusButton'
+				component={CustomTabBarButton}
 				options={{
-					tabBarIcon: ({ focused }) => {
-						return (
-							<>
-								<TouchableOpacity
-									onPress={() => navigate('manageVisit')}
-									style={{
-										backgroundColor: COLORS.main,
-										display: 'flex',
-										alignItems: 'center',
-										justifyContent: 'center',
-										borderRadius: 50,
-										width: 40,
-										height: 40,
-										marginBottom: 25,
-									}}>
-									<FontAwesome name={'plus'} size={24} color={COLORS.main_text_light_color} />
-								</TouchableOpacity>
-							</>
-						)
-					},
+					tabBarIcon: ({ focused }) => (
+						<TouchableOpacity
+							onPress={() => navigate('manageVisit')}
+							style={{
+								backgroundColor: COLORS.main,
+								display: 'flex',
+								alignItems: 'center',
+								justifyContent: 'center',
+								borderRadius: 50,
+								width: 40,
+								height: 40,
+								marginBottom: 25,
+							}}>
+							<FontAwesome name={'plus'} size={24} color={COLORS.main_text_light_color} />
+						</TouchableOpacity>
+					),
 				}}
+				listeners={({ navigation }) => ({
+					tabPress: e => {
+						e.preventDefault()
+						navigate('manageVisit')
+					},
+				})}
 			/>
 			<Tab.Screen
 				name='Pacjenci'

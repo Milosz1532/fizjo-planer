@@ -87,4 +87,21 @@ export const globalStyles = StyleSheet.create({
 		padding: 20,
 		marginTop: 10,
 	},
+
+	buttonContainer: {
+		padding: 20,
+	},
+
+	button: {
+		backgroundColor: COLORS.main,
+		padding: 10,
+		borderRadius: 8,
+	},
+
+	buttonText: {
+		fontFamily: 'Poppins-SemiBold',
+		color: COLORS.main_text_light_color,
+		textAlign: 'center',
+		fontSize: 20,
+	},
 })
