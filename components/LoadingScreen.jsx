@@ -3,9 +3,14 @@ import React from 'react'
 
 import { COLORS } from '../assets/colors'
 
-export default function LoadingScreen({ transparent }) {
+export default function LoadingScreen({ transparent, onContent }) {
 	return (
-		<View style={[styles.loadingContainer, transparent && styles.loadingTransparent]}>
+		<View
+			style={[
+				styles.loadingContainer,
+				transparent && styles.loadingTransparent,
+				onContent && styles.onContent,
+			]}>
 			<ActivityIndicator size={'large'} color={COLORS.main} />
 		</View>
 	)
@@ -13,13 +18,17 @@ export default function LoadingScreen({ transparent }) {
 
 const styles = StyleSheet.create({
 	loadingContainer: {
-		...StyleSheet.absoluteFillObject,
+		flex: 1,
 		alignItems: 'center',
 		justifyContent: 'center',
-		backgroundColor: 'rgba(255,255,255, 1)',
 	},
 
 	loadingTransparent: {
 		backgroundColor: 'rgba(255,255,255, 0.8)',
+	},
+
+	onContent: {
+		backgroundColor: 'rgba(255,255,255, 1)',
+		...StyleSheet.absoluteFillObject,
 	},
 })

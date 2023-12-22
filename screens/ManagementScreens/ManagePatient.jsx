@@ -19,9 +19,10 @@ import { ALERT_TYPE, Dialog } from 'react-native-alert-notification'
 import { globalStyles } from '../../assets/styles'
 import { COLORS } from '../../assets/colors'
 import TextField from '../../components/TextField'
-import SelectField from '../../components/SelectField'
 import Button from '../../components/Button'
 import LoadingScreen from '../../components/LoadingScreen'
+
+import { insertPatient } from '../../services/Database'
 
 const ProblemComponent = ({ id, text, onRemove }) => {
 	return (
@@ -40,7 +41,7 @@ const ProblemComponent = ({ id, text, onRemove }) => {
 export default function ManagePatient() {
 	const { goBack } = useNavigation()
 	const [fullName, setFullName] = useState('')
-	const [age, setAge] = useState('')
+	const [birthday, setBirthday] = useState('')
 	const [phoneNumber, setPhoneNumber] = useState('')
 	const [note, setNote] = useState('')
 
@@ -71,13 +72,29 @@ export default function ManagePatient() {
 	}
 
 	const handleAddPatient = () => {
-		console.log(`Pacjent dodany`)
-		const payload = {
-			fullName: fullName,
-			age: age,
-			phoneNumber: phoneNumber,
-			note: note,
-			problems: problemList,
+		if (
+			fullName.trim().length === 0 ||
+			birthday.trim().length < 10 ||
+			phoneNumber.trim().length === 0
+		) {
+			Dialog.show({
+				type: ALERT_TYPE.DANGER,
+				title: 'Problem',
+				textBody: 'Wypełnij poprawnie pola formularza',
+				button: 'OK',
+			})
+			return
+		}
+
+		try {
+			insertPatient(fullName, birthday, phoneNumber, note, problemList)
+		} catch (ex) {
+			Dialog.show({
+				type: ALERT_TYPE.DANGER,
+				title: 'Błąd',
+				textBody: 'Wystąpił problem podczas dodawania pacjenta. Spróbuj ponownie.',
+				button: 'OK',
+			})
 		}
 
 		Dialog.show({
@@ -85,6 +102,10 @@ export default function ManagePatient() {
 			title: 'Success',
 			textBody: 'Gratulacje pacjent został pomyślnie dodany',
 			button: 'OK',
+			onPressButton: () => {
+				Dialog.hide()
+				goBack()
+			},
 		})
 	}
 
@@ -125,10 +146,10 @@ export default function ManagePatient() {
 								<View style={{ marginTop: 20 }}>
 									<TextField
 										keyboardType='numeric'
-										value={age}
-										maxLength={4}
-										label='Rok urodzenia'
-										onChangeText={text => setAge(text)}
+										value={birthday}
+										contentType={'datetime'}
+										label='Data urodzenia'
+										onChangeText={text => setBirthday(text)}
 									/>
 								</View>
 								<View style={{ marginTop: 20 }}>
@@ -190,7 +211,7 @@ export default function ManagePatient() {
 							<Button text={'Dodaj pacjenta'} onPress={handleAddPatient} />
 						</View>
 					</ScrollView>
-					<LoadingScreen transparent={true} />
+					{/* <LoadingScreen transparent={true} /> */}
 				</KeyboardAvoidingView>
 			</SafeAreaView>
 		</View>

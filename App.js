@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import BottomTabNavigation from './BottomTabNavigation'
 import { NavigationContainer } from '@react-navigation/native'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
@@ -12,12 +12,41 @@ import {
 
 import { AlertNotificationRoot } from 'react-native-alert-notification'
 
+import {
+	initDatabase,
+	insertPatient,
+	insertPatientProblem,
+	fetchPatientData,
+} from './services/Database'
 import ManagePatient from './screens/ManagementScreens/ManagePatient'
 import ManageVisit from './screens/ManagementScreens/ManageVisit'
 
 const Stack = createNativeStackNavigator()
 
 export default function App() {
+	useEffect(() => {
+		initDatabase()
+		// insertPatient('Tamara Banaszek', 2022, 123456789, 'test')
+		// insertPatientProblem(1, 'Problem Tamary')
+		fetchPatientData(data => {
+			const patientList = data
+			patientList.forEach(element => {
+				console.log(`------------ PACJENT ------------------`)
+				console.log('ID: ' + element.id)
+				console.log('Full_name: ' + element.full_name)
+				console.log('Phone number: ' + element.phone_number)
+				console.log(`Year of birth: ` + element.year_of_birth)
+				console.log('Note: ' + element.note)
+
+				console.log(`Problemy: `)
+				element.problems.forEach(problem => {
+					console.log(`ID: ${problem.id}`)
+					console.log(`Text: ${problem.text}`)
+				})
+			})
+		})
+	}, [])
+
 	let [fontsLoaded] = useFonts({
 		'Poppins-Regular': Poppins_400Regular,
 		'Poppins-SemiBold': Poppins_600SemiBold,

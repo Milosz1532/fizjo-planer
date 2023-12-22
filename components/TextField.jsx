@@ -9,10 +9,22 @@ import {
 	TouchableWithoutFeedback,
 } from 'react-native'
 
+import { TextInputMask } from 'react-native-masked-text'
+
 import { COLORS } from '../assets/colors'
 
 const TextField = props => {
-	const { label, value, style, onBlur, onFocus, onChangeText, ...restOfProps } = props
+	const {
+		label,
+		value,
+		style,
+		onBlur,
+		onFocus,
+		onChangeText,
+		contentType,
+		maxLength,
+		...restOfProps
+	} = props
 	const [isFocused, setIsFocused] = useState(false)
 
 	const inputRef = useRef(null)
@@ -29,21 +41,45 @@ const TextField = props => {
 
 	return (
 		<View style={style}>
-			<TextInput
-				ref={inputRef}
-				style={[styles.input, isFocused && styles.inputFocus]}
-				value={value}
-				onChangeText={onChangeText}
-				onBlur={event => {
-					setIsFocused(false)
-					onBlur?.(event)
-				}}
-				onFocus={event => {
-					setIsFocused(true)
-					onFocus?.(event)
-				}}
-				{...restOfProps}
-			/>
+			{contentType === 'datetime' ? (
+				<TextInputMask
+					ref={inputRef}
+					style={[styles.input, isFocused && styles.inputFocus]}
+					value={value}
+					onChangeText={onChangeText}
+					type='datetime'
+					maxLength={10}
+					options={{
+						format: 'DD.MM.YYYY',
+					}}
+					onBlur={event => {
+						setIsFocused(false)
+						onBlur?.(event)
+					}}
+					onFocus={event => {
+						setIsFocused(true)
+						onFocus?.(event)
+					}}
+					{...restOfProps}
+				/>
+			) : (
+				<TextInput
+					ref={inputRef}
+					style={[styles.input, isFocused && styles.inputFocus]}
+					value={value}
+					onChangeText={onChangeText}
+					onBlur={event => {
+						setIsFocused(false)
+						onBlur?.(event)
+					}}
+					onFocus={event => {
+						setIsFocused(true)
+						onFocus?.(event)
+					}}
+					{...restOfProps}
+				/>
+			)}
+
 			<TouchableWithoutFeedback onPress={() => inputRef.current?.focus()}>
 				<Animated.View
 					style={[

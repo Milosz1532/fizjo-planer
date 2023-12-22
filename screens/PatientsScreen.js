@@ -1,5 +1,5 @@
-import React, { useState } from 'react'
-import { useNavigation } from '@react-navigation/native'
+import React, { useState, useCallback } from 'react'
+import { useNavigation, useFocusEffect } from '@react-navigation/native'
 
 import { ScrollView, View, Text, TextInput, StyleSheet, TouchableOpacity } from 'react-native'
 import FontAwesome from '@expo/vector-icons/FontAwesome5'
@@ -11,15 +11,62 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { StatusBar } from 'expo-status-bar'
 
-const PatientComponent = () => {
+import { fetchPatientData } from '../services/Database'
+import LoadingScreen from '../components/LoadingScreen'
+
+const PatientComponent = ({ fullName, dateOfBirth }) => {
+	const calculateAge = birthDate => {
+		const today = new Date()
+		const birthDateObj = new Date(birthDate)
+
+		const years = today.getFullYear() - birthDateObj.getFullYear()
+		const months = today.getMonth() - birthDateObj.getMonth()
+		const days = today.getDate() - birthDateObj.getDate()
+
+		if (years > 0 || (years === 0 && months > 0) || (years === 0 && months === 0 && days >= 0)) {
+			if (years === 0) {
+				return `${months} ${
+					months === 1 ? 'miesiąc' : months > 1 && months < 5 ? 'miesiące' : 'miesięcy'
+				}`
+			} else {
+				const yearsPart = `${years} ${
+					years === 1
+						? 'rok'
+						: (years > 1 && years < 5) ||
+						  (years % 10 >= 2 && years % 10 <= 4 && (years % 100 < 10 || years % 100 >= 20))
+						? 'lata'
+						: 'lat'
+				}`
+				const monthsPart =
+					months > 0
+						? ` i ${months} ${
+								months === 1 ? 'miesiąc' : months > 1 && months < 5 ? 'miesiące' : 'miesięcy'
+						  }`
+						: ''
+				return `${yearsPart}${monthsPart}`
+			}
+		} else {
+			return `${years - 1} ${
+				years - 1 === 1
+					? 'rok'
+					: (years - 1 > 1 && years - 1 < 5) ||
+					  ((years - 1) % 10 >= 2 &&
+							(years - 1) % 10 <= 4 &&
+							((years - 1) % 100 < 10 || (years - 1) % 100 >= 20))
+					? 'lata'
+					: 'lat'
+			}`
+		}
+	}
+
 	return (
 		<View style={styles.PatientComponent}>
 			<View style={styles.PatientComponentIcon}></View>
 
 			<View style={styles.PatientComponentContent}>
 				<View>
-					<Text style={styles.PatientComponentName}>Jasiu Kowalski</Text>
-					<Text style={styles.PatientComponentAge}>Wiek: 10 lat</Text>
+					<Text style={styles.PatientComponentName}>{fullName}</Text>
+					<Text style={styles.PatientComponentAge}>Wiek: {calculateAge(dateOfBirth)}</Text>
 				</View>
 				<View style={styles.PatientComponentTime}>
 					<FontAwesome name={'calendar'} size={18} color={COLORS.main} />
@@ -32,6 +79,23 @@ const PatientComponent = () => {
 
 export default function PatientsScreen() {
 	const { navigate } = useNavigation()
+	const [patientList, setPatientList] = useState([])
+	const [isLoading, setIsLoading] = useState(true)
+
+	const fetchData = async () => {
+		console.log(`Pobieram listę pacjentów`)
+		setIsLoading(true)
+		fetchPatientData(data => {
+			setPatientList(data)
+			setIsLoading(false)
+		})
+	}
+
+	useFocusEffect(
+		useCallback(() => {
+			fetchData()
+		}, [])
+	)
 
 	return (
 		<View style={{ flex: 1, backgroundColor: COLORS.main }}>
@@ -48,22 +112,30 @@ export default function PatientsScreen() {
 						</View>
 					</View>
 
-					<ScrollView style={globalStyles.roundedContainer}>
-						<View style={[styles.searchBar, globalStyles.cardShadow]}>
-							<TextInput style={styles.searchInput} placeholder='Wyszukaj pacjenta...' />
-							<FontAwesome name={'search'} size={16} color={COLORS.header_text_gray_color} />
-						</View>
+					{!isLoading ? (
+						<ScrollView style={globalStyles.roundedContainer}>
+							<View style={[styles.searchBar, globalStyles.cardShadow]}>
+								<TextInput style={styles.searchInput} placeholder='Wyszukaj pacjenta...' />
+								<FontAwesome name={'search'} size={16} color={COLORS.header_text_gray_color} />
+							</View>
 
-						<View style={{ marginTop: 10 }}>
-							<Text style={globalStyles.containerTitle}>Lista pacjentów</Text>
+							<View style={{ marginTop: 10 }}>
+								<Text style={globalStyles.containerTitle}>Lista pacjentów</Text>
 
-							<PatientComponent />
-							<PatientComponent />
-							<PatientComponent />
-							<PatientComponent />
-							<PatientComponent />
+								{patientList.map(el => (
+									<PatientComponent
+										key={el.id}
+										fullName={el.full_name}
+										dateOfBirth={el.date_of_birth}
+									/>
+								))}
+							</View>
+						</ScrollView>
+					) : (
+						<View style={globalStyles.roundedContainer}>
+							<LoadingScreen />
 						</View>
-					</ScrollView>
+					)}
 				</View>
 			</SafeAreaView>
 		</View>
