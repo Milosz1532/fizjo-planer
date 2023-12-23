@@ -107,7 +107,7 @@ export default function PatientsScreen() {
 
 						<View style={globalStyles.plusIconContainer}>
 							<TouchableOpacity onPress={() => navigate('ManagePatient', {})}>
-								<FontAwesome name={'plus'} size={14} color={COLORS.main_text_light_color} />
+								<FontAwesome name={'plus'} size={16} color={COLORS.main_text_light_color} />
 							</TouchableOpacity>
 						</View>
 					</View>
@@ -145,6 +145,7 @@ export default function PatientsScreen() {
 const styles = StyleSheet.create({
 	searchBar: {
 		margin: 2,
+		marginTop: 20,
 		backgroundColor: COLORS.element_background,
 		height: 50,
 		borderRadius: 20,

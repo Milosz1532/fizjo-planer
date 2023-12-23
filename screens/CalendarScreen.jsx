@@ -138,7 +138,7 @@ export default function CalendaScreen() {
 						<Text style={globalStyles.topHeaderText}>Kalendarz</Text>
 
 						<View style={globalStyles.plusIconContainer}>
-							<FontAwesome name={'plus'} size={14} color={COLORS.main_text_light_color} />
+							<FontAwesome name={'plus'} size={16} color={COLORS.main_text_light_color} />
 						</View>
 					</View>
 

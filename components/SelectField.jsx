@@ -22,6 +22,7 @@ const SelectField = props => {
 	const focusAnim = useRef(new Animated.Value(0)).current
 
 	const [selectedItem, setSelectedItem] = useState(null)
+	const [isDropdownOpen, setIsDropdownOpen] = useState(false)
 
 	useEffect(() => {
 		Animated.timing(focusAnim, {
@@ -32,13 +33,13 @@ const SelectField = props => {
 		}).start()
 	}, [focusAnim, isFocused, value])
 
+	useEffect(() => {
+		setIsDropdownOpen(isFocused)
+	}, [isFocused])
+
 	const handleSelectItem = async item => {
 		console.log(`Wybieram element: ${item}`)
 		setSelectedItem(item)
-	}
-
-	const handleContainerPress = () => {
-		inputRef.current?.focus()
 	}
 
 	return (
@@ -58,6 +59,7 @@ const SelectField = props => {
 							setIsFocused(true)
 							onFocus?.(event)
 						}}
+						returnKeyLabel='Test'
 						{...restOfProps}
 					/>
 					<TouchableWithoutFeedback onPress={() => inputRef.current?.focus()}>
@@ -98,7 +100,7 @@ const SelectField = props => {
 				</View>
 			</View>
 
-			{isFocused && (
+			{isDropdownOpen && (
 				<View style={styles.dropDownContainer}>
 					<TouchableOpacity onPress={() => handleSelectItem('Basen Miejski Włocławek')}>
 						<View style={styles.dropDownItem}>

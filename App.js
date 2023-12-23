@@ -12,12 +12,7 @@ import {
 
 import { AlertNotificationRoot } from 'react-native-alert-notification'
 
-import {
-	initDatabase,
-	insertPatient,
-	insertPatientProblem,
-	fetchPatientData,
-} from './services/Database'
+import { initDatabase, fetchPatientData } from './services/Database'
 import ManagePatient from './screens/ManagementScreens/ManagePatient'
 import ManageVisit from './screens/ManagementScreens/ManageVisit'
 

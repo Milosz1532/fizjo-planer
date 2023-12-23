@@ -53,7 +53,7 @@ export const globalStyles = StyleSheet.create({
 
 	plusIconContainer: {
 		position: 'absolute',
-		top: 10,
+		top: 6,
 		right: 25,
 	},
 
@@ -84,7 +84,8 @@ export const globalStyles = StyleSheet.create({
 		flex: 1,
 		borderTopLeftRadius: 20,
 		borderTopRightRadius: 20,
-		padding: 20,
+		paddingBottom: 20,
+		paddingHorizontal: 20,
 		marginTop: 10,
 	},
 
