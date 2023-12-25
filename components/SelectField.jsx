@@ -8,6 +8,7 @@ import {
 	Easing,
 	TouchableWithoutFeedback,
 	TouchableOpacity,
+	KeyboardAvoidingView,
 } from 'react-native'
 
 import FontAwesome from '@expo/vector-icons/FontAwesome5'
@@ -43,7 +44,9 @@ const SelectField = props => {
 	}
 
 	return (
-		<View style={[styles.container, isFocused && styles.containerFocus]}>
+		<KeyboardAvoidingView
+			style={[styles.container, isFocused && styles.containerFocus]}
+			behavior='padding'>
 			<View style={{ flexDirection: 'row' }}>
 				<View style={{ flex: 1 }}>
 					<TextInput
@@ -119,7 +122,7 @@ const SelectField = props => {
 					</TouchableOpacity>
 				</View>
 			)}
-		</View>
+		</KeyboardAvoidingView>
 	)
 }
 
