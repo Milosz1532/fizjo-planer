@@ -9,21 +9,20 @@ import {
 	TouchableWithoutFeedback,
 	TouchableOpacity,
 	KeyboardAvoidingView,
+	Keyboard,
 } from 'react-native'
+import OutsidePressHandler from 'react-native-outside-press'
 
 import FontAwesome from '@expo/vector-icons/FontAwesome5'
 
 import { COLORS } from '../assets/colors'
 
 const SelectField = props => {
-	const { label, value, style, onBlur, onFocus, onChangeText, ...restOfProps } = props
+	const { label, value, style, onBlur, onFocus, onChangeText, items, ...restOfProps } = props
 	const [isFocused, setIsFocused] = useState(false)
 
 	const inputRef = useRef(null)
 	const focusAnim = useRef(new Animated.Value(0)).current
-
-	const [selectedItem, setSelectedItem] = useState(null)
-	const [isDropdownOpen, setIsDropdownOpen] = useState(false)
 
 	useEffect(() => {
 		Animated.timing(focusAnim, {
@@ -34,95 +33,89 @@ const SelectField = props => {
 		}).start()
 	}, [focusAnim, isFocused, value])
 
-	useEffect(() => {
-		setIsDropdownOpen(isFocused)
-	}, [isFocused])
+	const handlePressOutside = () => {
+		if (isFocused) inputRef.current.blur()
+	}
 
-	const handleSelectItem = async item => {
-		console.log(`Wybieram element: ${item}`)
-		setSelectedItem(item)
+	const handleSelectItem = item => {
+		onChangeText(item)
+		inputRef.current.blur()
 	}
 
 	return (
-		<KeyboardAvoidingView
-			style={[styles.container, isFocused && styles.containerFocus]}
-			behavior='padding'>
-			<View style={{ flexDirection: 'row' }}>
-				<View style={{ flex: 1 }}>
-					<TextInput
-						ref={inputRef}
-						style={[styles.input]}
-						value={value}
-						onChangeText={onChangeText}
-						onBlur={event => {
-							setIsFocused(false)
-							onBlur?.(event)
-						}}
-						onFocus={event => {
-							setIsFocused(true)
-							onFocus?.(event)
-						}}
-						returnKeyLabel='Test'
-						{...restOfProps}
-					/>
-					<TouchableWithoutFeedback onPress={() => inputRef.current?.focus()}>
-						<Animated.View
-							style={[
-								styles.labelContainer,
-								{
-									transform: [
-										{
-											scale: focusAnim.interpolate({
-												inputRange: [0, 1],
-												outputRange: [1, 0.95],
-											}),
-										},
-										{
-											translateY: focusAnim.interpolate({
-												inputRange: [0, 1],
-												outputRange: [16, -8],
-											}),
-										},
-										{
-											translateX: focusAnim.interpolate({
-												inputRange: [0, 1],
-												outputRange: [10, 10],
-											}),
-										},
-									],
-								},
-							]}>
-							<Text style={[styles.label, isFocused && styles.labelFocus]}>{label}</Text>
-						</Animated.View>
-					</TouchableWithoutFeedback>
+		<OutsidePressHandler onOutsidePress={handlePressOutside}>
+			<View
+				style={[styles.container, isFocused && styles.containerFocus]}
+				keyboardShouldPersistTaps='handled'>
+				<View style={{ flexDirection: 'row' }}>
+					<View style={{ flex: 1 }}>
+						<TextInput
+							ref={inputRef}
+							style={[styles.input]}
+							value={value}
+							onChangeText={onChangeText}
+							onBlur={event => {
+								setIsFocused(false)
+								onBlur?.(event)
+							}}
+							onFocus={event => {
+								setIsFocused(true)
+								onFocus?.(event)
+							}}
+							returnKeyLabel='Test'
+							{...restOfProps}
+						/>
+						<TouchableWithoutFeedback onPress={() => inputRef.current?.focus()}>
+							<Animated.View
+								style={[
+									styles.labelContainer,
+									{
+										transform: [
+											{
+												scale: focusAnim.interpolate({
+													inputRange: [0, 1],
+													outputRange: [1, 0.95],
+												}),
+											},
+											{
+												translateY: focusAnim.interpolate({
+													inputRange: [0, 1],
+													outputRange: [12, -8],
+												}),
+											},
+											{
+												translateX: focusAnim.interpolate({
+													inputRange: [0, 1],
+													outputRange: [10, 10],
+												}),
+											},
+										],
+									},
+								]}>
+								<Text style={[styles.label, isFocused && styles.labelFocus]}>{label}</Text>
+							</Animated.View>
+						</TouchableWithoutFeedback>
+					</View>
+					<View style={styles.iconContainer}>
+						<View style={styles.iconBtn}>
+							<FontAwesome name={'angle-down'} size={20} color={COLORS.placeholder_color} />
+						</View>
+					</View>
 				</View>
-				<View style={styles.iconContainer}>
-					<TouchableOpacity style={styles.iconBtn}>
-						<FontAwesome name={'angle-down'} size={20} color={COLORS.placeholder_color} />
-					</TouchableOpacity>
-				</View>
-			</View>
 
-			{isDropdownOpen && (
-				<View style={styles.dropDownContainer}>
-					<TouchableOpacity onPress={() => handleSelectItem('Basen Miejski Włocławek')}>
-						<View style={styles.dropDownItem}>
-							<Text style={styles.dropDownItemText}>Basen Miejski Włocławek</Text>
-						</View>
-					</TouchableOpacity>
-					<TouchableOpacity onPress={() => handleSelectItem('ul. Bajeczna 14/3 Włocławek')}>
-						<View style={styles.dropDownItem}>
-							<Text style={styles.dropDownItemText}>ul. Bajeczna 14/3 Włocławek</Text>
-						</View>
-					</TouchableOpacity>
-					<TouchableOpacity onPress={() => handleSelectItem('ul. Promienna 3/43 Włocławek')}>
-						<View style={styles.dropDownItem}>
-							<Text style={styles.dropDownItemText}>ul. Promienna 3/43 Włocławek</Text>
-						</View>
-					</TouchableOpacity>
-				</View>
-			)}
-		</KeyboardAvoidingView>
+				{isFocused && (
+					<View style={styles.dropDownContainer}>
+						{items.map(item => (
+							<TouchableOpacity key={item.id} onPress={() => handleSelectItem(item)}>
+								<View style={styles.dropDownItem}>
+									<Text style={styles.dropDownItemText}>{item.name}</Text>
+								</View>
+							</TouchableOpacity>
+						))}
+					</View>
+				)}
+			</View>
+		</OutsidePressHandler>
 	)
 }
 
@@ -141,7 +134,7 @@ const styles = StyleSheet.create({
 	input: {
 		padding: 13,
 		paddingHorizontal: 20,
-		fontFamily: 'Poppins-Regular',
+		fontFamily: 'Poppins-Bold',
 		fontSize: 14,
 	},
 
@@ -180,6 +173,35 @@ const styles = StyleSheet.create({
 	dropDownItemText: {
 		fontFamily: 'Poppins-Regular',
 		fontSize: 14,
+		color: COLORS.placeholder_color,
+	},
+
+	addItemContainer: {
+		flexDirection: 'row',
+		alignItems: 'center',
+		paddingHorizontal: 20,
+		paddingVertical: 10,
+		borderTopWidth: 1,
+		borderColor: COLORS.border_color,
+	},
+
+	addItemIcon: {
+		backgroundColor: COLORS.main,
+		borderRadius: 6,
+		width: 20,
+		height: 20,
+		marginEnd: 10,
+		alignItems: 'center',
+		justifyContent: 'center',
+	},
+
+	addItemInputContainer: {
+		flex: 1,
+	},
+
+	addItemInput: {
+		fontFamily: 'Poppins-Regular',
+		flex: 1,
 		color: COLORS.placeholder_color,
 	},
 })

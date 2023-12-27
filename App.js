@@ -11,6 +11,7 @@ import {
 } from '@expo-google-fonts/poppins'
 
 import { AlertNotificationRoot } from 'react-native-alert-notification'
+import { EventProvider } from 'react-native-outside-press'
 
 import { initDatabase, fetchPatientData } from './services/Database'
 import ManagePatient from './screens/ManagementScreens/ManagePatient'
@@ -58,25 +59,27 @@ export default function App() {
 
 	return (
 		<AlertNotificationRoot>
-			<NavigationContainer>
-				<Stack.Navigator>
-					<Stack.Screen
-						name='BottomNavigation'
-						options={{ headerShown: false }}
-						component={BottomTabNavigation}
-					/>
-					<Stack.Screen
-						name='ManagePatient'
-						options={{ headerShown: false }}
-						component={ManagePatient}
-					/>
-					<Stack.Screen
-						name='manageVisit'
-						options={{ headerShown: false }}
-						component={ManageVisit}
-					/>
-				</Stack.Navigator>
-			</NavigationContainer>
+			<EventProvider>
+				<NavigationContainer>
+					<Stack.Navigator>
+						<Stack.Screen
+							name='BottomNavigation'
+							options={{ headerShown: false }}
+							component={BottomTabNavigation}
+						/>
+						<Stack.Screen
+							name='ManagePatient'
+							options={{ headerShown: false }}
+							component={ManagePatient}
+						/>
+						<Stack.Screen
+							name='manageVisit'
+							options={{ headerShown: false }}
+							component={ManageVisit}
+						/>
+					</Stack.Navigator>
+				</NavigationContainer>
+			</EventProvider>
 		</AlertNotificationRoot>
 	)
 }

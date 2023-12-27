@@ -8,6 +8,7 @@ import {
 	Easing,
 	TouchableWithoutFeedback,
 } from 'react-native'
+import OutsidePressHandler from 'react-native-outside-press'
 
 import { TextInputMask } from 'react-native-masked-text'
 
@@ -39,78 +40,84 @@ const TextField = props => {
 		}).start()
 	}, [focusAnim, isFocused, value])
 
-	return (
-		<View style={style}>
-			{contentType === 'datetime' ? (
-				<TextInputMask
-					ref={inputRef}
-					style={[styles.input, isFocused && styles.inputFocus]}
-					value={value}
-					onChangeText={onChangeText}
-					type='datetime'
-					maxLength={10}
-					options={{
-						format: 'DD.MM.YYYY',
-					}}
-					onBlur={event => {
-						setIsFocused(false)
-						onBlur?.(event)
-					}}
-					onFocus={event => {
-						setIsFocused(true)
-						onFocus?.(event)
-					}}
-					{...restOfProps}
-				/>
-			) : (
-				<TextInput
-					ref={inputRef}
-					style={[styles.input, isFocused && styles.inputFocus]}
-					value={value}
-					onChangeText={onChangeText}
-					onBlur={event => {
-						setIsFocused(false)
-						onBlur?.(event)
-					}}
-					onFocus={event => {
-						setIsFocused(true)
-						onFocus?.(event)
-					}}
-					{...restOfProps}
-				/>
-			)}
+	const handlePressOutside = () => {
+		if (isFocused) inputRef.current.blur()
+	}
 
-			<TouchableWithoutFeedback onPress={() => inputRef.current?.focus()}>
-				<Animated.View
-					style={[
-						styles.labelContainer,
-						{
-							transform: [
-								{
-									scale: focusAnim.interpolate({
-										inputRange: [0, 1],
-										outputRange: [1, 0.95],
-									}),
-								},
-								{
-									translateY: focusAnim.interpolate({
-										inputRange: [0, 1],
-										outputRange: [16, -8],
-									}),
-								},
-								{
-									translateX: focusAnim.interpolate({
-										inputRange: [0, 1],
-										outputRange: [10, 10],
-									}),
-								},
-							],
-						},
-					]}>
-					<Text style={[styles.label, isFocused && styles.labelFocus]}>{label}</Text>
-				</Animated.View>
-			</TouchableWithoutFeedback>
-		</View>
+	return (
+		<OutsidePressHandler onOutsidePress={handlePressOutside}>
+			<View style={style}>
+				{contentType === 'datetime' ? (
+					<TextInputMask
+						ref={inputRef}
+						style={[styles.input, isFocused && styles.inputFocus]}
+						value={value}
+						onChangeText={onChangeText}
+						type='datetime'
+						maxLength={10}
+						options={{
+							format: 'DD.MM.YYYY',
+						}}
+						onBlur={event => {
+							setIsFocused(false)
+							onBlur?.(event)
+						}}
+						onFocus={event => {
+							setIsFocused(true)
+							onFocus?.(event)
+						}}
+						{...restOfProps}
+					/>
+				) : (
+					<TextInput
+						ref={inputRef}
+						style={[styles.input, isFocused && styles.inputFocus]}
+						value={value}
+						onChangeText={onChangeText}
+						onBlur={event => {
+							setIsFocused(false)
+							onBlur?.(event)
+						}}
+						onFocus={event => {
+							setIsFocused(true)
+							onFocus?.(event)
+						}}
+						{...restOfProps}
+					/>
+				)}
+
+				<TouchableWithoutFeedback onPress={() => inputRef.current?.focus()}>
+					<Animated.View
+						style={[
+							styles.labelContainer,
+							{
+								transform: [
+									{
+										scale: focusAnim.interpolate({
+											inputRange: [0, 1],
+											outputRange: [1, 0.95],
+										}),
+									},
+									{
+										translateY: focusAnim.interpolate({
+											inputRange: [0, 1],
+											outputRange: [14, -8],
+										}),
+									},
+									{
+										translateX: focusAnim.interpolate({
+											inputRange: [0, 1],
+											outputRange: [10, 10],
+										}),
+									},
+								],
+							},
+						]}>
+						<Text style={[styles.label, isFocused && styles.labelFocus]}>{label}</Text>
+					</Animated.View>
+				</TouchableWithoutFeedback>
+			</View>
+		</OutsidePressHandler>
 	)
 }
 
