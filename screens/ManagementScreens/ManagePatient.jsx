@@ -23,7 +23,7 @@ import TextField from '../../components/TextField'
 import Button from '../../components/Button'
 import LoadingScreen from '../../components/LoadingScreen'
 
-import { insertPatient, fetchPatientData } from '../../services/Database'
+import { insertPatient, fetchPatientData, updatePatient } from '../../services/Database'
 
 const ListItemComponent = ({ id, text, icon, iconSize, iconColor, onRemove }) => {
 	return (
@@ -79,7 +79,6 @@ export default function ManagePatient({ route }) {
 				setLocationList(result.addresses)
 				setIsLoading(false)
 			} else {
-				console.log('Pacjent o podanym ID nie został znaleziony.')
 				Dialog.show({
 					type: ALERT_TYPE.DANGER,
 					title: 'Błąd',
@@ -166,27 +165,57 @@ export default function ManagePatient({ route }) {
 			return
 		}
 
-		try {
-			insertPatient(fullName, birthday.getTime(), phoneNumber, note, problemList, locationList)
-		} catch (ex) {
-			Dialog.show({
-				type: ALERT_TYPE.DANGER,
-				title: 'Błąd',
-				textBody: 'Wystąpił problem podczas dodawania pacjenta. Spróbuj ponownie.',
-				button: 'OK',
-			})
+		if (PATIENT_ID) {
+			try {
+				updatePatient(
+					PATIENT_ID,
+					fullName,
+					birthday.getTime(),
+					phoneNumber,
+					note,
+					problemList,
+					locationList
+				)
+				Dialog.show({
+					type: ALERT_TYPE.SUCCESS,
+					title: 'Success',
+					textBody: 'Gratulacje pacjent został pomyślnie zmodyfikowany',
+					button: 'OK',
+					onPressButton: () => {
+						Dialog.hide()
+						goBack()
+					},
+				})
+			} catch (ex) {
+				Dialog.show({
+					type: ALERT_TYPE.DANGER,
+					title: 'Błąd',
+					textBody: 'Wystąpił problem podczas edycji pacjenta. Spróbuj ponownie.',
+					button: 'OK',
+				})
+			}
+		} else {
+			try {
+				insertPatient(fullName, birthday.getTime(), phoneNumber, note, problemList, locationList)
+				Dialog.show({
+					type: ALERT_TYPE.SUCCESS,
+					title: 'Success',
+					textBody: 'Gratulacje pacjent został pomyślnie dodany',
+					button: 'OK',
+					onPressButton: () => {
+						Dialog.hide()
+						goBack()
+					},
+				})
+			} catch (ex) {
+				Dialog.show({
+					type: ALERT_TYPE.DANGER,
+					title: 'Błąd',
+					textBody: 'Wystąpił problem podczas dodawania pacjenta. Spróbuj ponownie.',
+					button: 'OK',
+				})
+			}
 		}
-
-		Dialog.show({
-			type: ALERT_TYPE.SUCCESS,
-			title: 'Success',
-			textBody: 'Gratulacje pacjent został pomyślnie dodany',
-			button: 'OK',
-			onPressButton: () => {
-				Dialog.hide()
-				goBack()
-			},
-		})
 	}
 
 	const [isDatePickerVisible, setIsDatePickerVisible] = useState(false)

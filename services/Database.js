@@ -106,6 +106,88 @@ const insertPatientProblem = (patient_id, text) => {
 	})
 }
 
+const updatePatient = (
+	patientId,
+	full_name,
+	birthday,
+	phone_number,
+	note,
+	updatedProblems,
+	updatedAddresses
+) => {
+	db.transaction(
+		tx => {
+			tx.executeSql(
+				'UPDATE patients SET full_name = ?, date_of_birth = ?, phone_number = ?, note = ? WHERE id = ?',
+				[full_name, birthday, phone_number, note, patientId],
+				(_, results) => {
+					console.log('Patient data updated successfully')
+				},
+				error => {
+					console.log('Error updating Patient data:', error)
+					throw new Error('Update failed')
+				}
+			)
+
+			tx.executeSql(
+				'DELETE FROM patient_problem WHERE patient_id = ?',
+				[patientId],
+				(_, results) => {
+					console.log('Deleted old problems successfully')
+				},
+				error => {
+					console.log('Error deleting old problems:', error)
+					throw new Error('Update failed')
+				}
+			)
+
+			updatedProblems.forEach(problem => {
+				tx.executeSql(
+					'INSERT INTO patient_problem (patient_id, text) VALUES (?, ?)',
+					[patientId, problem.text],
+					(_, results) => {
+						console.log('Problem data inserted successfully')
+					},
+					error => {
+						console.log('Error inserting Problem data:', error)
+						throw new Error('Update failed')
+					}
+				)
+			})
+
+			tx.executeSql(
+				'DELETE FROM patient_address WHERE patient_id = ?',
+				[patientId],
+				(_, results) => {
+					console.log('Deleted old addresses successfully')
+				},
+				error => {
+					console.log('Error deleting old addresses:', error)
+					throw new Error('Update failed')
+				}
+			)
+
+			updatedAddresses.forEach(address => {
+				tx.executeSql(
+					'INSERT INTO patient_address (patient_id, text) VALUES (?, ?)',
+					[patientId, address.text],
+					(_, results) => {
+						console.log('Address data inserted successfully')
+					},
+					error => {
+						console.log('Error inserting Address data:', error)
+						throw new Error('Update failed')
+					}
+				)
+			})
+		},
+		error => {
+			console.log('Transaction error:', error)
+			throw new Error('Transaction failed')
+		}
+	)
+}
+
 const fetchPatientData = (patientId, callback) => {
 	db.transaction(tx => {
 		tx.executeSql(
@@ -115,7 +197,6 @@ const fetchPatientData = (patientId, callback) => {
 				const data = rows._array
 
 				if (data.length === 0) {
-					// Pacjent o podanym ID nie został znaleziony
 					if (callback) {
 						callback(null)
 					}
@@ -185,4 +266,11 @@ const fetchPatientList = callback => {
 	})
 }
 
-export { initDatabase, insertPatient, insertPatientProblem, fetchPatientData, fetchPatientList }
+export {
+	initDatabase,
+	insertPatient,
+	updatePatient,
+	insertPatientProblem,
+	fetchPatientData,
+	fetchPatientList,
+}
