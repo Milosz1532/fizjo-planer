@@ -24,23 +24,23 @@ export default function App() {
 		initDatabase()
 		// insertPatient('Tamara Banaszek', 2022, 123456789, 'test')
 		// insertPatientProblem(1, 'Problem Tamary')
-		fetchPatientData(data => {
-			const patientList = data
-			patientList.forEach(element => {
-				console.log(`------------ PACJENT ------------------`)
-				console.log('ID: ' + element.id)
-				console.log('Full_name: ' + element.full_name)
-				console.log('Phone number: ' + element.phone_number)
-				console.log(`Year of birth: ` + element.year_of_birth)
-				console.log('Note: ' + element.note)
+		// fetchPatientData(data => {
+		// 	const patientList = data
+		// 	patientList.forEach(element => {
+		// 		console.log(`------------ PACJENT ------------------`)
+		// 		console.log('ID: ' + element.id)
+		// 		console.log('Full_name: ' + element.full_name)
+		// 		console.log('Phone number: ' + element.phone_number)
+		// 		console.log(`Year of birth: ` + element.year_of_birth)
+		// 		console.log('Note: ' + element.note)
 
-				console.log(`Problemy: `)
-				element.problems.forEach(problem => {
-					console.log(`ID: ${problem.id}`)
-					console.log(`Text: ${problem.text}`)
-				})
-			})
-		})
+		// 		console.log(`Problemy: `)
+		// 		element.problems.forEach(problem => {
+		// 			console.log(`ID: ${problem.id}`)
+		// 			console.log(`Text: ${problem.text}`)
+		// 		})
+		// 	})
+		// })
 	}, [])
 
 	let [fontsLoaded] = useFonts({

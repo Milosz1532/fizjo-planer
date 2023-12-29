@@ -18,7 +18,8 @@ import FontAwesome from '@expo/vector-icons/FontAwesome5'
 import { COLORS } from '../assets/colors'
 
 const SelectField = props => {
-	const { label, value, style, onBlur, onFocus, onChangeText, items, ...restOfProps } = props
+	const { label, value, style, onBlur, onFocus, onChangeText, items, editable, ...restOfProps } =
+		props
 	const [isFocused, setIsFocused] = useState(false)
 
 	const inputRef = useRef(null)
@@ -45,7 +46,12 @@ const SelectField = props => {
 	return (
 		<OutsidePressHandler onOutsidePress={handlePressOutside}>
 			<View
-				style={[styles.container, isFocused && styles.containerFocus]}
+				pointerEvents={editable ? 'auto' : 'none'}
+				style={[
+					styles.container,
+					isFocused && styles.containerFocus,
+					!editable && styles.containerDisabled,
+				]}
 				keyboardShouldPersistTaps='handled'>
 				<View style={{ flexDirection: 'row' }}>
 					<View style={{ flex: 1 }}>
@@ -53,6 +59,7 @@ const SelectField = props => {
 							ref={inputRef}
 							style={[styles.input]}
 							value={value}
+							editable={editable}
 							onChangeText={onChangeText}
 							onBlur={event => {
 								setIsFocused(false)
@@ -124,6 +131,10 @@ const styles = StyleSheet.create({
 		borderWidth: 1,
 		borderColor: COLORS.border_color,
 		borderRadius: 20,
+	},
+
+	containerDisabled: {
+		opacity: 0.6,
 	},
 
 	containerFocus: {

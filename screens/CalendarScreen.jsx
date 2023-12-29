@@ -196,6 +196,7 @@ const styles = StyleSheet.create({
 		marginLeft: 10,
 		paddingHorizontal: 10,
 		borderLeftWidth: 2,
+		borderRadius: 1,
 		borderStyle: 'dotted',
 		borderColor: COLORS.header_text_gray_color,
 

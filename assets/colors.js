@@ -9,11 +9,13 @@ export const COLORS = {
 	text_gray_color: '#B7B7B7',
 	header_text_gray_color: '#BDC2CE',
 	tab_gray_element_color: '#A1A1A1',
+	light_gray_element: '#E9E9E9',
 	icon_color: '#787878',
 	light_icon_color: '#A8A8A8',
 	placeholder_color: '#ADADAD',
 	border_color: '#D6D6D6',
 	warning_color: '#F5AB93',
+	text_error_color: 'tomato',
 	light_border_color: '#E4E4E4',
 
 	element_color_1: '#3E8DF9',
@@ -21,4 +23,5 @@ export const COLORS = {
 	element_color_3: '#FFC75C',
 	element_color_4: '#A167FF',
 	element_color_5: '#FC8282',
+	element_color_6: '#565252',
 }

@@ -23,7 +23,8 @@ const TextField = props => {
 		onFocus,
 		onChangeText,
 		contentType,
-		maxLength,
+		editable,
+		multiline,
 		...restOfProps
 	} = props
 	const [isFocused, setIsFocused] = useState(false)
@@ -45,46 +46,27 @@ const TextField = props => {
 	}
 
 	return (
-		<OutsidePressHandler onOutsidePress={handlePressOutside}>
+		<OutsidePressHandler
+			pointerEvents={editable === false ? 'none' : 'auto'}
+			onOutsidePress={handlePressOutside}>
 			<View style={style}>
-				{contentType === 'datetime' ? (
-					<TextInputMask
-						ref={inputRef}
-						style={[styles.input, isFocused && styles.inputFocus]}
-						value={value}
-						onChangeText={onChangeText}
-						type='datetime'
-						maxLength={10}
-						options={{
-							format: 'DD.MM.YYYY',
-						}}
-						onBlur={event => {
-							setIsFocused(false)
-							onBlur?.(event)
-						}}
-						onFocus={event => {
-							setIsFocused(true)
-							onFocus?.(event)
-						}}
-						{...restOfProps}
-					/>
-				) : (
-					<TextInput
-						ref={inputRef}
-						style={[styles.input, isFocused && styles.inputFocus]}
-						value={value}
-						onChangeText={onChangeText}
-						onBlur={event => {
-							setIsFocused(false)
-							onBlur?.(event)
-						}}
-						onFocus={event => {
-							setIsFocused(true)
-							onFocus?.(event)
-						}}
-						{...restOfProps}
-					/>
-				)}
+				<TextInput
+					ref={inputRef}
+					style={[styles.input, isFocused && styles.inputFocus, multiline && { paddingTop: 20 }]}
+					value={value}
+					editable={editable ? editable : true}
+					onChangeText={onChangeText}
+					multiline={multiline}
+					onBlur={event => {
+						setIsFocused(false)
+						onBlur?.(event)
+					}}
+					onFocus={event => {
+						setIsFocused(true)
+						onFocus?.(event)
+					}}
+					{...restOfProps}
+				/>
 
 				<TouchableWithoutFeedback onPress={() => inputRef.current?.focus()}>
 					<Animated.View

@@ -11,10 +11,10 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { StatusBar } from 'expo-status-bar'
 
-import { fetchPatientData } from '../services/Database'
+import { fetchPatientList } from '../services/Database'
 import LoadingScreen from '../components/LoadingScreen'
 
-const PatientComponent = ({ fullName, dateOfBirth }) => {
+const PatientComponent = ({ fullName, dateOfBirth, onPress }) => {
 	const calculateAge = birthDate => {
 		const today = new Date()
 		const birthDateObj = new Date(birthDate)
@@ -60,20 +60,22 @@ const PatientComponent = ({ fullName, dateOfBirth }) => {
 	}
 
 	return (
-		<View style={styles.PatientComponent}>
-			<View style={styles.PatientComponentIcon}></View>
+		<TouchableOpacity onPress={onPress}>
+			<View style={styles.PatientComponent}>
+				<View style={styles.PatientComponentIcon}></View>
 
-			<View style={styles.PatientComponentContent}>
-				<View>
-					<Text style={styles.PatientComponentName}>{fullName}</Text>
-					<Text style={styles.PatientComponentAge}>Wiek: {calculateAge(dateOfBirth)}</Text>
-				</View>
-				<View style={styles.PatientComponentTime}>
-					<FontAwesome name={'calendar'} size={18} color={COLORS.main} />
-					<Text style={styles.PatientComponentTimeText}>3</Text>
+				<View style={styles.PatientComponentContent}>
+					<View>
+						<Text style={styles.PatientComponentName}>{fullName}</Text>
+						<Text style={styles.PatientComponentAge}>Wiek: {calculateAge(dateOfBirth)}</Text>
+					</View>
+					<View style={styles.PatientComponentTime}>
+						<FontAwesome name={'calendar'} size={18} color={COLORS.main} />
+						<Text style={styles.PatientComponentTimeText}>3</Text>
+					</View>
 				</View>
 			</View>
-		</View>
+		</TouchableOpacity>
 	)
 }
 
@@ -85,7 +87,7 @@ export default function PatientsScreen() {
 	const fetchData = async () => {
 		console.log(`Pobieram listę pacjentów`)
 		setIsLoading(true)
-		fetchPatientData(data => {
+		fetchPatientList(data => {
 			setPatientList(data)
 			setIsLoading(false)
 		})
@@ -96,6 +98,10 @@ export default function PatientsScreen() {
 			fetchData()
 		}, [])
 	)
+
+	const handleManagePatient = id => {
+		navigate('ManagePatient', { id })
+	}
 
 	return (
 		<View style={{ flex: 1, backgroundColor: COLORS.main }}>
@@ -127,6 +133,7 @@ export default function PatientsScreen() {
 										key={el.id}
 										fullName={el.full_name}
 										dateOfBirth={el.date_of_birth}
+										onPress={() => handleManagePatient(el.id)}
 									/>
 								))}
 							</View>
