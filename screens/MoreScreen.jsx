@@ -8,6 +8,8 @@ import { StatusBar } from 'expo-status-bar'
 
 import ToggleSwitch from 'toggle-switch-react-native'
 
+import { useSettings } from '../SettingsContext'
+
 const UserProfile = () => (
 	<View style={styles.userProfileContainer}>
 		<View style={styles.userProfileIconContainer}>
@@ -45,13 +47,21 @@ const ToggleSettingsItem = ({ icon, label, initialValue, onToggle }) => (
 				onColor={COLORS.element_color_2}
 				offColor={COLORS.light_gray_element}
 				size='medium'
-				// onToggle={onToggle}
+				onToggle={onToggle}
 			/>
 		</View>
 	</View>
 )
 
 export default function MoreScreen() {
+	const { settings, updateSetting } = useSettings()
+	const isDarkMode = settings.darkMode || false
+
+	const toggleDarkMode = () => {
+		const newDarkModeValue = !isDarkMode
+		updateSetting('darkMode', newDarkModeValue)
+	}
+
 	return (
 		<View style={{ flex: 1, backgroundColor: COLORS.main }}>
 			<StatusBar style='dark' />
@@ -87,7 +97,8 @@ export default function MoreScreen() {
 						<ToggleSettingsItem
 							icon={{ name: 'moon-o', backgroundColor: COLORS.element_color_6 }}
 							label='Tryb ciemny'
-							initialValue={false}
+							initialValue={isDarkMode}
+							onToggle={toggleDarkMode}
 						/>
 						<SettingsItem
 							icon={{ name: 'bug', backgroundColor: COLORS.element_color_5 }}
