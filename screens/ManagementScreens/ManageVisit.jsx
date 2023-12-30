@@ -13,7 +13,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { StatusBar } from 'expo-status-bar'
 import { Calendar, LocaleConfig } from 'react-native-calendars'
 import FontAwesome from '@expo/vector-icons/FontAwesome5'
-import { fetchPatientList } from '../../services/Database'
+import { fetchPatientListWithAddresses, insertVisit } from '../../services/Database'
 import DateTimePickerModal from 'react-native-modal-datetime-picker'
 
 import { globalStyles } from '../../assets/styles'
@@ -58,10 +58,7 @@ const displayDateText = _date => {
 	return `${dayOfWeek} ${dayOfMonth} ${month}, ${year}`
 }
 
-const DateComponent = ({ id, date, timeStart, timeEnd }) => {
-	const [timeStartInput, setTimeStartInput] = useState(new Date())
-	const [timeEndInput, setTimeEndInput] = useState(new Date())
-
+const DateComponent = ({ id, date, timeStart, timeEnd, selectStartTime, selectEndTime }) => {
 	const [isDatePickerVisible, setDatePickerVisibility] = useState(false)
 
 	const hideDatePicker = () => {
@@ -70,9 +67,9 @@ const DateComponent = ({ id, date, timeStart, timeEnd }) => {
 
 	const handleConfirm = selectedTime => {
 		if (isDatePickerVisible === 'start') {
-			setTimeStartInput(selectedTime)
+			selectStartTime(id, selectedTime)
 		} else if (isDatePickerVisible === 'end') {
-			setTimeEndInput(selectedTime)
+			selectEndTime(id, selectedTime)
 		}
 		hideDatePicker()
 	}
@@ -102,24 +99,24 @@ const DateComponent = ({ id, date, timeStart, timeEnd }) => {
 					}}>
 					<TouchableOpacity onPress={() => setDatePickerVisibility('start')}>
 						<View style={styles.dateTimeButton}>
-							<Text style={styles.dateTimeButtonText}>{`${('0' + timeStartInput.getHours()).slice(
+							<Text style={styles.dateTimeButtonText}>{`${('0' + timeStart.getHours()).slice(
 								-2
-							)}:${('0' + timeStartInput.getMinutes()).slice(-2)}`}</Text>
+							)}:${('0' + timeStart.getMinutes()).slice(-2)}`}</Text>
 						</View>
 					</TouchableOpacity>
 
 					<View style={{ paddingHorizontal: 20 }}></View>
 					<TouchableOpacity onPress={() => setDatePickerVisibility('end')}>
 						<View style={styles.dateTimeButton}>
-							<Text style={styles.dateTimeButtonText}>{`${('0' + timeEndInput.getHours()).slice(
-								-2
-							)}:${('0' + timeEndInput.getMinutes()).slice(-2)}`}</Text>
+							<Text style={styles.dateTimeButtonText}>{`${('0' + timeEnd.getHours()).slice(-2)}:${(
+								'0' + timeEnd.getMinutes()
+							).slice(-2)}`}</Text>
 						</View>
 					</TouchableOpacity>
 				</View>
 			</View>
-			{timeStartInput.getTime() > timeEndInput.getTime() && (
-				<View style={styles.errorMessage}>
+			{timeStart.getTime() > timeEnd.getTime() && (
+				<View>
 					<Text style={styles.errorMessageText}>
 						Godzina rozpoczęcia jest późniejsza niż godzina zakończenia
 					</Text>
@@ -142,13 +139,8 @@ export default function ManageVisit() {
 	const [patientList, setPatientList] = useState([])
 
 	const fetchData = async () => {
-		fetchPatientList(data => {
-			const patientData = data.map(patient => ({
-				id: patient.id,
-				name: patient.full_name,
-				date_of_birth: patient.date_of_birth,
-			}))
-			setPatientList(patientData)
+		fetchPatientListWithAddresses(data => {
+			setPatientList(data)
 		})
 	}
 
@@ -193,25 +185,6 @@ export default function ManageVisit() {
 
 	LocaleConfig.defaultLocale = 'pl'
 
-	const patientLocationList = [
-		{
-			id: 1,
-			name: 'Basen miejski we Włocławku',
-		},
-		{
-			id: 2,
-			name: 'ul. Bajeczna 14/3 Włocławek',
-		},
-		{
-			id: 3,
-			name: 'ul. Promienna 3/43 Włocławek',
-		},
-		{
-			id: 4,
-			name: 'Gabinet fizjoterapeutyczny',
-		},
-	]
-
 	const [patientLocationInputValue, setPatientLocationInputValue] = useState('')
 	const [selectedPatient, setSelectedPatient] = useState('')
 	const [noteInputValue, setNoteInputValue] = useState('')
@@ -225,14 +198,62 @@ export default function ManageVisit() {
 			const newDay = {
 				id: selectedDates.length > 0 ? selectedDates[selectedDates.length - 1].id + 1 : 1,
 				date: day.timestamp,
-				timeStart: 0,
-				timeEnd: 0,
+				timeStart: new Date(),
+				timeEnd: new Date(),
 			}
 			const updatedDates = [...selectedDates, newDay]
 			setSelectedDates(updatedDates)
 		} else {
 			const selectedDate = selectedDates.filter(el => el.date !== day.timestamp)
 			setSelectedDates(selectedDate)
+		}
+	}
+
+	const handleStartTime = (id, selectedTime) => {
+		const updatedDates = selectedDates.map(date => {
+			if (date.id === id) {
+				return {
+					...date,
+					timeStart: selectedTime,
+				}
+			}
+			return date
+		})
+
+		setSelectedDates(updatedDates)
+	}
+
+	const handleEndTime = (id, selectedTime) => {
+		const updatedDates = selectedDates.map(date => {
+			if (date.id === id) {
+				return {
+					...date,
+					timeEnd: selectedTime,
+				}
+			}
+			return date
+		})
+		setSelectedDates(updatedDates)
+	}
+
+	const handleSubmitVisit = () => {
+		const datesWithTimestamps = selectedDates.map(date => ({
+			...date,
+			timeStart: date.timeStart.getTime(),
+			timeEnd: date.timeEnd.getTime(),
+		}))
+
+		try {
+			insertVisit(
+				selectedPatient.id,
+				patientLocationInputValue.id ? patientLocationInputValue.id : null,
+				patientLocationInputValue.id ? null : patientLocationInputValue,
+				noteInputValue,
+				datesWithTimestamps
+			)
+			console.log('Visit added successfully')
+		} catch (error) {
+			console.error('Error adding visit:', error)
 		}
 	}
 
@@ -267,19 +288,22 @@ export default function ManageVisit() {
 										label='Pacjent'
 										items={patientList}
 										value={selectedPatient}
+										renderItem={item => <>{item.full_name}</>}
 										onChangeText={item => setSelectedPatient(item)}
 									/>
 								</View>
 								<View style={{ marginTop: 20 }}>
 									<SelectField
 										label='Lokalizacja'
-										items={patientLocationList}
+										items={selectedPatient.addresses}
 										editable={selectedPatient ? true : false}
 										value={
 											patientLocationInputValue.id
-												? patientLocationInputValue.name
+												? patientLocationInputValue.text
 												: patientLocationInputValue
 										}
+										renderItem={item => <>{item.text}</>}
+										selectedValue={setPatientLocationInputValue}
 										onChangeText={text => setPatientLocationInputValue(text)}
 									/>
 								</View>
@@ -329,8 +353,10 @@ export default function ManageVisit() {
 											key={el.id}
 											id={el.id}
 											date={el.date}
-											timeStart={'8:00'}
-											timeEnd={'10:00'}
+											selectStartTime={handleStartTime}
+											selectEndTime={handleEndTime}
+											timeStart={el.timeStart}
+											timeEnd={el.timeEnd}
 										/>
 									))}
 								</View>
@@ -338,7 +364,7 @@ export default function ManageVisit() {
 						</View>
 
 						<View style={{ justifyContent: 'flex-end' }}>
-							<Button text={'Dodaj wizytę'} />
+							<Button text={'Dodaj wizytę'} onPress={handleSubmitVisit} />
 						</View>
 					</ScrollView>
 					{/* <LoadingScreen transparent={true} /> */}

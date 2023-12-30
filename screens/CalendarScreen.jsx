@@ -1,7 +1,8 @@
-import React, { useState } from 'react'
+import React, { useState, useCallback } from 'react'
 import { ScrollView, View, Text, StyleSheet } from 'react-native'
 import { Calendar, LocaleConfig } from 'react-native-calendars'
 import FontAwesome from '@expo/vector-icons/FontAwesome5'
+import { useNavigation, useFocusEffect } from '@react-navigation/native'
 
 import { globalStyles } from '../assets/styles'
 import { COLORS } from '../assets/colors'
@@ -11,6 +12,8 @@ import CustomStatusBar from '../components/CustomStatusBar'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { StatusBar } from 'expo-status-bar'
+
+import { fetchAllVisits } from '../services/Database'
 
 const ScheduleComponent = ({ item, color }) => {
 	return (
@@ -31,41 +34,53 @@ const ScheduleComponent = ({ item, color }) => {
 	)
 }
 
+LocaleConfig.locales['pl'] = {
+	monthNames: [
+		'Styczeń',
+		'Luty',
+		'Marzec',
+		'Kwiecień',
+		'Maj',
+		'Czerwiec',
+		'Lipiec',
+		'Sierpień',
+		'Wrzesień',
+		'Październik',
+		'Listopad',
+		'Grudzień',
+	],
+	monthNamesShort: [
+		'Janv.',
+		'Févr.',
+		'Mars',
+		'Avril',
+		'Mai',
+		'Juin',
+		'Juil.',
+		'Août',
+		'Sept.',
+		'Oct.',
+		'Nov.',
+		'Déc.',
+	],
+	dayNames: ['Niedziela', 'Poniedziałek', 'Wtorek', 'Środa', 'Czwartek', 'Piątek', 'Sobota'],
+	dayNamesShort: ['Pn', 'Wt', 'Śr', 'Czw', 'Pt', 'Sob', 'Nd'],
+}
+
+LocaleConfig.defaultLocale = 'pl'
+
 export default function CalendaScreen() {
-	LocaleConfig.locales['pl'] = {
-		monthNames: [
-			'Styczeń',
-			'Luty',
-			'Marzec',
-			'Kwiecień',
-			'Maj',
-			'Czerwiec',
-			'Lipiec',
-			'Sierpień',
-			'Wrzesień',
-			'Październik',
-			'Listopad',
-			'Grudzień',
-		],
-		monthNamesShort: [
-			'Janv.',
-			'Févr.',
-			'Mars',
-			'Avril',
-			'Mai',
-			'Juin',
-			'Juil.',
-			'Août',
-			'Sept.',
-			'Oct.',
-			'Nov.',
-			'Déc.',
-		],
-		dayNames: ['Niedziela', 'Poniedziałek', 'Wtorek', 'Środa', 'Czwartek', 'Piątek', 'Sobota'],
-		dayNamesShort: ['Pn', 'Wt', 'Śr', 'Czw', 'Pt', 'Sob', 'Nd'],
+	const fetchData = async () => {
+		fetchAllVisits(data => {
+			console.log(data)
+		})
 	}
 
-	LocaleConfig.defaultLocale = 'pl'
+	useFocusEffect(
+		useCallback(() => {
+			fetchData()
+		}, [])
+	)
 
 	const schedule = [
 		{

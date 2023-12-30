@@ -85,12 +85,21 @@ export default function PatientsScreen() {
 	const [isLoading, setIsLoading] = useState(true)
 
 	const fetchData = async () => {
-		console.log(`Pobieram listę pacjentów`)
 		setIsLoading(true)
-		fetchPatientList(data => {
-			setPatientList(data)
+		try {
+			fetchPatientList((error, data) => {
+				if (error) {
+					console.log(`Nie udało się pobrać listy pacjentów: ${error.message}`)
+				} else {
+					console.log(`Udało się pobrać listę pacjentów`)
+					setPatientList(data)
+				}
+				setIsLoading(false)
+			})
+		} catch (error) {
+			console.log(`Nie udało się pobrać listy pacjentów: ${error.message}`)
 			setIsLoading(false)
-		})
+		}
 	}
 
 	useFocusEffect(

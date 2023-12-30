@@ -22,6 +22,10 @@ import { SettingsProvider } from './SettingsContext'
 const Stack = createNativeStackNavigator()
 
 export default function App() {
+	useEffect(() => {
+		initDatabase()
+	}, [])
+
 	let [fontsLoaded] = useFonts({
 		'Poppins-Regular': Poppins_400Regular,
 		'Poppins-SemiBold': Poppins_600SemiBold,

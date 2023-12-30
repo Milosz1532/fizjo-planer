@@ -16,7 +16,7 @@ import FontAwesome from '@expo/vector-icons/FontAwesome5'
 import { COLORS } from '../assets/colors'
 
 const SelectOnly = props => {
-	const { items, label, value, onChangeText, ...restOfProps } = props
+	const { items, label, value, onChangeText, renderItem, ...restOfProps } = props
 
 	const [isFocused, setIsFocused] = useState(false)
 
@@ -51,7 +51,7 @@ const SelectOnly = props => {
 				<TouchableOpacity activeOpacity={1} onPress={handlePress}>
 					<View style={{ flexDirection: 'row' }}>
 						<View style={{ flex: 1 }}>
-							<Text style={styles.selectText}>{value ? value.name : ''}</Text>
+							<Text style={styles.selectText}>{value ? renderItem(value) : ''}</Text>
 							<TouchableWithoutFeedback>
 								<Animated.View
 									style={[
@@ -96,7 +96,11 @@ const SelectOnly = props => {
 						{items.map(item => (
 							<TouchableOpacity key={item.id} onPress={() => handleItemPress(item)}>
 								<View style={styles.dropDownItem}>
-									<Text style={styles.dropDownItemText}>{item.name}</Text>
+									{renderItem ? (
+										<Text style={styles.dropDownItemText}>{renderItem(item)}</Text>
+									) : (
+										<Text style={styles.dropDownItemText}>{item.name}</Text>
+									)}
 								</View>
 							</TouchableOpacity>
 						))}

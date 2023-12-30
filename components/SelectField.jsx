@@ -18,8 +18,19 @@ import FontAwesome from '@expo/vector-icons/FontAwesome5'
 import { COLORS } from '../assets/colors'
 
 const SelectField = props => {
-	const { label, value, style, onBlur, onFocus, onChangeText, items, editable, ...restOfProps } =
-		props
+	const {
+		label,
+		value,
+		style,
+		onBlur,
+		onFocus,
+		onChangeText,
+		items,
+		editable,
+		renderItem,
+		selectedValue,
+		...restOfProps
+	} = props
 	const [isFocused, setIsFocused] = useState(false)
 
 	const inputRef = useRef(null)
@@ -39,8 +50,9 @@ const SelectField = props => {
 	}
 
 	const handleSelectItem = item => {
-		onChangeText(item)
+		onChangeText(item.text)
 		inputRef.current.blur()
+		selectedValue(item)
 	}
 
 	return (
@@ -115,7 +127,11 @@ const SelectField = props => {
 						{items.map(item => (
 							<TouchableOpacity key={item.id} onPress={() => handleSelectItem(item)}>
 								<View style={styles.dropDownItem}>
-									<Text style={styles.dropDownItemText}>{item.name}</Text>
+									{renderItem ? (
+										<Text style={styles.dropDownItemText}>{renderItem(item)}</Text>
+									) : (
+										<Text style={styles.dropDownItemText}>{item.name}</Text>
+									)}
 								</View>
 							</TouchableOpacity>
 						))}

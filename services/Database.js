@@ -28,6 +28,7 @@ const initDatabase = () => {
 			}
 		)
 
+		// Patient_address Table
 		tx.executeSql(
 			'CREATE TABLE IF NOT EXISTS patient_address (id INTEGER PRIMARY KEY AUTOINCREMENT, patient_id INTEGER, text TEXT)',
 			[],
@@ -36,6 +37,18 @@ const initDatabase = () => {
 			},
 			error => {
 				console.log('Error creating patient_address table:', error)
+			}
+		)
+
+		// Visit Table
+		tx.executeSql(
+			'CREATE TABLE IF NOT EXISTS visit (id INTEGER PRIMARY KEY AUTOINCREMENT, patient_id INTEGER, address_id INTEGER, custom_location TEXT, note TEXT, date INTEGER, time_start INTEGER, time_end INTEGER)',
+			[],
+			(_, results) => {
+				console.log('Table visit created successfully')
+			},
+			error => {
+				console.log('Error creating visit table:', error)
 			}
 		)
 	})
@@ -251,18 +264,143 @@ const fetchPatientData = (patientId, callback) => {
 
 const fetchPatientList = callback => {
 	db.transaction(tx => {
-		tx.executeSql('SELECT * FROM patients', [], (_, { rows }) => {
-			const data = rows._array
-			if (callback) {
-				callback(data)
+		tx.executeSql(
+			'SELECT * FROM patients',
+			[],
+			(_, { rows }) => {
+				const data = rows._array
+				if (callback) {
+					callback(null, data)
+				}
+			},
+			error => {
+				console.log('Error fetching patient data:', error)
+				if (callback) {
+					callback(error, [])
+				}
 			}
-		})
+		)
+	})
+}
+
+const fetchPatientListWithAddresses = callback => {
+	db.transaction(tx => {
+		tx.executeSql(
+			'SELECT p.id as patientId, p.full_name, p.date_of_birth, p.phone_number, p.note, pa.id as addressId, pa.text as addressText ' +
+				'FROM patients p ' +
+				'LEFT JOIN patient_address pa ON p.id = pa.patient_id',
+			[],
+			(_, { rows }) => {
+				const data = rows._array
+
+				const patientsWithAddresses = data.reduce((acc, current) => {
+					const existingPatient = acc.find(patient => patient.id === current.patientId)
+
+					if (!existingPatient) {
+						const newPatient = {
+							id: current.patientId,
+							full_name: current.full_name,
+							date_of_birth: current.date_of_birth,
+							phone_number: current.phone_number,
+							note: current.note,
+							addresses: current.addressId
+								? [
+										{
+											id: current.addressId,
+											text: current.addressText,
+										},
+								  ]
+								: [],
+						}
+
+						acc.push(newPatient)
+					} else {
+						if (current.addressId) {
+							existingPatient.addresses.push({
+								id: current.addressId,
+								text: current.addressText,
+							})
+						}
+					}
+
+					return acc
+				}, [])
+
+				if (callback) {
+					callback(patientsWithAddresses.length > 0 ? patientsWithAddresses : null)
+				}
+			},
+			error => {
+				console.log('Error fetching patient data with addresses:', error)
+				if (callback) {
+					callback([])
+				}
+			}
+		)
+	})
+}
+
+const insertVisit = (patient_id, address_id, custom_address, note, dateList) => {
+	db.transaction(
+		tx => {
+			dateList.forEach(date => {
+				tx.executeSql(
+					'INSERT INTO visit (patient_id, address_id, custom_location, note, date, time_start, time_end) VALUES (?, ?, ?, ?, ?, ?, ?)',
+					[patient_id, address_id, custom_address, note, date.date, date.timeStart, date.timeEnd],
+					(_, results) => {
+						console.log('Visit data inserted successfully')
+					},
+					error => {
+						console.log('Error inserting Visit data:', error)
+						throw new Error('Insert failed')
+					}
+				)
+			})
+		},
 		error => {
-			console.log('Error fetching patient data:', error)
-			if (callback) {
-				callback([])
-			}
+			console.log('Transaction error:', error)
+			throw new Error('Transaction failed')
 		}
+	)
+}
+
+const fetchAllVisits = callback => {
+	db.transaction(tx => {
+		tx.executeSql(
+			'SELECT v.id as visitId, v.patient_id, v.address_id, v.custom_location, v.note, v.date, v.time_start, v.time_end, ' +
+				'p.full_name, pa.text as addressText ' +
+				'FROM visit v ' +
+				'LEFT JOIN patients p ON v.patient_id = p.id ' +
+				'LEFT JOIN patient_address pa ON v.address_id = pa.id ' +
+				'WHERE 1',
+			[],
+			(_, { rows }) => {
+				const data = rows._array
+
+				const visits = data.map(current => ({
+					id: current.visitId,
+					patient_id: current.patient_id,
+					address_id: current.address_id,
+					custom_location: current.custom_location,
+					note: current.note,
+					date: current.date,
+					time_start: current.time_start,
+					time_end: current.time_end,
+					patient_full_name: current.full_name,
+					address_text: current.addressText,
+				}))
+
+				if (callback) {
+					callback(visits)
+				}
+			},
+			error => {
+				console.log('Error fetching visit data:', error)
+				if (callback) {
+					callback([])
+				}
+			}
+		)
 	})
 }
 
@@ -273,4 +411,7 @@ export {
 	insertPatientProblem,
 	fetchPatientData,
 	fetchPatientList,
+	fetchPatientListWithAddresses,
+	insertVisit,
+	fetchAllVisits,
 }
