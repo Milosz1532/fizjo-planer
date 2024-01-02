@@ -118,7 +118,8 @@ export default function ManagePatient({ route }) {
 			return
 		}
 		const newProblem = {
-			id: problemList.length > 0 ? problemList[problemList.length - 1].id + 1 : 1,
+			id: null,
+			key: problemList.length > 0 ? problemList[problemList.length - 1].id + 1 : 1,
 			text: addProblemValue.trim(),
 		}
 		setProblemList(prevList => [...prevList, newProblem])
@@ -134,7 +135,8 @@ export default function ManagePatient({ route }) {
 			return
 		}
 		const newLocation = {
-			id: locationList.length > 0 ? locationList[locationList.length - 1].id + 1 : 1,
+			id: null,
+			key: locationList.length > 0 ? locationList[locationList.length - 1].id + 1 : 1,
 			text: addLocationValue.trim(),
 		}
 		setLocationList(prevList => [...prevList, newLocation])
@@ -323,7 +325,7 @@ export default function ManagePatient({ route }) {
 											<View>
 												{problemList.map(problem => (
 													<ListItemComponent
-														key={problem.id}
+														key={problem.id || problem.key}
 														id={problem.id}
 														text={problem.text}
 														icon={'warning'}
@@ -362,7 +364,7 @@ export default function ManagePatient({ route }) {
 											<View>
 												{locationList.map(location => (
 													<ListItemComponent
-														key={location.id}
+														key={location.id || location.key}
 														id={location.id}
 														text={location.text}
 														icon={'location-pin'}

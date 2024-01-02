@@ -70,7 +70,7 @@ const BottomTabNavigation = () => {
 				options={{
 					tabBarIcon: ({ focused }) => (
 						<TouchableOpacity
-							onPress={() => navigate('manageVisit')}
+							onPress={() => navigate('manageVisit', {})}
 							style={{
 								backgroundColor: COLORS.main,
 								display: 'flex',
@@ -88,7 +88,7 @@ const BottomTabNavigation = () => {
 				listeners={({ navigation }) => ({
 					tabPress: e => {
 						e.preventDefault()
-						navigate('manageVisit')
+						navigate('manageVisit', {})
 					},
 				})}
 			/>

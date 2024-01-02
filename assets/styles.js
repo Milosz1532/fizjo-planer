@@ -90,13 +90,15 @@ export const globalStyles = StyleSheet.create({
 	},
 
 	buttonContainer: {
-		padding: 20,
+		// padding: 20,
+		paddingHorizontal: 20,
 	},
 
 	button: {
 		backgroundColor: COLORS.main,
 		padding: 10,
 		borderRadius: 8,
+		marginBottom: 20,
 	},
 
 	buttonText: {

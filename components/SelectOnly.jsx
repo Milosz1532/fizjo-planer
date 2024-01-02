@@ -29,7 +29,7 @@ const SelectOnly = props => {
 			easing: Easing.bezier(0.4, 0, 0.2, 1),
 			useNativeDriver: true,
 		}).start()
-	}, [focusAnim, isFocused])
+	}, [focusAnim, isFocused, value])
 
 	const handlePress = () => {
 		setIsFocused(!isFocused)

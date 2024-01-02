@@ -42,7 +42,7 @@ const initDatabase = () => {
 
 		// Visit Table
 		tx.executeSql(
-			'CREATE TABLE IF NOT EXISTS visit (id INTEGER PRIMARY KEY AUTOINCREMENT, patient_id INTEGER, address_id INTEGER, custom_location TEXT, note TEXT, date INTEGER, time_start INTEGER, time_end INTEGER)',
+			'CREATE TABLE IF NOT EXISTS visit (id INTEGER PRIMARY KEY AUTOINCREMENT, patient_id INTEGER, address TEXT, note TEXT, date INTEGER, time_start INTEGER, time_end INTEGER)',
 			[],
 			(_, results) => {
 				console.log('Table visit created successfully')
@@ -52,6 +52,34 @@ const initDatabase = () => {
 			}
 		)
 	})
+}
+
+const updateVisit = (visit_id, patient_id, address, note, date, time_start, time_end, callback) => {
+	db.transaction(
+		tx => {
+			tx.executeSql(
+				'UPDATE visit SET patient_id = ?, address = ?, note = ?, date = ?, time_start = ?, time_end = ? WHERE id = ?',
+				[patient_id, address, note, date, time_start, time_end, visit_id],
+				(_, results) => {
+					if (results.rowsAffected > 0) {
+						console.log('Visit data updated successfully')
+						callback({ success: true, message: 'Visit data updated successfully' })
+					} else {
+						console.log('No rows updated')
+						callback({ success: false, message: 'No rows updated' })
+					}
+				},
+				(tx, error) => {
+					console.log('Error updating visit data:', error)
+					callback({ success: false, message: 'Error updating visit data' })
+				}
+			)
+		},
+		error => {
+			console.log('Transaction error:', error)
+			callback({ success: false, message: 'Transaction failed' })
+		}
+	)
 }
 
 const insertPatient = (full_name, birthday, phone_number, note, problemList, locationList) => {
@@ -340,13 +368,13 @@ const fetchPatientListWithAddresses = callback => {
 	})
 }
 
-const insertVisit = (patient_id, address_id, custom_address, note, dateList) => {
+const insertVisit = (patient_id, address, note, dateList) => {
 	db.transaction(
 		tx => {
 			dateList.forEach(date => {
 				tx.executeSql(
-					'INSERT INTO visit (patient_id, address_id, custom_location, note, date, time_start, time_end) VALUES (?, ?, ?, ?, ?, ?, ?)',
-					[patient_id, address_id, custom_address, note, date.date, date.timeStart, date.timeEnd],
+					'INSERT INTO visit (patient_id, address, note, date, time_start, time_end) VALUES (?, ?, ?, ?, ?, ?)',
+					[patient_id, address, note, date.date, date.timeStart, date.timeEnd],
 					(_, results) => {
 						console.log('Visit data inserted successfully')
 					},
@@ -365,43 +393,97 @@ const insertVisit = (patient_id, address_id, custom_address, note, dateList) => 
 }
 
 const fetchAllVisits = callback => {
-	db.transaction(tx => {
-		tx.executeSql(
-			'SELECT v.id as visitId, v.patient_id, v.address_id, v.custom_location, v.note, v.date, v.time_start, v.time_end, ' +
-				'p.full_name, pa.text as addressText ' +
-				'FROM visit v ' +
-				'LEFT JOIN patients p ON v.patient_id = p.id ' +
-				'LEFT JOIN patient_address pa ON v.address_id = pa.id ' +
-				'WHERE 1',
-			[],
-			(_, { rows }) => {
-				const data = rows._array
+	db.transaction(
+		tx => {
+			tx.executeSql(
+				'SELECT v.id as visitId, v.patient_id, v.address, v.note, v.date, v.time_start, v.time_end, ' +
+					'p.full_name ' +
+					'FROM visit v ' +
+					'LEFT JOIN patients p ON v.patient_id = p.id ' +
+					'WHERE 1',
+				[],
+				(_, { rows }) => {
+					const data = rows._array
 
-				const visits = data.map(current => ({
-					id: current.visitId,
-					patient_id: current.patient_id,
-					address_id: current.address_id,
-					custom_location: current.custom_location,
-					note: current.note,
-					date: current.date,
-					time_start: current.time_start,
-					time_end: current.time_end,
-					patient_full_name: current.full_name,
-					address_text: current.addressText,
-				}))
+					const visits = data.map(current => ({
+						id: current.visitId,
+						patient_id: current.patient_id,
+						address: current.address,
+						note: current.note,
+						date: current.date,
+						time_start: current.time_start,
+						time_end: current.time_end,
+						patient_full_name: current.full_name,
+					}))
 
-				if (callback) {
-					callback(visits)
+					if (callback) {
+						callback(visits)
+					}
+				},
+				(tx, error) => {
+					console.log('Transaction error:', error)
+
+					if (callback) {
+						callback([], error)
+					}
 				}
-			},
-			error => {
-				console.log('Error fetching visit data:', error)
-				if (callback) {
-					callback([])
+			)
+		},
+		error => {
+			console.log('Transaction error:', error)
+			throw new Error('Transaction failed')
+		}
+	)
+}
+
+const fetchVisitById = (visitId, callback) => {
+	db.transaction(
+		tx => {
+			tx.executeSql(
+				'SELECT v.id as visitId, v.patient_id, v.address, v.note, v.date, v.time_start, v.time_end, ' +
+					'p.full_name ' +
+					'FROM visit v ' +
+					'LEFT JOIN patients p ON v.patient_id = p.id ' +
+					'WHERE v.id = ?',
+				[visitId],
+				(_, { rows }) => {
+					const data = rows._array
+
+					if (data.length > 0) {
+						const visit = {
+							id: data[0].visitId,
+							patient_id: data[0].patient_id,
+							address: data[0].address,
+							note: data[0].note,
+							date: data[0].date,
+							time_start: data[0].time_start,
+							time_end: data[0].time_end,
+							patient_full_name: data[0].full_name,
+						}
+
+						if (callback) {
+							callback(visit)
+						}
+					} else {
+						if (callback) {
+							callback(null, { message: 'Visit not found', code: 'VISIT_NOT_FOUND' })
+						}
+					}
+				},
+				(tx, error) => {
+					console.log('Transaction error:', error)
+
+					if (callback) {
+						callback(null, error)
+					}
 				}
-			}
-		)
-	})
+			)
+		},
+		error => {
+			console.log('Transaction error:', error)
+			throw new Error('Transaction failed')
+		}
+	)
 }
 
 export {
@@ -414,4 +496,6 @@ export {
 	fetchPatientListWithAddresses,
 	insertVisit,
 	fetchAllVisits,
+	fetchVisitById,
+	updateVisit,
 }

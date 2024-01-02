@@ -18,6 +18,7 @@ export const COLORS = {
 	text_error_color: 'tomato',
 	light_border_color: '#E4E4E4',
 	line_color: '#E8E8E8',
+	light_element_background: '#DEE8F1',
 
 	element_color_1: '#3E8DF9',
 	element_color_2: '#00B792',
