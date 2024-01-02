@@ -130,7 +130,11 @@ export default function PatientsScreen() {
 					{!isLoading ? (
 						<ScrollView style={globalStyles.roundedContainer}>
 							<View style={[styles.searchBar, globalStyles.cardShadow]}>
-								<TextInput style={styles.searchInput} placeholder='Wyszukaj pacjenta...' />
+								<TextInput
+									style={styles.searchInput}
+									placeholderTextColor={COLORS.placeholder_color}
+									placeholder='Wyszukaj pacjenta...'
+								/>
 								<FontAwesome name={'search'} size={16} color={COLORS.header_text_gray_color} />
 							</View>
 

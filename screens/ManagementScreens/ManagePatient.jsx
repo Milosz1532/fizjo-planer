@@ -344,6 +344,7 @@ export default function ManagePatient({ route }) {
 														value={addProblemValue}
 														style={styles.addProblemInput}
 														placeholder='Wprowadź problem...'
+														placeholderTextColor={COLORS.placeholder_color}
 														onChangeText={text => setAddProblemValue(text)}
 														onSubmitEditing={handleAddNewProblem}
 														maxLength={40}
@@ -383,6 +384,7 @@ export default function ManagePatient({ route }) {
 														value={addLocationValue}
 														style={styles.addProblemInput}
 														placeholder='Wprowadź lokalizcje...'
+														placeholderTextColor={COLORS.placeholder_color}
 														autoComplete='street-address'
 														onChangeText={text => setAddLocationValue(text)}
 														onSubmitEditing={handleAddNewLocation}

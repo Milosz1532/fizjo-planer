@@ -15,6 +15,7 @@ import { Calendar, LocaleConfig } from 'react-native-calendars'
 import FontAwesome from '@expo/vector-icons/FontAwesome5'
 import { fetchPatientListWithAddresses, insertVisit } from '../../services/Database'
 import DateTimePickerModal from 'react-native-modal-datetime-picker'
+import { ALERT_TYPE, Dialog } from 'react-native-alert-notification'
 
 import { globalStyles } from '../../assets/styles'
 import { COLORS } from '../../assets/colors'
@@ -66,10 +67,13 @@ const DateComponent = ({ id, date, timeStart, timeEnd, selectStartTime, selectEn
 	}
 
 	const handleConfirm = selectedTime => {
+		const selectedDateTime = new Date(date)
+		selectedDateTime.setHours(selectedTime.getHours())
+		selectedDateTime.setMinutes(selectedTime.getMinutes())
 		if (isDatePickerVisible === 'start') {
-			selectStartTime(id, selectedTime)
+			selectStartTime(id, selectedDateTime)
 		} else if (isDatePickerVisible === 'end') {
-			selectEndTime(id, selectedTime)
+			selectEndTime(id, selectedDateTime)
 		}
 		hideDatePicker()
 	}
@@ -137,6 +141,11 @@ export default function ManageVisit() {
 	const { navigate, goBack } = useNavigation()
 
 	const [patientList, setPatientList] = useState([])
+	const [patientLocationInputValue, setPatientLocationInputValue] = useState('')
+	const [selectedPatient, setSelectedPatient] = useState(false)
+	const [noteInputValue, setNoteInputValue] = useState('')
+
+	const [selectedDates, setSelectedDates] = useState([])
 
 	const fetchData = async () => {
 		fetchPatientListWithAddresses(data => {
@@ -185,12 +194,6 @@ export default function ManageVisit() {
 
 	LocaleConfig.defaultLocale = 'pl'
 
-	const [patientLocationInputValue, setPatientLocationInputValue] = useState('')
-	const [selectedPatient, setSelectedPatient] = useState('')
-	const [noteInputValue, setNoteInputValue] = useState('')
-
-	const [selectedDates, setSelectedDates] = useState([])
-
 	const handleSelectDay = day => {
 		const isDateAlreadySelected = selectedDates.some(date => date.date === day.timestamp)
 
@@ -237,6 +240,28 @@ export default function ManageVisit() {
 	}
 
 	const handleSubmitVisit = () => {
+		let errorMessage = false
+		if (!selectedPatient) {
+			errorMessage = 'Musisz wybrać pacjenta przed dodaniem wizyty'
+		} else if (patientLocationInputValue === '') {
+			errorMessage = 'Musisz wpisać lub wybrać lokalizacje przed dodaniem wizyty'
+		} else if (selectedDates.length <= 0) {
+			errorMessage = 'Musisz wybrać termin przed dodaniem wizyty'
+		}
+
+		if (errorMessage) {
+			Dialog.show({
+				type: ALERT_TYPE.DANGER,
+				title: 'Błąd walidacji',
+				textBody: errorMessage,
+				button: 'OK',
+				onPressButton: () => {
+					Dialog.hide()
+				},
+			})
+			return
+		}
+
 		const datesWithTimestamps = selectedDates.map(date => ({
 			...date,
 			timeStart: date.timeStart.getTime(),
@@ -251,9 +276,26 @@ export default function ManageVisit() {
 				noteInputValue,
 				datesWithTimestamps
 			)
-			console.log('Visit added successfully')
+			Dialog.show({
+				type: ALERT_TYPE.SUCCESS,
+				title: 'Sukces',
+				textBody: 'Wizyta została dodana pomyślnie',
+				button: 'OK',
+				onPressButton: () => {
+					Dialog.hide()
+					goBack()
+				},
+			})
 		} catch (error) {
-			console.error('Error adding visit:', error)
+			Dialog.show({
+				type: ALERT_TYPE.DANGER,
+				title: 'Coś poszło nie tak',
+				textBody: 'Niestety nie udało się dodać wizyty. Spróbuj ponownie za chwile',
+				button: 'OK',
+				onPressButton: () => {
+					Dialog.hide()
+				},
+			})
 		}
 	}
 

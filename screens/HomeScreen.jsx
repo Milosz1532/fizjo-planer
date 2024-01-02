@@ -5,7 +5,6 @@ import FontAwesome from '@expo/vector-icons/FontAwesome5'
 import { COLORS } from '../assets/colors'
 import { globalStyles } from '../assets/styles'
 
-import CustomStatusBar from '../components/CustomStatusBar'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { StatusBar } from 'expo-status-bar'

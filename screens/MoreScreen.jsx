@@ -6,8 +6,6 @@ import { COLORS } from '../assets/colors'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { StatusBar } from 'expo-status-bar'
 
-import ToggleSwitch from 'toggle-switch-react-native'
-
 import { useSettings } from '../SettingsContext'
 
 const UserProfile = () => (
@@ -42,13 +40,13 @@ const ToggleSettingsItem = ({ icon, label, initialValue, onToggle }) => (
 		</View>
 		<Text style={styles.toggleSettingsItemText}>{label}</Text>
 		<View style={styles.toggleSettingsItemToggleContainer}>
-			<ToggleSwitch
+			{/* <ToggleSwitch
 				isOn={initialValue}
 				onColor={COLORS.element_color_2}
 				offColor={COLORS.light_gray_element}
 				size='medium'
 				onToggle={onToggle}
-			/>
+			/> */}
 		</View>
 	</View>
 )

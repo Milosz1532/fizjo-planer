@@ -33,9 +33,9 @@ const BottomTabNavigation = () => {
 	const { navigate } = useNavigation()
 
 	return (
-		<Tab.Navigator screenOptions={screenOptions}>
+		<Tab.Navigator screenOptions={screenOptions} initialRouteName='home'>
 			<Tab.Screen
-				name='Home'
+				name='home'
 				component={HomeScreen}
 				options={{
 					tabBarIcon: ({ focused }) => {
@@ -50,7 +50,7 @@ const BottomTabNavigation = () => {
 				}}
 			/>
 			<Tab.Screen
-				name='Kalendarz'
+				name='calendar'
 				component={CalendarScreen}
 				options={{
 					tabBarIcon: ({ focused }) => {
@@ -93,7 +93,7 @@ const BottomTabNavigation = () => {
 				})}
 			/>
 			<Tab.Screen
-				name='Pacjenci'
+				name='patients'
 				component={PatientsCreen}
 				options={{
 					tabBarIcon: ({ focused }) => {
@@ -108,7 +108,7 @@ const BottomTabNavigation = () => {
 				}}
 			/>
 			<Tab.Screen
-				name='Więcej'
+				name='more'
 				component={MoreScreen}
 				options={{
 					tabBarIcon: ({ focused }) => {

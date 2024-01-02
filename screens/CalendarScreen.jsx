@@ -7,27 +7,43 @@ import { useNavigation, useFocusEffect } from '@react-navigation/native'
 import { globalStyles } from '../assets/styles'
 import { COLORS } from '../assets/colors'
 
-import CustomStatusBar from '../components/CustomStatusBar'
-
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { StatusBar } from 'expo-status-bar'
 
 import { fetchAllVisits } from '../services/Database'
 
-const ScheduleComponent = ({ item, color }) => {
+import moment from 'moment'
+import Timetable from 'react-native-calendar-timetable'
+
+const ScheduleComponent = ({ style, item, dayIndex, daysTotal }) => {
+	const startTime = new Date(item.time_start).toLocaleTimeString('en-US', {
+		hour12: false,
+		hour: '2-digit',
+		minute: '2-digit',
+	})
+	const endTime = new Date(item.time_end).toLocaleTimeString('en-US', {
+		hour12: false,
+		hour: '2-digit',
+		minute: '2-digit',
+	})
+
 	return (
-		<View style={[styles.scheduleComponent, { backgroundColor: color }]}>
+		<View style={[styles.scheduleComponent, { ...style, backgroundColor: item.color }]}>
 			<View style={styles.scheduleComponentIcon}></View>
 
 			<View style={styles.scheduleComponentContent}>
-				<View>
-					<Text style={styles.scheduleComponentTitle}>Basen miejski</Text>
-					<Text style={styles.scheduleComponentPatient}>Jaś Kowalski</Text>
+				<View style={styles.ScheduleCompscheduleComponentLeftContentonent}>
+					<Text style={styles.scheduleComponentTitle}>
+						{!item.custom_location ? item.address_text : item.custom_location}
+					</Text>
+					<Text style={styles.scheduleComponentPatient}>{item.patient_full_name}</Text>
 				</View>
 				<View style={styles.scheduleComponentTime}>
 					<FontAwesome name={'clock'} size={18} color={COLORS.main_text_light_color} />
-					<Text style={styles.scheduleComponentTimeText}>12:00 - 14:00</Text>
+					<Text style={styles.scheduleComponentTimeText}>
+						{startTime} - {endTime}
+					</Text>
 				</View>
 			</View>
 		</View>
@@ -69,10 +85,37 @@ LocaleConfig.locales['pl'] = {
 
 LocaleConfig.defaultLocale = 'pl'
 
+const groupColors = [
+	COLORS.element_color_1,
+	COLORS.element_color_2,
+	COLORS.element_color_3,
+	COLORS.element_color_4,
+	COLORS.element_color_5,
+]
+
+const getColorByIndex = index => groupColors[index % groupColors.length]
+
 export default function CalendaScreen() {
+	const [scheduleList, setScheduleList] = useState([])
+	const [selectedDay, setSelectedDate] = useState(null)
+	const [selectedDayVisits, setSelectedDateVisits] = useState(null)
+	const [markedDates, setMarkedDates] = useState({})
+
 	const fetchData = async () => {
 		fetchAllVisits(data => {
-			console.log(data)
+			setScheduleList(data)
+
+			const updatedMarkedDates = {}
+			data.forEach((item, index) => {
+				const dateString = new Date(item.date).toISOString().split('T')[0]
+				if (!updatedMarkedDates[dateString]) {
+					updatedMarkedDates[dateString] = {
+						marked: true,
+						dotColor: getColorByIndex(index),
+					}
+				}
+			})
+			setMarkedDates(updatedMarkedDates)
 		})
 	}
 
@@ -82,67 +125,59 @@ export default function CalendaScreen() {
 		}, [])
 	)
 
-	const schedule = [
-		{
-			id: 1,
-			date: new Date(2023, 11, 7),
-			time_start: '8:00',
-			time_end: '8:30',
-		},
-		{
-			id: 2,
-			date: new Date(2023, 11, 7),
-			time_start: '8:30',
-			time_end: '9:00',
-		},
-		{
-			id: 3,
-			date: new Date(2023, 11, 7),
-			time_start: '9:00',
-			time_end: '10:00',
-		},
-		{
-			id: 4,
-			date: new Date(2023, 11, 7),
-			time_start: '10:00',
-			time_end: '11:00',
-		},
-		{
-			id: 5,
-			date: new Date(2023, 11, 8),
-			time_start: '13:00',
-			time_end: '14:00',
-		},
-		{
-			id: 6,
-			date: new Date(2023, 11, 7),
-			time_start: '14:00',
-			time_end: '17:00',
-		},
-	]
-
-	const [scheduleList, setScheduleList] = useState(schedule)
-
-	const markedDates = {}
-	schedule.forEach(item => {
-		const dateString = item.date.toISOString().split('T')[0]
-		if (!markedDates[dateString]) {
-			markedDates[dateString] = { marked: true }
-		}
-	})
-
-	const groupColors = [
-		COLORS.element_color_1,
-		COLORS.element_color_2,
-		COLORS.element_color_3,
-		COLORS.element_color_4,
-		COLORS.element_color_5,
-	]
-
-	const getColorForGroup = groupId => {
-		const index = (groupId - 1) % groupColors.length
-		return groupColors[index]
+	const isToday = (date1, date2) => {
+		return (
+			date1.getFullYear() === date2.getFullYear() &&
+			date1.getMonth() === date2.getMonth() &&
+			date1.getDate() === date2.getDate()
+		)
 	}
+
+	const handleDayPress = day => {
+		const clickedDate = markedDates[day.dateString]
+		if (clickedDate) {
+			setSelectedDate(day)
+			const selectedDateString = day.dateString
+			const visitsForSelectedDay = scheduleList.filter(
+				item => new Date(item.date).toISOString().split('T')[0] === selectedDateString
+			)
+
+			visitsForSelectedDay.sort((a, b) => a.time_start - b.time_start)
+
+			const formattedVisits = visitsForSelectedDay.map((visit, index) => {
+				const startTime = new Date(visit.time_start)
+				const endTime = new Date(visit.time_end)
+				const color = getColorByIndex(index)
+
+				return {
+					...visit,
+					startDate: startTime,
+					endDate: endTime,
+					color,
+				}
+			})
+
+			const updatedMarkedDates = {}
+			Object.keys(markedDates).forEach(date => {
+				updatedMarkedDates[date] = {
+					...markedDates[date],
+					selected: date === selectedDateString,
+					selectedColor: COLORS.element_color_3,
+				}
+			})
+
+			setMarkedDates(updatedMarkedDates)
+
+			console.log(formattedVisits)
+			setSelectedDateVisits(formattedVisits)
+		}
+	}
+
+	const [dateNow] = React.useState(new Date())
+
+	const [from] = React.useState(moment().subtract(3, 'days').toDate())
+	const [till] = React.useState(moment().add(3, 'days').toISOString())
+	const range = { from, till }
 
 	return (
 		<View style={{ flex: 1, backgroundColor: COLORS.main }}>
@@ -157,41 +192,42 @@ export default function CalendaScreen() {
 						</View>
 					</View>
 
-					<ScrollView style={globalStyles.roundedContainer}>
+					<ScrollView style={[globalStyles.roundedContainer, { paddingHorizontal: 0 }]}>
 						<View>
 							<Calendar
+								renderArrow={direction =>
+									direction === 'left' ? (
+										<FontAwesome name={'angle-left'} size={18} color={COLORS.main} />
+									) : (
+										<FontAwesome name={'angle-right'} size={18} color={COLORS.main} />
+									)
+								}
+								onDayPress={handleDayPress}
 								markedDates={markedDates}
 								theme={{
 									backgroundColor: 'transparent',
 									calendarBackground: 'transparent',
 									textDayFontFamily: 'Poppins-Regular',
-									textMonthFontFamily: 'Poppins-Regular',
+									monthTextColor: COLORS.main,
+									textMonthFontFamily: 'Poppins-Bold',
 									textDayHeaderFontFamily: 'Poppins-Regular',
 								}}
 							/>
 						</View>
-						<View style={{ marginTop: 10 }}>
-							{scheduleList.map((item, index, array) => (
-								<View key={index}>
-									{index === 0 || item.time_start !== array[index - 1].time_start ? (
-										item.time_start.endsWith(':00') ? (
-											<Text style={[styles.calendarScheduleHours, { marginTop: 10 }]}>
-												{item.time_start}
-											</Text>
-										) : null
-									) : null}
-
-									<View style={styles.calendarScheduleElements}>
-										<ScheduleComponent item={item} color={getColorForGroup(item.id)} />
-									</View>
-
-									{index === array.length - 1 || item.time_end !== array[index + 1].time_start ? (
-										item.time_end.endsWith(':00') ? (
-											<Text style={styles.calendarScheduleHours}>{item.time_end}</Text>
-										) : null
-									) : null}
-								</View>
-							))}
+						<View style={{ marginTop: 10, paddingStart: 5, marginBottom: 15 }}>
+							{selectedDay && (
+								<>
+									<Timetable
+										items={selectedDayVisits}
+										renderItem={props => <ScheduleComponent {...props} />}
+										date={new Date(selectedDay.timestamp)}
+										hourHeight={100}
+										range={range}
+										style={timetableStyles}
+										hideNowLine={isToday(new Date(selectedDay.timestamp), dateNow) ? false : true}
+									/>
+								</>
+							)}
 						</View>
 					</ScrollView>
 				</View>
@@ -199,6 +235,30 @@ export default function CalendaScreen() {
 		</View>
 	)
 }
+
+const timetableStyles = StyleSheet.create({
+	timeContainer: {
+		backgroundColor: COLORS.app_background,
+	},
+	time: {
+		fontFamily: 'Poppins-Regular',
+		fontSize: 16,
+		color: COLORS.text_gray_color,
+	},
+
+	lines: {
+		borderColor: COLORS.line_color,
+		borderStartWidth: 0,
+	},
+	nowLine: {
+		dot: {
+			backgroundColor: COLORS.primary,
+		},
+		line: {
+			backgroundColor: COLORS.primary,
+		},
+	},
+})
 
 const styles = StyleSheet.create({
 	calendarScheduleHours: {
@@ -209,24 +269,16 @@ const styles = StyleSheet.create({
 
 	calendarScheduleElements: {
 		marginLeft: 10,
-		paddingHorizontal: 10,
-		borderLeftWidth: 2,
-		borderRadius: 1,
-		borderStyle: 'dotted',
-		borderColor: COLORS.header_text_gray_color,
 
 		justifyContent: 'space-between',
 	},
 
 	scheduleComponent: {
 		backgroundColor: COLORS.main,
-		marginVertical: 10,
 		paddingHorizontal: 10,
 		paddingVertical: 20,
 		borderRadius: 6,
-
 		flexDirection: 'row',
-		alignItems: 'center',
 	},
 
 	scheduleComponentIcon: {
@@ -244,6 +296,10 @@ const styles = StyleSheet.create({
 		justifyContent: 'space-between',
 	},
 
+	ScheduleCompscheduleComponentLeftContentonent: {
+		flex: 3,
+	},
+
 	scheduleComponentTitle: {
 		color: COLORS.main_text_light_color,
 		fontFamily: 'Poppins-SemiBold',
@@ -257,6 +313,8 @@ const styles = StyleSheet.create({
 
 	scheduleComponentTime: {
 		flexDirection: 'row',
+		alignItems: 'center',
+		flex: 2,
 	},
 
 	scheduleComponentTimeText: {
