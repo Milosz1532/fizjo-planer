@@ -2,79 +2,17 @@ import React, { useState, useCallback, useEffect } from 'react'
 import { useNavigation, useFocusEffect } from '@react-navigation/native'
 import { StyleSheet, View, Text, TouchableOpacity, ScrollView } from 'react-native'
 import FontAwesome from '@expo/vector-icons/FontAwesome5'
-
 import { startOfWeek, addDays, format, isToday } from 'date-fns'
 import plLocale from 'date-fns/locale/pl'
-
 import { COLORS } from '../assets/colors'
 import { globalStyles } from '../assets/styles'
-
 import { SafeAreaView } from 'react-native-safe-area-context'
-
 import { StatusBar } from 'expo-status-bar'
 
+import UpcomingVisit from '../components/UpcomingVisit'
+import VisitCard from '../components/VisitCard'
+
 import { fetchAllVisitsThisWeek, fetchUpcomingVisits } from '../services/Database'
-
-const VisitCard = ({ meeting, onPress }) => {
-	const startTime = new Date(meeting.time_start).toLocaleTimeString('en-US', {
-		hour12: false,
-		hour: '2-digit',
-		minute: '2-digit',
-	})
-	const endTime = new Date(meeting.time_end).toLocaleTimeString('en-US', {
-		hour12: false,
-		hour: '2-digit',
-		minute: '2-digit',
-	})
-	return (
-		<TouchableOpacity style={styles.visitCard} onPress={onPress}>
-			<View style={styles.visitCardIcon}>
-				<FontAwesome name={'calendar-week'} size={24} color={COLORS.main_text_light_color} />
-			</View>
-			<View style={styles.visitCardContent}>
-				<Text style={styles.visitCardContentLocation}>{meeting.address}</Text>
-				<Text style={styles.visitCardContentPatient}>{meeting.patient_full_name}</Text>
-			</View>
-			<View style={styles.visitCardTime}>
-				<FontAwesome name={'clock'} size={18} color={COLORS.main_text_light_color} />
-				<Text style={styles.visitCardTimeText}>
-					{startTime} - {endTime}
-				</Text>
-			</View>
-		</TouchableOpacity>
-	)
-}
-
-const UpcomingVisit = ({ meeting, color, onPress }) => {
-	const startTime = new Date(meeting.time_start).toLocaleTimeString('en-US', {
-		hour12: false,
-		hour: '2-digit',
-		minute: '2-digit',
-	})
-	const endTime = new Date(meeting.time_end).toLocaleTimeString('en-US', {
-		hour12: false,
-		hour: '2-digit',
-		minute: '2-digit',
-	})
-
-	return (
-		<TouchableOpacity style={styles.upcomingVisitCard} onPress={onPress}>
-			<View style={[styles.upcomingVisitCardIcon, { backgroundColor: color }]}></View>
-			<View style={styles.upcomingVisitCardContent}>
-				<View style={styles.upcommingLeftContent}>
-					<Text style={styles.upcomingVisitCardLocation}>{meeting.address}</Text>
-					<Text style={styles.upcomingVisitCardPatient}>{meeting.patient_full_name}</Text>
-				</View>
-				<View style={styles.upcomingVisitCardTime}>
-					<FontAwesome name={'clock'} size={18} color={COLORS.tab_gray_element_color} />
-					<Text style={styles.upcomingVisitCardTimeText}>
-						{startTime} - {endTime}
-					</Text>
-				</View>
-			</View>
-		</TouchableOpacity>
-	)
-}
 
 const getCurrentWeekArray = () => {
 	const today = new Date()
@@ -338,105 +276,11 @@ const styles = StyleSheet.create({
 		fontSize: 12,
 	},
 
-	visitCard: {
-		backgroundColor: COLORS.main,
-		display: 'flex',
-		justifyContent: 'space-between',
-		flexDirection: 'row',
-		alignItems: 'center',
-		padding: 10,
-		borderRadius: 6,
-		marginTop: 10,
-	},
-
-	visitCardIcon: {
-		backgroundColor: COLORS.primary,
-		display: 'flex',
-		justifyContent: 'center',
-		alignItems: 'center',
-		borderRadius: 6,
-		width: 50,
-		height: 50,
-		marginEnd: 5,
-	},
-
-	visitCardContent: {
-		flex: 3,
-	},
-
-	visitCardContentLocation: {
-		fontFamily: 'Poppins-Bold',
-		color: COLORS.main_text_light_color,
-		fontSize: 15,
-	},
-
-	visitCardContentPatient: {
-		fontFamily: 'Poppins-Regular',
-		marginTop: -4,
-		color: COLORS.main_text_light_color,
-	},
-
-	visitCardTime: {
-		flex: 2,
-		flexDirection: 'row',
-	},
-
-	visitCardTimeText: {
-		fontFamily: 'Poppins-Regular',
-		marginStart: 10,
-		color: COLORS.main_text_light_color,
-	},
-
 	tabTitle: {
 		fontFamily: 'Poppins-SemiBold',
 		color: COLORS.header_text_gray_color,
 		fontSize: 18,
 		marginTop: 5,
-	},
-
-	upcomingVisitCard: {
-		display: 'flex',
-		flexDirection: 'row',
-		marginTop: 10,
-	},
-
-	upcomingVisitCardIcon: {
-		width: 5,
-		backgroundColor: COLORS.element_color_1,
-		marginEnd: 10,
-		borderRadius: 6,
-	},
-
-	upcomingVisitCardContent: {
-		flex: 1,
-		flexDirection: 'row',
-		justifyContent: 'space-between',
-		alignItems: 'center',
-	},
-
-	upcommingLeftContent: {
-		flex: 3,
-		paddingEnd: 5,
-	},
-
-	upcomingVisitCardTime: {
-		flexDirection: 'row',
-	},
-
-	upcomingVisitCardTimeText: {
-		marginStart: 5,
-		fontFamily: 'Poppins-Regular',
-	},
-
-	upcomingVisitCardLocation: {
-		fontFamily: 'Poppins-SemiBold',
-		fontSize: 16,
-	},
-
-	upcomingVisitCardPatient: {
-		fontFamily: 'Poppins-Regular',
-		marginTop: -4,
-		color: COLORS.tab_gray_element_color,
 	},
 
 	noMeetingsContainer: {

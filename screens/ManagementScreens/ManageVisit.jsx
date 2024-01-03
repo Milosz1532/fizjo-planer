@@ -608,6 +608,13 @@ export default function ManageVisit({ route }) {
 													mode='time'
 													onConfirm={handleConfirmTimePicker}
 													onCancel={() => setIsTimePickerVisible(false)}
+													date={
+														new Date(
+															isTimePickerVisible === 'start'
+																? selectedVisitTimeStart
+																: selectedVisitTimeEnd
+														)
+													}
 												/>
 											</>
 										)}
