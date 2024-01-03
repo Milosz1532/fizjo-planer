@@ -15,7 +15,7 @@ import { StatusBar } from 'expo-status-bar'
 
 import { fetchAllVisitsThisWeek, fetchUpcomingVisits } from '../services/Database'
 
-const VisitCard = ({ meeting }) => {
+const VisitCard = ({ meeting, onPress }) => {
 	const startTime = new Date(meeting.time_start).toLocaleTimeString('en-US', {
 		hour12: false,
 		hour: '2-digit',
@@ -27,7 +27,7 @@ const VisitCard = ({ meeting }) => {
 		minute: '2-digit',
 	})
 	return (
-		<View style={styles.visitCard}>
+		<TouchableOpacity style={styles.visitCard} onPress={onPress}>
 			<View style={styles.visitCardIcon}>
 				<FontAwesome name={'calendar-week'} size={24} color={COLORS.main_text_light_color} />
 			</View>
@@ -41,11 +41,11 @@ const VisitCard = ({ meeting }) => {
 					{startTime} - {endTime}
 				</Text>
 			</View>
-		</View>
+		</TouchableOpacity>
 	)
 }
 
-const UpcomingVisit = ({ meeting, color }) => {
+const UpcomingVisit = ({ meeting, color, onPress }) => {
 	const startTime = new Date(meeting.time_start).toLocaleTimeString('en-US', {
 		hour12: false,
 		hour: '2-digit',
@@ -58,7 +58,7 @@ const UpcomingVisit = ({ meeting, color }) => {
 	})
 
 	return (
-		<View style={styles.upcomingVisitCard}>
+		<TouchableOpacity style={styles.upcomingVisitCard} onPress={onPress}>
 			<View style={[styles.upcomingVisitCardIcon, { backgroundColor: color }]}></View>
 			<View style={styles.upcomingVisitCardContent}>
 				<View style={styles.upcommingLeftContent}>
@@ -72,7 +72,7 @@ const UpcomingVisit = ({ meeting, color }) => {
 					</Text>
 				</View>
 			</View>
-		</View>
+		</TouchableOpacity>
 	)
 }
 
@@ -109,6 +109,8 @@ const NoMeetings = ({ text }) => (
 )
 
 export default function HomeScreen() {
+	const { navigate } = useNavigation()
+
 	const [weekCalendarDays, setWeekCalendarDays] = useState([])
 	const [selectedWeekDay, setSelectedWeekDay] = useState(weekCalendarDays[0])
 	const [selectedDayMeetings, setSelectedDayMeetings] = useState([])
@@ -233,7 +235,11 @@ export default function HomeScreen() {
 								{selectedWeekDay && selectedDayMeetings.length > 0 ? (
 									<>
 										{selectedDayMeetings.map(meeting => (
-											<VisitCard key={meeting.id} meeting={meeting} />
+											<VisitCard
+												key={meeting.id}
+												meeting={meeting}
+												onPress={() => navigate('manageVisit', { id: meeting.id })}
+											/>
 										))}
 									</>
 								) : (
@@ -256,6 +262,7 @@ export default function HomeScreen() {
 													key={meeting.id}
 													meeting={meeting}
 													color={getColorByIndex(index)}
+													onPress={() => navigate('manageVisit', { id: meeting.id })}
 												/>
 											))}
 										</View>
