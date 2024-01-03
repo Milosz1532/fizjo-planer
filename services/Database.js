@@ -1,4 +1,5 @@
 import * as SQLite from 'expo-sqlite'
+import { startOfWeek, endOfWeek, format, addDays } from 'date-fns'
 
 const db = SQLite.openDatabase('fp_sqlite', '1.0')
 
@@ -486,6 +487,106 @@ const fetchVisitById = (visitId, callback) => {
 	)
 }
 
+const fetchAllVisitsThisWeek = callback => {
+	const currentDate = new Date() // Aktualna data
+	const startOfWeekDate = startOfWeek(currentDate, { weekStartsOn: 1 })
+	const endOfWeekDate = endOfWeek(currentDate)
+
+	const formattedStartOfWeek = startOfWeekDate.toLocaleDateString('pl-PL')
+	const formattedEndOfWeek = addDays(endOfWeekDate, 1).toLocaleDateString().split('T')[0]
+
+	db.transaction(
+		tx => {
+			tx.executeSql(
+				"SELECT v.id as visitId, v.patient_id, v.address, v.note, strftime('%Y-%m-%d', v.date/1000, 'unixepoch') as formattedDate, v.time_start, v.time_end, p.full_name " +
+					'FROM visit v ' +
+					'LEFT JOIN patients p ON v.patient_id = p.id ' +
+					'WHERE formattedDate BETWEEN ? AND ?',
+				[formattedStartOfWeek, formattedEndOfWeek],
+				(_, { rows }) => {
+					const data = rows._array
+
+					const visits = data.map(current => ({
+						id: current.visitId,
+						patient_id: current.patient_id,
+						address: current.address,
+						note: current.note,
+						date: current.formattedDate,
+						time_start: current.time_start,
+						time_end: current.time_end,
+						patient_full_name: current.full_name,
+					}))
+
+					if (callback) {
+						callback(visits)
+					}
+				},
+				(tx, error) => {
+					console.log('Transaction error:', error)
+
+					if (callback) {
+						callback([], error)
+					}
+				}
+			)
+		},
+		error => {
+			console.log('Transaction error:', error)
+			throw new Error('Transaction failed')
+		}
+	)
+}
+
+const fetchUpcomingVisits = callback => {
+	const currentDate = new Date()
+	const formattedCurrentDate = `${currentDate.getFullYear()}-${(currentDate.getMonth() + 1)
+		.toString()
+		.padStart(2, '0')}-${currentDate.getDate().toString().padStart(2, '0')}`
+
+	db.transaction(
+		tx => {
+			tx.executeSql(
+				"SELECT v.id as visitId, v.patient_id, v.address, v.note, strftime('%Y-%m-%d', v.date/1000, 'unixepoch', 'localtime') as formattedDate, v.time_start, v.time_end, p.full_name " +
+					'FROM visit v ' +
+					'LEFT JOIN patients p ON v.patient_id = p.id ' +
+					'WHERE formattedDate >= ? ' +
+					'ORDER BY formattedDate ASC ' +
+					'LIMIT 10',
+				[formattedCurrentDate],
+				(_, { rows }) => {
+					const data = rows._array
+
+					const visits = data.map(current => ({
+						id: current.visitId,
+						patient_id: current.patient_id,
+						address: current.address,
+						note: current.note,
+						date: current.formattedDate,
+						time_start: current.time_start,
+						time_end: current.time_end,
+						patient_full_name: current.full_name,
+					}))
+
+					if (callback) {
+						callback(visits)
+					}
+				},
+				(tx, error) => {
+					console.log('Transaction error:', error)
+
+					if (callback) {
+						callback([], error)
+					}
+				}
+			)
+		},
+		error => {
+			console.log('Transaction error:', error)
+			throw new Error('Transaction failed')
+		}
+	)
+}
+
 export {
 	initDatabase,
 	insertPatient,
@@ -498,4 +599,6 @@ export {
 	fetchAllVisits,
 	fetchVisitById,
 	updateVisit,
+	fetchAllVisitsThisWeek,
+	fetchUpcomingVisits,
 }

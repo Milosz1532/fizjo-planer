@@ -50,7 +50,7 @@ LocaleConfig.locales['pl'] = {
 		'Déc.',
 	],
 	dayNames: ['Niedziela', 'Poniedziałek', 'Wtorek', 'Środa', 'Czwartek', 'Piątek', 'Sobota'],
-	dayNamesShort: ['Pn', 'Wt', 'Śr', 'Czw', 'Pt', 'Sob', 'Nd'],
+	dayNamesShort: ['Nd', 'Pn', 'Wt', 'Śr', 'Czw', 'Pt', 'Sob'],
 }
 
 LocaleConfig.defaultLocale = 'pl'
