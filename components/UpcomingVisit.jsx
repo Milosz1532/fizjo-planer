@@ -2,7 +2,7 @@ import React from 'react'
 import { StyleSheet, View, Text, TouchableOpacity } from 'react-native'
 import FontAwesome from '@expo/vector-icons/FontAwesome5'
 
-import { COLORS } from '../assets/colors'
+import { useGlobalColors } from '../assets/colors'
 
 const UpcomingVisit = ({ meeting, color, onPress }) => {
 	const startTime = new Date(meeting.time_start).toLocaleTimeString('en-US', {
@@ -15,6 +15,9 @@ const UpcomingVisit = ({ meeting, color, onPress }) => {
 		hour: '2-digit',
 		minute: '2-digit',
 	})
+
+	const COLORS = useGlobalColors()
+	const styles = generateStyles(COLORS)
 
 	return (
 		<TouchableOpacity style={styles.upcomingVisitCard} onPress={onPress}>
@@ -35,51 +38,53 @@ const UpcomingVisit = ({ meeting, color, onPress }) => {
 	)
 }
 
-const styles = StyleSheet.create({
-	upcomingVisitCard: {
-		display: 'flex',
-		flexDirection: 'row',
-		marginTop: 10,
-	},
+const generateStyles = COLORS =>
+	StyleSheet.create({
+		upcomingVisitCard: {
+			display: 'flex',
+			flexDirection: 'row',
+			marginTop: 10,
+		},
 
-	upcomingVisitCardIcon: {
-		width: 5,
-		backgroundColor: COLORS.element_color_1,
-		marginEnd: 10,
-		borderRadius: 6,
-	},
+		upcomingVisitCardIcon: {
+			width: 5,
+			backgroundColor: COLORS.element_color_1,
+			marginEnd: 10,
+			borderRadius: 6,
+		},
 
-	upcomingVisitCardContent: {
-		flex: 1,
-		flexDirection: 'row',
-		justifyContent: 'space-between',
-		alignItems: 'center',
-	},
+		upcomingVisitCardContent: {
+			flex: 1,
+			flexDirection: 'row',
+			justifyContent: 'space-between',
+			alignItems: 'center',
+		},
 
-	upcommingLeftContent: {
-		flex: 3,
-		paddingEnd: 5,
-	},
+		upcommingLeftContent: {
+			flex: 3,
+			paddingEnd: 5,
+		},
 
-	upcomingVisitCardTime: {
-		flexDirection: 'row',
-	},
+		upcomingVisitCardTime: {
+			flexDirection: 'row',
+		},
 
-	upcomingVisitCardTimeText: {
-		marginStart: 5,
-		fontFamily: 'Poppins-Regular',
-	},
+		upcomingVisitCardTimeText: {
+			marginStart: 5,
+			fontFamily: 'Poppins-Regular',
+		},
 
-	upcomingVisitCardLocation: {
-		fontFamily: 'Poppins-SemiBold',
-		fontSize: 16,
-	},
+		upcomingVisitCardLocation: {
+			fontFamily: 'Poppins-SemiBold',
+			fontSize: 16,
+			color: COLORS.main_text_dark_color,
+		},
 
-	upcomingVisitCardPatient: {
-		fontFamily: 'Poppins-Regular',
-		marginTop: -4,
-		color: COLORS.tab_gray_element_color,
-	},
-})
+		upcomingVisitCardPatient: {
+			fontFamily: 'Poppins-Regular',
+			marginTop: -4,
+			color: COLORS.tab_gray_element_color,
+		},
+	})
 
 export default UpcomingVisit

@@ -1,11 +1,12 @@
 import React from 'react'
-
-import { ScrollView, View, Text, TextInput, StyleSheet, TouchableOpacity } from 'react-native'
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native'
 import FontAwesome from '@expo/vector-icons/FontAwesome5'
 
-import { COLORS } from '../assets/colors'
+import { useGlobalColors } from '../assets/colors'
 
 const PatientComponent = ({ fullName, dateOfBirth, onPress }) => {
+	const COLORS = useGlobalColors()
+
 	const calculateAge = birthDate => {
 		const today = new Date()
 		const birthDateObj = new Date(birthDate)
@@ -50,6 +51,56 @@ const PatientComponent = ({ fullName, dateOfBirth, onPress }) => {
 		}
 	}
 
+	const styles = StyleSheet.create({
+		PatientComponent: {
+			backgroundColor: COLORS.element_background,
+			marginVertical: 10,
+			paddingHorizontal: 10,
+			paddingVertical: 20,
+			borderRadius: 10,
+
+			flexDirection: 'row',
+			alignItems: 'center',
+		},
+
+		PatientComponentIcon: {
+			width: 8,
+			backgroundColor: COLORS.main,
+			height: '100%',
+			marginEnd: 8,
+			borderRadius: 6,
+		},
+
+		PatientComponentContent: {
+			flex: 1,
+			flexDirection: 'row',
+			alignItems: 'center',
+			justifyContent: 'space-between',
+		},
+
+		PatientComponentName: {
+			color: COLORS.main_text_dark_color,
+			fontFamily: 'Poppins-SemiBold',
+			fontSize: 16,
+		},
+
+		PatientComponentAge: {
+			color: COLORS.main_text_dark_color,
+			fontFamily: 'Poppins-Regular',
+		},
+
+		PatientComponentTime: {
+			flexDirection: 'row',
+		},
+
+		PatientComponentTimeText: {
+			color: COLORS.main,
+			fontFamily: 'Poppins-Bold',
+			marginLeft: 10,
+			marginEnd: 10,
+		},
+	})
+
 	return (
 		<TouchableOpacity onPress={onPress}>
 			<View style={styles.PatientComponent}>
@@ -69,55 +120,5 @@ const PatientComponent = ({ fullName, dateOfBirth, onPress }) => {
 		</TouchableOpacity>
 	)
 }
-
-const styles = StyleSheet.create({
-	PatientComponent: {
-		backgroundColor: COLORS.element_background,
-		marginVertical: 10,
-		paddingHorizontal: 10,
-		paddingVertical: 20,
-		borderRadius: 10,
-
-		flexDirection: 'row',
-		alignItems: 'center',
-	},
-
-	PatientComponentIcon: {
-		width: 8,
-		backgroundColor: COLORS.main,
-		height: '100%',
-		marginEnd: 8,
-		borderRadius: 6,
-	},
-
-	PatientComponentContent: {
-		flex: 1,
-		flexDirection: 'row',
-		alignItems: 'center',
-		justifyContent: 'space-between',
-	},
-
-	PatientComponentName: {
-		color: COLORS.main_text_dark_color,
-		fontFamily: 'Poppins-SemiBold',
-		fontSize: 16,
-	},
-
-	PatientComponentAge: {
-		color: COLORS.main_text_dark_color,
-		fontFamily: 'Poppins-Regular',
-	},
-
-	PatientComponentTime: {
-		flexDirection: 'row',
-	},
-
-	PatientComponentTimeText: {
-		color: COLORS.main,
-		fontFamily: 'Poppins-Bold',
-		marginLeft: 10,
-		marginEnd: 10,
-	},
-})
 
 export default PatientComponent

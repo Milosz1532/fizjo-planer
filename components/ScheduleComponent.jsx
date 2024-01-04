@@ -1,9 +1,12 @@
 import React from 'react'
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native'
 import FontAwesome from '@expo/vector-icons/FontAwesome5'
-import { COLORS } from '../assets/colors'
+import { useGlobalColors } from '../assets/colors'
 
 const ScheduleComponent = ({ style, item, navigate, dayIndex, daysTotal }) => {
+	const COLORS = useGlobalColors()
+	const styles = generateStyles(COLORS)
+
 	const startTime = new Date(item.time_start).toLocaleTimeString('en-US', {
 		hour12: false,
 		hour: '2-digit',
@@ -37,56 +40,57 @@ const ScheduleComponent = ({ style, item, navigate, dayIndex, daysTotal }) => {
 	)
 }
 
-const styles = StyleSheet.create({
-	scheduleComponent: {
-		backgroundColor: COLORS.main,
-		paddingHorizontal: 10,
-		paddingVertical: 20,
-		borderRadius: 6,
-		flexDirection: 'row',
-	},
+const generateStyles = COLORS =>
+	StyleSheet.create({
+		scheduleComponent: {
+			backgroundColor: COLORS.main,
+			paddingHorizontal: 10,
+			paddingVertical: 20,
+			borderRadius: 6,
+			flexDirection: 'row',
+		},
 
-	scheduleComponentIcon: {
-		width: 4,
-		backgroundColor: COLORS.element_background,
-		height: '100%',
-		marginEnd: 8,
-		borderRadius: 6,
-	},
+		scheduleComponentIcon: {
+			width: 4,
+			backgroundColor: COLORS.element_background,
+			height: '100%',
+			marginEnd: 8,
+			borderRadius: 6,
+		},
 
-	scheduleComponentContent: {
-		flex: 1,
-		flexDirection: 'row',
-		alignItems: 'center',
-		justifyContent: 'space-between',
-	},
+		scheduleComponentContent: {
+			flex: 1,
+			flexDirection: 'row',
+			alignItems: 'center',
+			justifyContent: 'space-between',
+		},
 
-	ScheduleCompscheduleComponentLeftContentonent: {
-		flex: 3,
-	},
+		ScheduleCompscheduleComponentLeftContentonent: {
+			flex: 3,
+		},
 
-	scheduleComponentTitle: {
-		color: COLORS.main_text_light_color,
-		fontFamily: 'Poppins-SemiBold',
-		fontSize: 16,
-	},
+		scheduleComponentTitle: {
+			color: COLORS.main_text_light_color,
+			fontFamily: 'Poppins-SemiBold',
+			fontSize: 16,
+		},
 
-	scheduleComponentPatient: {
-		color: COLORS.main_text_light_color,
-		fontFamily: 'Poppins-Regular',
-	},
+		scheduleComponentPatient: {
+			color: COLORS.main_text_light_color,
+			fontFamily: 'Poppins-Regular',
+		},
 
-	scheduleComponentTime: {
-		flexDirection: 'row',
-		alignItems: 'center',
-		flex: 2,
-	},
+		scheduleComponentTime: {
+			flexDirection: 'row',
+			alignItems: 'center',
+			flex: 2,
+		},
 
-	scheduleComponentTimeText: {
-		color: COLORS.main_text_light_color,
-		fontFamily: 'Poppins-Regular',
-		marginLeft: 10,
-	},
-})
+		scheduleComponentTimeText: {
+			color: COLORS.main_text_light_color,
+			fontFamily: 'Poppins-Regular',
+			marginLeft: 10,
+		},
+	})
 
 export default ScheduleComponent

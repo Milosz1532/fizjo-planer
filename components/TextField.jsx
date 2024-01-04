@@ -12,7 +12,7 @@ import OutsidePressHandler from 'react-native-outside-press'
 
 import { TextInputMask } from 'react-native-masked-text'
 
-import { COLORS } from '../assets/colors'
+import { useGlobalColors } from '../assets/colors'
 
 const TextField = props => {
 	const {
@@ -44,6 +44,9 @@ const TextField = props => {
 	const handlePressOutside = () => {
 		if (isFocused) inputRef.current.blur()
 	}
+
+	const COLORS = useGlobalColors()
+	const styles = generateStyles(COLORS)
 
 	return (
 		<OutsidePressHandler
@@ -103,37 +106,39 @@ const TextField = props => {
 	)
 }
 
-const styles = StyleSheet.create({
-	input: {
-		padding: 13,
-		paddingHorizontal: 20,
-		borderWidth: 1,
-		borderRadius: 20,
-		fontFamily: 'Poppins-Regular',
-		fontSize: 14,
-		borderColor: COLORS.border_color,
-	},
+const generateStyles = COLORS =>
+	StyleSheet.create({
+		input: {
+			padding: 13,
+			paddingHorizontal: 20,
+			borderWidth: 1,
+			borderRadius: 20,
+			fontFamily: 'Poppins-Regular',
+			fontSize: 14,
+			borderColor: COLORS.border_color,
+			color: COLORS.main_text_dark_color,
+		},
 
-	inputFocus: {
-		borderWidth: 2,
-		borderColor: COLORS.main,
-	},
-	labelContainer: {
-		position: 'absolute',
-		paddingHorizontal: 8,
-		backgroundColor: COLORS.app_background,
-	},
-	label: {
-		fontFamily: 'Poppins-Regular',
-		fontSize: 14,
-		color: COLORS.placeholder_color,
-	},
+		inputFocus: {
+			borderWidth: 2,
+			borderColor: COLORS.main,
+		},
+		labelContainer: {
+			position: 'absolute',
+			paddingHorizontal: 8,
+			backgroundColor: COLORS.app_background,
+		},
+		label: {
+			fontFamily: 'Poppins-Regular',
+			fontSize: 14,
+			color: COLORS.placeholder_color,
+		},
 
-	labelFocus: {
-		fontFamily: 'Poppins-SemiBold',
-		fontSize: 14,
-		color: COLORS.main,
-	},
-})
+		labelFocus: {
+			fontFamily: 'Poppins-SemiBold',
+			fontSize: 14,
+			color: COLORS.main,
+		},
+	})
 
 export default TextField

@@ -1,4 +1,5 @@
 import React, { createContext, useState, useContext, useEffect } from 'react'
+
 import { readData, saveData } from './services/storage'
 const SettingsContext = createContext()
 
@@ -20,8 +21,16 @@ export const SettingsProvider = ({ children }) => {
 		await saveData('settings', updatedSettings)
 	}
 
+	const toggleDarkMode = () => {
+		const newDarkModeValue = !settings.darkMode
+		updateSetting('darkMode', newDarkModeValue)
+	}
+
+	const currentColorScheme = settings.darkMode ? 'dark' : 'light'
+
 	return (
-		<SettingsContext.Provider value={{ settings, updateSetting }}>
+		<SettingsContext.Provider
+			value={{ settings, updateSetting, toggleDarkMode, currentColorScheme }}>
 			{children}
 		</SettingsContext.Provider>
 	)

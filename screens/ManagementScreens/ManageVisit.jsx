@@ -22,8 +22,8 @@ import {
 import DateTimePickerModal from 'react-native-modal-datetime-picker'
 import { ALERT_TYPE, Dialog } from 'react-native-alert-notification'
 
-import { globalStyles } from '../../assets/styles'
-import { COLORS } from '../../assets/colors'
+import { useGlobalStyles } from '../../assets/styles'
+import { useGlobalColors } from '../../assets/colors'
 
 import TextField from '../../components/TextField'
 import SelectField from '../../components/SelectField'
@@ -127,6 +127,9 @@ const DateComponent = ({
 		hideDatePicker()
 	}
 
+	const COLORS = useGlobalColors()
+	const styles = generateStyles(COLORS)
+
 	return (
 		<View style={styles.dateContainer}>
 			<View style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -189,6 +192,10 @@ const DateComponent = ({
 export default function ManageVisit({ route }) {
 	const { id } = route.params
 	const { navigate, goBack } = useNavigation()
+
+	const COLORS = useGlobalColors()
+	const globalStyles = useGlobalStyles()
+	const styles = generateStyles(COLORS)
 
 	const VISIT_ID = id
 	const [isLoading, setIsLoading] = useState(false)
@@ -529,6 +536,7 @@ export default function ManageVisit({ route }) {
 															calendarBackground: 'transparent',
 															textDayFontFamily: 'Poppins-Regular',
 															monthTextColor: COLORS.main,
+															dayTextColor: COLORS.main_text_dark_color,
 															textMonthFontFamily: 'Poppins-Bold',
 															textDayHeaderFontFamily: 'Poppins-Regular',
 														}}
@@ -642,87 +650,90 @@ export default function ManageVisit({ route }) {
 	)
 }
 
-const styles = StyleSheet.create({
-	dateContainer: {
-		marginTop: 10,
-		borderBottomWidth: 1,
-		borderBottomColor: COLORS.light_border_color,
-		paddingVertical: 10,
-	},
-	dateIcon: {
-		backgroundColor: COLORS.primary,
-		borderRadius: 6,
-		marginEnd: 10,
-		minWidth: 30,
-		minHeight: 30,
-		alignItems: 'center',
-		justifyContent: 'center',
-	},
-	dateText: {
-		fontFamily: 'Poppins-SemiBold',
-		fontSize: 14,
-		flex: 1,
-	},
+const generateStyles = COLORS =>
+	StyleSheet.create({
+		dateContainer: {
+			marginTop: 10,
+			borderBottomWidth: 1,
+			borderBottomColor: COLORS.light_border_color,
+			paddingVertical: 10,
+		},
+		dateIcon: {
+			backgroundColor: COLORS.primary,
+			borderRadius: 6,
+			marginEnd: 10,
+			minWidth: 30,
+			minHeight: 30,
+			alignItems: 'center',
+			justifyContent: 'center',
+		},
+		dateText: {
+			fontFamily: 'Poppins-SemiBold',
+			fontSize: 14,
+			flex: 1,
+			color: COLORS.main_text_dark_color,
+		},
 
-	dateInputs: {
-		marginTop: 10,
-		flexDirection: 'row',
-	},
+		dateInputs: {
+			marginTop: 10,
+			flexDirection: 'row',
+		},
 
-	dateTimeButton: {
-		justifyContent: 'center',
-		alignItems: 'center',
-		backgroundColor: COLORS.light_border_color,
-		borderRadius: 6,
-		minHeight: 30,
-		paddingHorizontal: 10,
-	},
+		dateTimeButton: {
+			justifyContent: 'center',
+			alignItems: 'center',
+			backgroundColor: COLORS.light_border_color,
+			borderRadius: 6,
+			minHeight: 30,
+			paddingHorizontal: 10,
+		},
 
-	dateTimeButtonText: {
-		fontFamily: 'Poppins-Regular',
-	},
+		dateTimeButtonText: {
+			fontFamily: 'Poppins-Regular',
+			color: COLORS.main_text_dark_color,
+		},
 
-	errorMessageText: {
-		fontFamily: 'Poppins-SemiBold',
-		color: COLORS.text_error_color,
-		marginTop: 5,
-		marginStart: 35,
-		fontSize: 11,
-	},
+		errorMessageText: {
+			fontFamily: 'Poppins-SemiBold',
+			color: COLORS.text_error_color,
+			marginTop: 5,
+			marginStart: 35,
+			fontSize: 11,
+		},
 
-	visitDateContainer: {
-		backgroundColor: COLORS.light_element_background,
-		justifyContent: 'center',
-		alignItems: 'center',
-		borderRadius: 12,
-		height: 70,
-	},
+		visitDateContainer: {
+			backgroundColor: COLORS.light_element_background,
+			justifyContent: 'center',
+			alignItems: 'center',
+			borderRadius: 12,
+			height: 70,
+		},
 
-	visitDateContainerText: {
-		fontFamily: 'Poppins-Bold',
-		color: COLORS.main,
-		fontSize: 20,
-	},
+		visitDateContainerText: {
+			fontFamily: 'Poppins-Bold',
+			color: COLORS.main,
+			fontSize: 20,
+		},
 
-	visitTimeContainer: {
-		backgroundColor: COLORS.light_element_background,
-		borderRadius: 12,
-		justifyContent: 'space-between',
-		flexDirection: 'row',
-		paddingHorizontal: 50,
-		paddingTop: 10,
-		alignItems: 'center',
-	},
+		visitTimeContainer: {
+			backgroundColor: COLORS.light_element_background,
+			borderRadius: 12,
+			justifyContent: 'space-between',
+			flexDirection: 'row',
+			paddingHorizontal: 50,
+			paddingTop: 10,
+			alignItems: 'center',
+		},
 
-	visitTimeContainerTitle: {
-		fontFamily: 'Poppins-SemiBold',
-		fontSize: 18,
-	},
+		visitTimeContainerTitle: {
+			fontFamily: 'Poppins-SemiBold',
+			fontSize: 18,
+		},
 
-	visitTimeContainerTime: {
-		fontFamily: 'Poppins-Bold',
-		color: COLORS.main,
-		fontSize: 30,
-		marginTop: -10,
-	},
-})
+		visitTimeContainerTime: {
+			fontFamily: 'Poppins-Bold',
+			color: COLORS.main,
+			fontSize: 30,
+			marginTop: -10,
+		},
+	})

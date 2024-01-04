@@ -4,8 +4,8 @@ import { Calendar, LocaleConfig } from 'react-native-calendars'
 import FontAwesome from '@expo/vector-icons/FontAwesome5'
 import { useNavigation, useFocusEffect } from '@react-navigation/native'
 
-import { globalStyles } from '../assets/styles'
-import { COLORS } from '../assets/colors'
+import { useGlobalStyles } from '../assets/styles'
+import { useGlobalColors } from '../assets/colors'
 
 import { SafeAreaView } from 'react-native-safe-area-context'
 
@@ -55,18 +55,11 @@ LocaleConfig.locales['pl'] = {
 
 LocaleConfig.defaultLocale = 'pl'
 
-const groupColors = [
-	COLORS.element_color_1,
-	COLORS.element_color_2,
-	COLORS.element_color_3,
-	COLORS.element_color_4,
-	COLORS.element_color_5,
-]
-
-const getColorByIndex = index => groupColors[index % groupColors.length]
-
 export default function CalendaScreen() {
 	const { navigate } = useNavigation()
+
+	const COLORS = useGlobalColors()
+	const globalStyles = useGlobalStyles()
 
 	const [scheduleList, setScheduleList] = useState([])
 	const [selectedDay, setSelectedDate] = useState(null)
@@ -156,6 +149,40 @@ export default function CalendaScreen() {
 	const [till] = React.useState(moment().add(3, 'days').toISOString())
 	const range = { from, till }
 
+	const groupColors = [
+		COLORS.element_color_1,
+		COLORS.element_color_2,
+		COLORS.element_color_3,
+		COLORS.element_color_4,
+		COLORS.element_color_5,
+	]
+
+	const getColorByIndex = index => groupColors[index % groupColors.length]
+
+	const timetableStyles = StyleSheet.create({
+		timeContainer: {
+			backgroundColor: COLORS.app_background,
+		},
+		time: {
+			fontFamily: 'Poppins-Regular',
+			fontSize: 16,
+			color: COLORS.text_gray_color,
+		},
+
+		lines: {
+			borderColor: COLORS.line_color,
+			borderStartWidth: 0,
+		},
+		nowLine: {
+			dot: {
+				backgroundColor: COLORS.primary,
+			},
+			line: {
+				backgroundColor: COLORS.primary,
+			},
+		},
+	})
+
 	return (
 		<View style={{ flex: 1, backgroundColor: COLORS.main }}>
 			<StatusBar style='dark' />
@@ -189,6 +216,7 @@ export default function CalendaScreen() {
 										calendarBackground: 'transparent',
 										textDayFontFamily: 'Poppins-Regular',
 										monthTextColor: COLORS.main,
+										dayTextColor: COLORS.main_text_dark_color,
 										textMonthFontFamily: 'Poppins-Bold',
 										textDayHeaderFontFamily: 'Poppins-Regular',
 									}}
@@ -220,41 +248,3 @@ export default function CalendaScreen() {
 		</View>
 	)
 }
-
-const timetableStyles = StyleSheet.create({
-	timeContainer: {
-		backgroundColor: COLORS.app_background,
-	},
-	time: {
-		fontFamily: 'Poppins-Regular',
-		fontSize: 16,
-		color: COLORS.text_gray_color,
-	},
-
-	lines: {
-		borderColor: COLORS.line_color,
-		borderStartWidth: 0,
-	},
-	nowLine: {
-		dot: {
-			backgroundColor: COLORS.primary,
-		},
-		line: {
-			backgroundColor: COLORS.primary,
-		},
-	},
-})
-
-const styles = StyleSheet.create({
-	calendarScheduleHours: {
-		fontFamily: 'Poppins-SemiBold',
-		color: COLORS.header_text_gray_color,
-		fontSize: 20,
-	},
-
-	calendarScheduleElements: {
-		marginLeft: 10,
-
-		justifyContent: 'space-between',
-	},
-})

@@ -10,20 +10,10 @@ import PatientsCreen from './screens/PatientsScreen'
 import MoreScreen from './screens/MoreScreen'
 import ManageVisit from './screens/ManagementScreens/ManageVisit'
 
-import { COLORS } from './assets/colors'
+import { useGlobalColors } from './assets/colors'
 import { TouchableOpacity } from 'react-native'
 
 const Tab = createBottomTabNavigator()
-
-const screenOptions = {
-	tabBarShowLabel: false,
-	tabBarHideOnKeyboard: true,
-	headerShown: false,
-	tabBarStyle: {
-		margin: 0,
-		padding: 0,
-	},
-}
 
 const CustomTabBarButton = ({ onPress }) => {
 	return <TouchableOpacity onPress={onPress}></TouchableOpacity>
@@ -31,6 +21,19 @@ const CustomTabBarButton = ({ onPress }) => {
 
 const BottomTabNavigation = () => {
 	const { navigate } = useNavigation()
+
+	const COLORS = useGlobalColors()
+
+	const screenOptions = {
+		tabBarShowLabel: false,
+		tabBarHideOnKeyboard: true,
+		headerShown: false,
+		tabBarStyle: {
+			margin: 0,
+			padding: 0,
+			backgroundColor: COLORS.navigation_background
+		},
+	}
 
 	return (
 		<Tab.Navigator screenOptions={screenOptions} initialRouteName='home'>

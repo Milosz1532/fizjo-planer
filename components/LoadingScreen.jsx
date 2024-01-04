@@ -1,9 +1,10 @@
 import { View, ActivityIndicator, StyleSheet } from 'react-native'
 import React from 'react'
 
-import { COLORS } from '../assets/colors'
+import { useGlobalColors } from '../assets/colors'
 
 export default function LoadingScreen({ transparent, onContent }) {
+	const COLORS = useGlobalColors()
 	return (
 		<View
 			style={[

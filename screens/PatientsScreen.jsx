@@ -4,8 +4,8 @@ import { useNavigation, useFocusEffect } from '@react-navigation/native'
 import { ScrollView, View, Text, TextInput, StyleSheet, TouchableOpacity } from 'react-native'
 import FontAwesome from '@expo/vector-icons/FontAwesome5'
 
-import { globalStyles } from '../assets/styles'
-import { COLORS } from '../assets/colors'
+import { useGlobalStyles } from '../assets/styles'
+import { useGlobalColors } from '../assets/colors'
 
 import { SafeAreaView } from 'react-native-safe-area-context'
 
@@ -17,6 +17,9 @@ import LoadingScreen from '../components/LoadingScreen'
 import PatientComponent from '../components/PatientComponent'
 
 export default function PatientsScreen() {
+	const COLORS = useGlobalColors()
+	const globalStyles = useGlobalStyles()
+
 	const { navigate } = useNavigation()
 	const [patientList, setPatientList] = useState([])
 	const [isLoading, setIsLoading] = useState(true)
@@ -48,6 +51,26 @@ export default function PatientsScreen() {
 	const handleManagePatient = id => {
 		navigate('ManagePatient', { id })
 	}
+
+	const styles = StyleSheet.create({
+		searchBar: {
+			margin: 2,
+			marginTop: 20,
+			backgroundColor: COLORS.element_background,
+			height: 50,
+			borderRadius: 20,
+			paddingHorizontal: 15,
+			flexDirection: 'row',
+			alignItems: 'center',
+			justifyContent: 'space-between',
+		},
+
+		searchInput: {
+			flex: 1,
+			paddingEnd: 10,
+			fontFamily: 'Poppins-Regular',
+		},
+	})
 
 	return (
 		<View style={{ flex: 1, backgroundColor: COLORS.main }}>
@@ -98,23 +121,3 @@ export default function PatientsScreen() {
 		</View>
 	)
 }
-
-const styles = StyleSheet.create({
-	searchBar: {
-		margin: 2,
-		marginTop: 20,
-		backgroundColor: COLORS.element_background,
-		height: 50,
-		borderRadius: 20,
-		paddingHorizontal: 15,
-		flexDirection: 'row',
-		alignItems: 'center',
-		justifyContent: 'space-between',
-	},
-
-	searchInput: {
-		flex: 1,
-		paddingEnd: 10,
-		fontFamily: 'Poppins-Regular',
-	},
-})

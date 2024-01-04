@@ -17,8 +17,8 @@ import Entypo from '@expo/vector-icons/Entypo'
 import { ALERT_TYPE, Dialog } from 'react-native-alert-notification'
 import DateTimePickerModal from 'react-native-modal-datetime-picker'
 
-import { globalStyles } from '../../assets/styles'
-import { COLORS } from '../../assets/colors'
+import { useGlobalStyles } from '../../assets/styles'
+import { useGlobalColors } from '../../assets/colors'
 import TextField from '../../components/TextField'
 import Button from '../../components/Button'
 import LoadingScreen from '../../components/LoadingScreen'
@@ -26,6 +26,8 @@ import LoadingScreen from '../../components/LoadingScreen'
 import { insertPatient, fetchPatientData, updatePatient } from '../../services/Database'
 
 const ListItemComponent = ({ id, text, icon, iconSize, iconColor, onRemove }) => {
+	const COLORS = useGlobalColors()
+	const styles = generateStyles(COLORS)
 	return (
 		<View style={[styles.problemContainer, id === 1 && styles.problemContainerFirstElement]}>
 			<View style={[styles.problemIcon, { backgroundColor: iconColor }]}>
@@ -42,6 +44,10 @@ const ListItemComponent = ({ id, text, icon, iconSize, iconColor, onRemove }) =>
 export default function ManagePatient({ route }) {
 	const { id } = route.params
 	const { goBack } = useNavigation()
+
+	const COLORS = useGlobalColors()
+	const globalStyles = useGlobalStyles()
+	const styles = generateStyles(COLORS)
 
 	const PATIENT_ID = id
 
@@ -414,58 +420,59 @@ export default function ManagePatient({ route }) {
 	)
 }
 
-const styles = StyleSheet.create({
-	problemContainer: {
-		flexDirection: 'row',
-		alignItems: 'center',
-		marginTop: 10,
-		borderBottomWidth: 1,
-		borderBottomColor: COLORS.light_border_color,
-		paddingVertical: 10,
-	},
+const generateStyles = COLORS =>
+	StyleSheet.create({
+		problemContainer: {
+			flexDirection: 'row',
+			alignItems: 'center',
+			marginTop: 10,
+			borderBottomWidth: 1,
+			borderBottomColor: COLORS.light_border_color,
+			paddingVertical: 10,
+		},
 
-	problemContainerFirstElement: {
-		borderTopWidth: 1,
-		borderTopColor: COLORS.light_border_color,
-	},
+		problemContainerFirstElement: {
+			borderTopWidth: 1,
+			borderTopColor: COLORS.light_border_color,
+		},
 
-	problemIcon: {
-		borderRadius: 6,
-		marginEnd: 10,
-		minWidth: 30,
-		minHeight: 30,
-		alignItems: 'center',
-		justifyContent: 'center',
-	},
-	problemText: {
-		fontFamily: 'Poppins-SemiBold',
-		fontSize: 14,
-		flex: 1,
-	},
+		problemIcon: {
+			borderRadius: 6,
+			marginEnd: 10,
+			minWidth: 30,
+			minHeight: 30,
+			alignItems: 'center',
+			justifyContent: 'center',
+		},
+		problemText: {
+			fontFamily: 'Poppins-SemiBold',
+			fontSize: 14,
+			flex: 1,
+		},
 
-	addProblemContainer: {
-		flexDirection: 'row',
-		marginTop: 10,
-		paddingBottom: 10,
-		paddingVertical: 10,
-		borderBottomWidth: 1,
-		borderBottomColor: COLORS.light_border_color,
-	},
+		addProblemContainer: {
+			flexDirection: 'row',
+			marginTop: 10,
+			paddingBottom: 10,
+			paddingVertical: 10,
+			borderBottomWidth: 1,
+			borderBottomColor: COLORS.light_border_color,
+		},
 
-	addProblemIcon: {
-		backgroundColor: COLORS.border_color,
-		borderRadius: 6,
-		marginEnd: 10,
-		minWidth: 30,
-		minHeight: 30,
-		alignItems: 'center',
-		justifyContent: 'center',
-		alignItems: 'center',
-		justifyContent: 'center',
-	},
+		addProblemIcon: {
+			backgroundColor: COLORS.border_color,
+			borderRadius: 6,
+			marginEnd: 10,
+			minWidth: 30,
+			minHeight: 30,
+			alignItems: 'center',
+			justifyContent: 'center',
+			alignItems: 'center',
+			justifyContent: 'center',
+		},
 
-	addProblemInput: {
-		fontFamily: 'Poppins-Regular',
-		flex: 1,
-	},
-})
+		addProblemInput: {
+			fontFamily: 'Poppins-Regular',
+			flex: 1,
+		},
+	})

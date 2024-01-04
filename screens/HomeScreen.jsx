@@ -4,13 +4,14 @@ import { StyleSheet, View, Text, TouchableOpacity, ScrollView } from 'react-nati
 import FontAwesome from '@expo/vector-icons/FontAwesome5'
 import { startOfWeek, addDays, format, isToday } from 'date-fns'
 import plLocale from 'date-fns/locale/pl'
-import { COLORS } from '../assets/colors'
-import { globalStyles } from '../assets/styles'
+import { useGlobalColors } from '../assets/colors'
+import { useGlobalStyles } from '../assets/styles'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { StatusBar } from 'expo-status-bar'
 
 import UpcomingVisit from '../components/UpcomingVisit'
 import VisitCard from '../components/VisitCard'
+import NoMeetings from '../components/NoMeetings'
 
 import { fetchAllVisitsThisWeek, fetchUpcomingVisits } from '../services/Database'
 
@@ -34,20 +35,11 @@ const getCurrentWeekArray = () => {
 	return weekArray
 }
 
-const NoMeetings = ({ text }) => (
-	<View style={[globalStyles.cardBox, globalStyles.cardShadow]}>
-		<View style={styles.noMeetingsContainer}>
-			<View style={styles.noMeetingsIcon}>
-				<FontAwesome name={'calendar-times'} size={25} color={COLORS.main_text_light_color} />
-			</View>
-
-			<Text style={[styles.tabTitle, { textAlign: 'center' }]}>{text}</Text>
-		</View>
-	</View>
-)
-
 export default function HomeScreen() {
 	const { navigate } = useNavigation()
+	const COLORS = useGlobalColors()
+	const globalStyles = useGlobalStyles()
+	const styles = generateStyles(COLORS)
 
 	const [weekCalendarDays, setWeekCalendarDays] = useState([])
 	const [selectedWeekDay, setSelectedWeekDay] = useState(weekCalendarDays[0])
@@ -219,78 +211,68 @@ export default function HomeScreen() {
 	)
 }
 
-const styles = StyleSheet.create({
-	titleText: {
-		flexDirection: 'row',
-		alignItems: 'center',
-		justifyContent: 'space-between',
-		color: COLORS.main_text_dark_color,
-	},
-	notificationsBox: {
-		backgroundColor: COLORS.element_background,
-		padding: 5,
-		borderRadius: 6,
-	},
+const generateStyles = COLORS =>
+	StyleSheet.create({
+		titleText: {
+			flexDirection: 'row',
+			alignItems: 'center',
+			justifyContent: 'space-between',
+			color: COLORS.main_text_dark_color,
+		},
+		notificationsBox: {
+			backgroundColor: COLORS.element_background,
+			padding: 5,
+			borderRadius: 6,
+		},
 
-	weekCalendar: {
-		display: 'flex',
-		flexDirection: 'row',
-		justifyContent: 'space-between',
-		marginTop: 5,
-	},
+		weekCalendar: {
+			display: 'flex',
+			flexDirection: 'row',
+			justifyContent: 'space-between',
+			marginTop: 5,
+		},
 
-	dateBox: {
-		backgroundColor: COLORS.element_background,
-		minWidth: 60,
-		justifyContent: 'center',
-		alignItems: 'center',
-		paddingHorizontal: 10,
-		paddingVertical: 5,
-		borderRadius: 6,
-		marginEnd: 10,
-	},
+		dateBox: {
+			backgroundColor: COLORS.element_background,
+			minWidth: 60,
+			justifyContent: 'center',
+			alignItems: 'center',
+			paddingHorizontal: 10,
+			paddingVertical: 5,
+			borderRadius: 6,
+			marginEnd: 10,
+		},
 
-	dateBoxDay: {
-		color: COLORS.main_text_dark_color,
-		fontFamily: 'Poppins-Bold',
-		fontSize: 20,
-	},
+		dateBoxDay: {
+			color: COLORS.main_text_dark_color,
+			fontFamily: 'Poppins-Bold',
+			fontSize: 20,
+		},
 
-	selectedDateBox: {
-		borderColor: COLORS.main,
-		borderTopWidth: 7,
-		borderBottomWidth: 7,
-	},
+		selectedDateBox: {
+			borderColor: COLORS.main,
+			borderTopWidth: 7,
+			borderBottomWidth: 7,
+		},
 
-	selectedDateBoxDay: {
-		color: COLORS.main,
-	},
+		selectedDateBoxDay: {
+			color: COLORS.main,
+		},
 
-	selectedDateBoxWeek: {
-		color: COLORS.main,
-	},
+		selectedDateBoxWeek: {
+			color: COLORS.main,
+		},
 
-	dateBoxWeek: {
-		color: COLORS.text_gray_color,
-		fontFamily: 'Poppins-Regular',
-		fontSize: 12,
-	},
+		dateBoxWeek: {
+			color: COLORS.text_gray_color,
+			fontFamily: 'Poppins-Regular',
+			fontSize: 12,
+		},
 
-	tabTitle: {
-		fontFamily: 'Poppins-SemiBold',
-		color: COLORS.header_text_gray_color,
-		fontSize: 18,
-		marginTop: 5,
-	},
-
-	noMeetingsContainer: {
-		alignItems: 'center',
-		paddingVertical: 10,
-	},
-
-	noMeetingsIcon: {
-		backgroundColor: COLORS.primary,
-		padding: 15,
-		borderRadius: 6,
-	},
-})
+		tabTitle: {
+			fontFamily: 'Poppins-SemiBold',
+			color: COLORS.header_text_gray_color,
+			fontSize: 18,
+			marginTop: 5,
+		},
+	})
