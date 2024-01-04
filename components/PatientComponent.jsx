@@ -4,7 +4,7 @@ import FontAwesome from '@expo/vector-icons/FontAwesome5'
 
 import { useGlobalColors } from '../assets/colors'
 
-const PatientComponent = ({ fullName, dateOfBirth, onPress }) => {
+const PatientComponent = ({ fullName, dateOfBirth, upcomingVisitsCount, onPress }) => {
 	const COLORS = useGlobalColors()
 
 	const calculateAge = birthDate => {
@@ -113,7 +113,7 @@ const PatientComponent = ({ fullName, dateOfBirth, onPress }) => {
 					</View>
 					<View style={styles.PatientComponentTime}>
 						<FontAwesome name={'calendar'} size={18} color={COLORS.main} />
-						<Text style={styles.PatientComponentTimeText}>3</Text>
+						<Text style={styles.PatientComponentTimeText}>{upcomingVisitsCount}</Text>
 					</View>
 				</View>
 			</View>

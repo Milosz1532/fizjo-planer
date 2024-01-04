@@ -292,10 +292,19 @@ const fetchPatientData = (patientId, callback) => {
 }
 
 const fetchPatientList = callback => {
+	const currentDate = new Date()
+	const formattedCurrentDate = `${currentDate.getFullYear()}-${(currentDate.getMonth() + 1)
+		.toString()
+		.padStart(2, '0')}-${currentDate.getDate().toString().padStart(2, '0')}`
+
 	db.transaction(tx => {
 		tx.executeSql(
-			'SELECT * FROM patients',
-			[],
+			'SELECT p.id, p.full_name, p.date_of_birth, COUNT(v.id) as upcoming_visits_count ' +
+				'FROM patients p ' +
+				"LEFT JOIN visit v ON p.id = v.patient_id AND strftime('%Y-%m-%d', v.date/1000, 'unixepoch', 'localtime') >= ? " +
+				'GROUP BY p.id, p.full_name ' +
+				'ORDER BY upcoming_visits_count DESC',
+			[formattedCurrentDate],
 			(_, { rows }) => {
 				const data = rows._array
 				if (callback) {

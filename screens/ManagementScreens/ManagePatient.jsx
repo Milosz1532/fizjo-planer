@@ -448,6 +448,7 @@ const generateStyles = COLORS =>
 			fontFamily: 'Poppins-SemiBold',
 			fontSize: 14,
 			flex: 1,
+			color: COLORS.main_text_dark_color
 		},
 
 		addProblemContainer: {
@@ -474,5 +475,6 @@ const generateStyles = COLORS =>
 		addProblemInput: {
 			fontFamily: 'Poppins-Regular',
 			flex: 1,
+			color: COLORS.main_text_dark_color,
 		},
 	})

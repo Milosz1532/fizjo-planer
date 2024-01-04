@@ -31,7 +31,6 @@ export default function PatientsScreen() {
 				if (error) {
 					console.log(`Nie udało się pobrać listy pacjentów: ${error.message}`)
 				} else {
-					console.log(`Udało się pobrać listę pacjentów`)
 					setPatientList(data)
 				}
 				setIsLoading(false)
@@ -106,6 +105,7 @@ export default function PatientsScreen() {
 										key={el.id}
 										fullName={el.full_name}
 										dateOfBirth={el.date_of_birth}
+										upcomingVisitsCount={el.upcoming_visits_count}
 										onPress={() => handleManagePatient(el.id)}
 									/>
 								))}

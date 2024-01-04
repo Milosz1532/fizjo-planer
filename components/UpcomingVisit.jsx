@@ -72,6 +72,7 @@ const generateStyles = COLORS =>
 		upcomingVisitCardTimeText: {
 			marginStart: 5,
 			fontFamily: 'Poppins-Regular',
+			color: COLORS.main_text_dark_color,
 		},
 
 		upcomingVisitCardLocation: {
