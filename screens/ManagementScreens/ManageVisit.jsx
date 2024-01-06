@@ -6,6 +6,7 @@ import {
 	TouchableOpacity,
 	KeyboardAvoidingView,
 	StyleSheet,
+	Alert,
 } from 'react-native'
 
 import { useNavigation, useFocusEffect } from '@react-navigation/native'
@@ -18,6 +19,7 @@ import {
 	insertVisit,
 	fetchVisitById,
 	updateVisit,
+	deleteVisit,
 } from '../../services/Database'
 import DateTimePickerModal from 'react-native-modal-datetime-picker'
 import { ALERT_TYPE, Dialog } from 'react-native-alert-notification'
@@ -337,19 +339,10 @@ export default function ManageVisit({ route }) {
 		}
 
 		if (VISIT_ID) {
-			console.log(`----------------------`)
-			console.log(`Visit ID: ${VISIT_ID}`)
-			console.log(`Patient ID: ${selectedPatient.id}`)
-			console.log(`Address: ${patientLocationInputValue}`)
-			console.log(`Note: ${noteInputValue}`)
-			console.log(`Date: ${selectedVisitDate}`)
-			console.log(`Time_start: ${selectedVisitTimeStart}`)
-			console.log(`Time_end: ${selectedVisitTimeEnd}`)
-
 			updateVisit(
 				VISIT_ID,
 				selectedPatient.id,
-				patientLocationInputValue,
+				patientLocationInputValue.id ? patientLocationInputValue.text : patientLocationInputValue,
 				noteInputValue,
 				selectedVisitDate,
 				selectedVisitTimeStart,
@@ -437,8 +430,54 @@ export default function ManageVisit({ route }) {
 
 	const handleRemoveDatetime = id => {
 		const prevDates = selectedDates
-		console.log(prevDates)
 		setSelectedDates(prevDates.filter(date => date.id !== id))
+	}
+
+	const handleRemoveVisit = () => {
+		if (!VISIT_ID || VISIT_ID === null) return
+
+		Alert.alert(
+			'Potwierdzenie',
+			'Czy na pewno chcesz usunąć tą wizyte?',
+			[
+				{
+					text: 'Anuluj',
+					style: 'cancel',
+				},
+				{
+					text: 'Potwierdź',
+					onPress: () => {
+						deleteVisit(VISIT_ID, (success, errorMessage) => {
+							if (success) {
+								console.log(`Wizyta została usunięta`)
+								Dialog.show({
+									type: ALERT_TYPE.SUCCESS,
+									title: 'Sukces',
+									textBody: `Wizyta została pomyślnie usunięta`,
+									button: 'OK',
+									onPressButton: () => {
+										Dialog.hide()
+										goBack()
+									},
+								})
+							} else {
+								console.log(`Wystąpił błąd poczas usuwania wizyty: ${errorMessage}`)
+								Dialog.show({
+									type: ALERT_TYPE.DANGER,
+									title: 'Wystąpił błąd',
+									textBody: `Wystąpił błąd podczas usuwania wizyty. \n Symbol błędu: ${errorMessage}`,
+									button: 'OK',
+									onPressButton: () => {
+										Dialog.hide()
+									},
+								})
+							}
+						})
+					},
+				},
+			],
+			{ cancelable: false }
+		)
 	}
 
 	return (
@@ -635,7 +674,7 @@ export default function ManageVisit({ route }) {
 										onPress={handleSubmitVisit}
 									/>
 
-									{VISIT_ID && <Button text={'Usuń wizytę'} />}
+									{VISIT_ID && <Button text={'Usuń wizytę'} onPress={handleRemoveVisit} />}
 								</View>
 							</>
 						) : (

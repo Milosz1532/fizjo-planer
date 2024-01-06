@@ -246,9 +246,9 @@ const fetchPatientData = (patientId, callback) => {
 				'LEFT JOIN patient_problem pp ON p.id = pp.patient_id ' +
 				'LEFT JOIN patient_address pa ON p.id = pa.patient_id ' +
 				'LEFT JOIN visit v ON p.id = v.patient_id ' +
-				'WHERE p.id = ? AND visitDate >= ? ' +
+				'WHERE p.id = ? ' +
 				'ORDER BY visitDate ASC',
-			[patientId, formattedCurrentDate],
+			[patientId],
 			(_, { rows }) => {
 				const data = rows._array
 
@@ -291,15 +291,20 @@ const fetchPatientData = (patientId, callback) => {
 						})
 					}
 
-					if (current.visitId && !patientData.visits.some(visit => visit.id === current.visitId)) {
-						patientData.visits.push({
-							id: current.visitId,
-							address: current.visitAddress,
-							note: current.visitNote,
-							date: current.visitDate,
-							time_start: current.visitTimeStart,
-							time_end: current.visitTimeEnd,
-						})
+					if (current.visitId) {
+						const visitDate = new Date(current.visitDate)
+						if (visitDate >= currentDate) {
+							if (!patientData.visits.some(visit => visit.id === current.visitId)) {
+								patientData.visits.push({
+									id: current.visitId,
+									address: current.visitAddress,
+									note: current.visitNote,
+									date: current.visitDate,
+									time_start: current.visitTimeStart,
+									time_end: current.visitTimeEnd,
+								})
+							}
+						}
 					}
 				})
 
@@ -622,6 +627,65 @@ const fetchUpcomingVisits = callback => {
 	)
 }
 
+const deleteVisit = (id, callback) => {
+	db.transaction(
+		tx => {
+			tx.executeSql(
+				'DELETE FROM visit WHERE id = ?',
+				[id],
+				(_, results) => {
+					if (results.rowsAffected > 0) {
+						callback(true)
+					} else {
+						callback(false, '[record not found]')
+					}
+				},
+				error => {
+					callback(false, '[sql error]')
+				}
+			)
+		},
+		error => {
+			callback(false, '[transaction error]')
+		}
+	)
+}
+
+const deletePatient = (id, callback) => {
+	db.transaction(
+		tx => {
+			tx.executeSql(
+				'DELETE FROM patients WHERE id = ?',
+				[id],
+				(_, results) => {
+					if (results.rowsAffected > 0) {
+						tx.executeSql(
+							'DELETE FROM patient_problem WHERE patient_id = ?',
+							[id],
+							(_, results) => {}
+						)
+						tx.executeSql(
+							'DELETE FROM patient_address WHERE patient_id= ?',
+							[id],
+							(_, results) => {}
+						)
+						tx.executeSql('DELETE FROM visit WHERE patient_id = ?', [id], (_, results) => {})
+						callback(true)
+					} else {
+						callback(false, '[record not found]')
+					}
+				},
+				error => {
+					callback(false, '[sql error]')
+				}
+			)
+		},
+		error => {
+			callback(false, '[transaction error]')
+		}
+	)
+}
+
 export {
 	initDatabase,
 	insertPatient,
@@ -636,4 +700,6 @@ export {
 	updateVisit,
 	fetchAllVisitsThisWeek,
 	fetchUpcomingVisits,
+	deleteVisit,
+	deletePatient,
 }

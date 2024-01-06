@@ -8,6 +8,7 @@ import {
 	TextInput,
 	KeyboardAvoidingView,
 	Keyboard,
+	Alert,
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { StatusBar } from 'expo-status-bar'
@@ -24,7 +25,12 @@ import Button from '../../components/Button'
 import LoadingScreen from '../../components/LoadingScreen'
 import { format } from 'date-fns'
 
-import { insertPatient, fetchPatientData, updatePatient } from '../../services/Database'
+import {
+	insertPatient,
+	fetchPatientData,
+	updatePatient,
+	deletePatient,
+} from '../../services/Database'
 import VisitCard from '../../components/VisitCard'
 
 const ListItemComponent = ({ id, text, icon, iconSize, iconColor, onRemove }) => {
@@ -244,6 +250,51 @@ export default function ManagePatient({ route }) {
 		setIsDatePickerVisible(false)
 	}
 
+	const handleRemovePatient = () => {
+		if (!PATIENT_ID || PATIENT_ID === null) return
+
+		Alert.alert(
+			'Potwierdzenie',
+			'Czy na pewno chcesz usunąć dane pacjenta? Spowoduje to usunięcie wszystkich jego wizyt',
+			[
+				{
+					text: 'Anuluj',
+					style: 'cancel',
+				},
+				{
+					text: 'Potwierdź',
+					onPress: () => {
+						deletePatient(PATIENT_ID, (success, errorMessage) => {
+							if (success) {
+								Dialog.show({
+									type: ALERT_TYPE.SUCCESS,
+									title: 'Sukces',
+									textBody: `Pacjent został pomyślnie usunięty`,
+									button: 'OK',
+									onPressButton: () => {
+										Dialog.hide()
+										goBack()
+									},
+								})
+							} else {
+								Dialog.show({
+									type: ALERT_TYPE.DANGER,
+									title: 'Wystąpił błąd',
+									textBody: `Wystąpił błąd podczas usuwania pacjenta. \n Symbol błędu: ${errorMessage}`,
+									button: 'OK',
+									onPressButton: () => {
+										Dialog.hide()
+									},
+								})
+							}
+						})
+					},
+				},
+			],
+			{ cancelable: false }
+		)
+	}
+
 	return (
 		<View style={{ flex: 1, backgroundColor: COLORS.app_background }}>
 			<StatusBar style='dark' />
@@ -439,6 +490,7 @@ export default function ManagePatient({ route }) {
 										text={PATIENT_ID ? 'Edytuj pacjenta' : 'Dodaj pacjenta'}
 										onPress={handleAddPatient}
 									/>
+									{PATIENT_ID && <Button text={'Usuń pacjenta'} onPress={handleRemovePatient} />}
 								</View>
 							</>
 						) : (

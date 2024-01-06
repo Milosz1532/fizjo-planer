@@ -223,11 +223,21 @@ export default function CalendaScreen() {
 								/>
 							</View>
 							<View style={{ marginTop: 10, paddingStart: 5, marginBottom: 15 }}>
-								{selectedDay && (
+								{selectedDay ? (
 									<>
 										<Timetable
 											items={selectedDayVisits}
 											renderItem={props => <ScheduleComponent {...props} navigate={navigate} />}
+											date={new Date(selectedDay.timestamp)}
+											hourHeight={100}
+											range={range}
+											style={timetableStyles}
+											hideNowLine={isToday(new Date(selectedDay.timestamp), dateNow) ? false : true}
+										/>
+									</>
+								) : (
+									<>
+										<Timetable
 											date={new Date(selectedDay.timestamp)}
 											hourHeight={100}
 											range={range}
