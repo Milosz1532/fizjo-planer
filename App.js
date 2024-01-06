@@ -18,8 +18,10 @@ import ManagePatient from './screens/ManagementScreens/ManagePatient'
 import ManageVisit from './screens/ManagementScreens/ManageVisit'
 
 import { SettingsProvider } from './SettingsContext'
+import AppIntro from './AppIntro'
+import Main from './Main'
 
-const Stack = createNativeStackNavigator()
+import * as SplashScreen from 'expo-splash-screen'
 
 export default function App() {
 	useEffect(() => {
@@ -32,37 +34,24 @@ export default function App() {
 		'Poppins-Bold': Poppins_700Bold,
 	})
 
+	useEffect(() => {
+		async function prepare() {
+			await SplashScreen.preventAutoHideAsync()
+		}
+		prepare()
+	}, [])
+
 	if (!fontsLoaded) {
-		return (
-			<>
-				<Text>Ładowanie</Text>
-			</>
-		)
+		return undefined
+	} else {
+		SplashScreen.hideAsync()
 	}
 
 	return (
 		<AlertNotificationRoot>
 			<EventProvider>
 				<SettingsProvider>
-					<NavigationContainer>
-						<Stack.Navigator>
-							<Stack.Screen
-								name='BottomNavigation'
-								options={{ headerShown: false }}
-								component={BottomTabNavigation}
-							/>
-							<Stack.Screen
-								name='ManagePatient'
-								options={{ headerShown: false }}
-								component={ManagePatient}
-							/>
-							<Stack.Screen
-								name='manageVisit'
-								options={{ headerShown: false }}
-								component={ManageVisit}
-							/>
-						</Stack.Navigator>
-					</NavigationContainer>
+					<Main />
 				</SettingsProvider>
 			</EventProvider>
 		</AlertNotificationRoot>

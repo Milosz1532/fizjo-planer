@@ -14,6 +14,7 @@ import VisitCard from '../components/VisitCard'
 import NoMeetings from '../components/NoMeetings'
 
 import { fetchAllVisitsThisWeek, fetchUpcomingVisits } from '../services/Database'
+import { useSettings } from '../SettingsContext'
 
 const getCurrentWeekArray = () => {
 	const today = new Date()
@@ -36,6 +37,7 @@ const getCurrentWeekArray = () => {
 }
 
 export default function HomeScreen() {
+	const { settings, updateSettings } = useSettings()
 	const { navigate } = useNavigation()
 	const COLORS = useGlobalColors()
 	const globalStyles = useGlobalStyles()
@@ -115,7 +117,7 @@ export default function HomeScreen() {
 				<ScrollView style={globalStyles.screenContainer}>
 					<View style={[globalStyles.container, { marginTop: 10 }]}>
 						<View style={styles.titleText}>
-							<Text style={globalStyles.containerTitle}>Witaj Tamara </Text>
+							<Text style={globalStyles.containerTitle}>Witaj {settings.user.split(' ')[0]} </Text>
 							<TouchableOpacity>
 								<View style={styles.notificationsBox}>
 									<FontAwesome name={'bell'} size={18} color={COLORS.icon_color} />
@@ -167,7 +169,10 @@ export default function HomeScreen() {
 										{selectedDayMeetings.map(meeting => (
 											<VisitCard
 												key={meeting.id}
-												meeting={meeting}
+												address={meeting.address}
+												patient_full_name={meeting.patient_full_name}
+												time_end={meeting.time_end}
+												time_start={meeting.time_start}
 												onPress={() => navigate('manageVisit', { id: meeting.id })}
 											/>
 										))}

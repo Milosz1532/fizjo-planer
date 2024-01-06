@@ -23,6 +23,7 @@ export const COLORS = {
 		line_color: '#E8E8E8',
 		light_element_background: '#DEE8F1',
 		navigation_background: '#fff',
+		intro_background: '#E1EBFF',
 		element_color_1: '#3E8DF9',
 		element_color_2: '#00B792',
 		element_color_3: '#FFC75C',

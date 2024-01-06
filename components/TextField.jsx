@@ -25,6 +25,7 @@ const TextField = props => {
 		contentType,
 		editable,
 		multiline,
+		labelBackground,
 		...restOfProps
 	} = props
 	const [isFocused, setIsFocused] = useState(false)
@@ -75,6 +76,7 @@ const TextField = props => {
 					<Animated.View
 						style={[
 							styles.labelContainer,
+							labelBackground && { backgroundColor: labelBackground },
 							{
 								transform: [
 									{

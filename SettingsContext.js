@@ -5,18 +5,30 @@ const SettingsContext = createContext()
 
 export const SettingsProvider = ({ children }) => {
 	const [settings, setSettings] = useState({})
+	const [isDataLoaded, setDataLoaded] = useState(false)
 
 	useEffect(() => {
 		readSettings()
 	}, [])
 
 	const readSettings = async () => {
-		const storedSettings = await readData('settings')
-		setSettings(storedSettings || {})
+		try {
+			const storedSettings = await readData('settings')
+			setSettings(storedSettings || {})
+			setDataLoaded(true)
+		} catch (error) {
+			console.error('Błąd podczas odczytywania ustawień:', error)
+		}
 	}
 
 	const updateSetting = async (key, value) => {
 		const updatedSettings = { ...settings, [key]: value }
+		setSettings(updatedSettings)
+		await saveData('settings', updatedSettings)
+	}
+
+	const updateSettings = async newSettings => {
+		const updatedSettings = { ...newSettings }
 		setSettings(updatedSettings)
 		await saveData('settings', updatedSettings)
 	}
@@ -30,7 +42,14 @@ export const SettingsProvider = ({ children }) => {
 
 	return (
 		<SettingsContext.Provider
-			value={{ settings, updateSetting, toggleDarkMode, currentColorScheme }}>
+			value={{
+				settings,
+				isDataLoaded,
+				updateSetting,
+				updateSettings,
+				toggleDarkMode,
+				currentColorScheme,
+			}}>
 			{children}
 		</SettingsContext.Provider>
 	)

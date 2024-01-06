@@ -4,13 +4,13 @@ import FontAwesome from '@expo/vector-icons/FontAwesome5'
 
 import { useGlobalColors } from '../assets/colors'
 
-const VisitCard = ({ meeting, onPress }) => {
-	const startTime = new Date(meeting.time_start).toLocaleTimeString('en-US', {
+const VisitCard = ({ address, patient_full_name, time_start, time_end, onPress }) => {
+	const startTime = new Date(time_start).toLocaleTimeString('en-US', {
 		hour12: false,
 		hour: '2-digit',
 		minute: '2-digit',
 	})
-	const endTime = new Date(meeting.time_end).toLocaleTimeString('en-US', {
+	const endTime = new Date(time_end).toLocaleTimeString('en-US', {
 		hour12: false,
 		hour: '2-digit',
 		minute: '2-digit',
@@ -20,19 +20,21 @@ const VisitCard = ({ meeting, onPress }) => {
 	const styles = generateStyles(COLORS)
 
 	return (
-		<TouchableOpacity style={styles.visitCard} onPress={onPress}>
-			<View style={styles.visitCardIcon}>
-				<FontAwesome name={'calendar-week'} size={24} color={COLORS.main_text_light_color} />
-			</View>
-			<View style={styles.visitCardContent}>
-				<Text style={styles.visitCardContentLocation}>{meeting.address}</Text>
-				<Text style={styles.visitCardContentPatient}>{meeting.patient_full_name}</Text>
-			</View>
-			<View style={styles.visitCardTime}>
-				<FontAwesome name={'clock'} size={18} color={COLORS.main_text_light_color} />
-				<Text style={styles.visitCardTimeText}>
-					{startTime} - {endTime}
-				</Text>
+		<TouchableOpacity onPress={onPress}>
+			<View style={styles.visitCard}>
+				<View style={styles.visitCardIcon}>
+					<FontAwesome name={'calendar-week'} size={24} color={COLORS.main_text_light_color} />
+				</View>
+				<View style={styles.visitCardContent}>
+					<Text style={styles.visitCardContentLocation}>{address}</Text>
+					<Text style={styles.visitCardContentPatient}>{patient_full_name}</Text>
+				</View>
+				<View style={styles.visitCardTime}>
+					<FontAwesome name={'clock'} size={18} color={COLORS.main_text_light_color} />
+					<Text style={styles.visitCardTimeText}>
+						{startTime} - {endTime}
+					</Text>
+				</View>
 			</View>
 		</TouchableOpacity>
 	)

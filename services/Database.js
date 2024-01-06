@@ -231,10 +231,24 @@ const updatePatient = (
 }
 
 const fetchPatientData = (patientId, callback) => {
+	const currentDate = new Date()
+	const formattedCurrentDate = `${currentDate.getFullYear()}-${(currentDate.getMonth() + 1)
+		.toString()
+		.padStart(2, '0')}-${currentDate.getDate().toString().padStart(2, '0')}`
+
 	db.transaction(tx => {
 		tx.executeSql(
-			'SELECT p.id as patientId, p.full_name, p.phone_number, p.date_of_birth, p.note, pp.id as problemId, pp.text as problemText, pa.id as addressId, pa.text as addressText FROM patients p LEFT JOIN patient_problem pp ON p.id = pp.patient_id LEFT JOIN patient_address pa ON p.id = pa.patient_id WHERE p.id = ?',
-			[patientId],
+			'SELECT p.id as patientId, p.full_name, p.phone_number, p.date_of_birth, p.note, ' +
+				'pp.id as problemId, pp.text as problemText, pa.id as addressId, pa.text as addressText, ' +
+				"v.id as visitId, v.address as visitAddress, v.note as visitNote, strftime('%Y-%m-%d', v.date/1000, 'unixepoch', 'localtime') as visitDate, " +
+				'v.time_start as visitTimeStart, v.time_end as visitTimeEnd ' +
+				'FROM patients p ' +
+				'LEFT JOIN patient_problem pp ON p.id = pp.patient_id ' +
+				'LEFT JOIN patient_address pa ON p.id = pa.patient_id ' +
+				'LEFT JOIN visit v ON p.id = v.patient_id ' +
+				'WHERE p.id = ? AND visitDate >= ? ' +
+				'ORDER BY visitDate ASC',
+			[patientId, formattedCurrentDate],
 			(_, { rows }) => {
 				const data = rows._array
 
@@ -253,6 +267,7 @@ const fetchPatientData = (patientId, callback) => {
 					note: data[0].note,
 					problems: [],
 					addresses: [],
+					visits: [],
 				}
 
 				data.forEach(current => {
@@ -273,6 +288,17 @@ const fetchPatientData = (patientId, callback) => {
 						patientData.addresses.push({
 							id: current.addressId,
 							text: current.addressText,
+						})
+					}
+
+					if (current.visitId && !patientData.visits.some(visit => visit.id === current.visitId)) {
+						patientData.visits.push({
+							id: current.visitId,
+							address: current.visitAddress,
+							note: current.visitNote,
+							date: current.visitDate,
+							time_start: current.visitTimeStart,
+							time_end: current.visitTimeEnd,
 						})
 					}
 				})

@@ -22,8 +22,10 @@ import { useGlobalColors } from '../../assets/colors'
 import TextField from '../../components/TextField'
 import Button from '../../components/Button'
 import LoadingScreen from '../../components/LoadingScreen'
+import { format } from 'date-fns'
 
 import { insertPatient, fetchPatientData, updatePatient } from '../../services/Database'
+import VisitCard from '../../components/VisitCard'
 
 const ListItemComponent = ({ id, text, icon, iconSize, iconColor, onRemove }) => {
 	const COLORS = useGlobalColors()
@@ -43,7 +45,7 @@ const ListItemComponent = ({ id, text, icon, iconSize, iconColor, onRemove }) =>
 
 export default function ManagePatient({ route }) {
 	const { id } = route.params
-	const { goBack } = useNavigation()
+	const { navigate, goBack } = useNavigation()
 
 	const COLORS = useGlobalColors()
 	const globalStyles = useGlobalStyles()
@@ -75,8 +77,15 @@ export default function ManagePatient({ route }) {
 				})
 			})
 			if (result) {
-				console.log(result)
-				setPatientData(result)
+				const groupedVisits = result.visits.reduce((groups, visit) => {
+					const date = visit.date
+					if (!groups[date]) {
+						groups[date] = []
+					}
+					groups[date].push(visit)
+					return groups
+				}, {})
+				setPatientData({ ...result, groupedVisits })
 				setFullName(result.full_name)
 				setBirthday(new Date(result.date_of_birth))
 				setPhoneNumber(result.phone_number)
@@ -281,12 +290,7 @@ export default function ManagePatient({ route }) {
 											<TouchableOpacity onPress={() => setIsDatePickerVisible(true)}>
 												<TextField
 													keyboardType='numeric'
-													value={
-														birthday &&
-														`${birthday.getUTCDate()}.${
-															birthday.getUTCMonth() + 1
-														}.${birthday.getUTCFullYear()}`
-													}
+													value={birthday && format(new Date(birthday), 'dd.MM.yyyy')}
 													contentType={'datetime'}
 													editable={false}
 													label='Data urodzenia'
@@ -400,6 +404,33 @@ export default function ManagePatient({ route }) {
 												</View>
 											</View>
 										</View>
+										{PATIENT_ID && patientData?.visits.length > 0 && (
+											<View style={{ marginVertical: 20 }}>
+												<Text style={[globalStyles.containerMediumText, { textAlign: 'center' }]}>
+													Nadchodzące wizyty
+												</Text>
+
+												<View>
+													{Object.entries(patientData.groupedVisits).map(([date, visits]) => (
+														<View key={date}>
+															<Text style={styles.patientVisitTitle}>
+																{format(new Date(date), 'dd.MM.yyyy')}
+															</Text>
+															{visits.map(visit => (
+																<VisitCard
+																	key={visit.id}
+																	address={visit.address}
+																	patient_full_name={patientData.full_name}
+																	time_end={visit.time_end}
+																	time_start={visit.time_start}
+																	onPress={() => navigate('manageVisit', { id: visit.id })}
+																/>
+															))}
+														</View>
+													))}
+												</View>
+											</View>
+										)}
 									</View>
 								</View>
 
@@ -448,7 +479,7 @@ const generateStyles = COLORS =>
 			fontFamily: 'Poppins-SemiBold',
 			fontSize: 14,
 			flex: 1,
-			color: COLORS.main_text_dark_color
+			color: COLORS.main_text_dark_color,
 		},
 
 		addProblemContainer: {
@@ -476,5 +507,10 @@ const generateStyles = COLORS =>
 			fontFamily: 'Poppins-Regular',
 			flex: 1,
 			color: COLORS.main_text_dark_color,
+		},
+
+		patientVisitTitle: {
+			fontFamily: 'Poppins-SemiBold',
+			color: COLORS.tab_gray_element_color,
 		},
 	})
