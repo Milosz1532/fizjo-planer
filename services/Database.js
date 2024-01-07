@@ -1,5 +1,6 @@
 import * as SQLite from 'expo-sqlite'
 import { startOfWeek, endOfWeek, format, addDays } from 'date-fns'
+import plLocale from 'date-fns/locale/pl'
 
 const db = SQLite.openDatabase('fp_sqlite', '1.0')
 
@@ -528,12 +529,12 @@ const fetchVisitById = (visitId, callback) => {
 }
 
 const fetchAllVisitsThisWeek = callback => {
-	const currentDate = new Date() // Aktualna data
-	const startOfWeekDate = startOfWeek(currentDate, { weekStartsOn: 1 })
-	const endOfWeekDate = endOfWeek(currentDate)
+	const currentDate = new Date()
 
-	const formattedStartOfWeek = startOfWeekDate.toLocaleDateString('pl-PL')
-	const formattedEndOfWeek = addDays(endOfWeekDate, 1).toLocaleDateString().split('T')[0]
+	const startOfCurrentWeek = startOfWeek(currentDate, { weekStartsOn: 1, locale: plLocale })
+
+	const formattedStartOfWeek = startOfCurrentWeek.toLocaleDateString('pl-PL')
+	const formattedEndOfWeek = addDays(startOfCurrentWeek, 6).toLocaleDateString().split('T')[0]
 
 	db.transaction(
 		tx => {
