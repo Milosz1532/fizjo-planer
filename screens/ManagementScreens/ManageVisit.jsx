@@ -7,6 +7,8 @@ import {
 	KeyboardAvoidingView,
 	StyleSheet,
 	Alert,
+	Platform,
+	Linking,
 } from 'react-native'
 
 import { useNavigation, useFocusEffect } from '@react-navigation/native'
@@ -22,7 +24,9 @@ import {
 	deleteVisit,
 } from '../../services/Database'
 import DateTimePickerModal from 'react-native-modal-datetime-picker'
+import { format } from 'date-fns'
 import { ALERT_TYPE, Dialog } from 'react-native-alert-notification'
+import * as SMS from 'expo-sms'
 
 import { useGlobalStyles } from '../../assets/styles'
 import { useGlobalColors } from '../../assets/colors'
@@ -32,6 +36,7 @@ import SelectField from '../../components/SelectField'
 import SelectOnly from '../../components/SelectOnly'
 import Button from '../../components/Button'
 import LoadingScreen from '../../components/LoadingScreen'
+import { useSettings } from '../../SettingsContext'
 
 LocaleConfig.locales['pl'] = {
 	monthNames: [
@@ -191,9 +196,30 @@ const DateComponent = ({
 	)
 }
 
+const ActionComponent = ({ icon, text, action }) => {
+	const COLORS = useGlobalColors()
+	const styles = generateStyles(COLORS)
+	const globalStyles = useGlobalStyles()
+
+	return (
+		<TouchableOpacity onPress={action} style={[globalStyles.cardBox, styles.actionContainer]}>
+			<View style={[styles.actionIcon, { backgroundColor: icon.backgroundColor }]}>
+				<FontAwesome name={icon.icon} size={15} color={COLORS.element_background} />
+			</View>
+
+			<Text style={styles.actionText}>{text}</Text>
+
+			<View style={styles.actionRightIcon}>
+				<FontAwesome name={'angle-right'} size={18} color={COLORS.light_border_color} />
+			</View>
+		</TouchableOpacity>
+	)
+}
+
 export default function ManageVisit({ route }) {
 	const { id } = route.params
 	const { navigate, goBack } = useNavigation()
+	const { settings } = useSettings()
 
 	const COLORS = useGlobalColors()
 	const globalStyles = useGlobalStyles()
@@ -236,7 +262,6 @@ export default function ManageVisit({ route }) {
 								} else {
 									if (visit) {
 										const findPatient = data.find(patient => patient.id === visit.patient_id)
-										console.log(visit)
 										setSelectedPatient(findPatient)
 										setPatientLocationInputValue(visit.address)
 										setNoteInputValue(visit.note)
@@ -449,7 +474,6 @@ export default function ManageVisit({ route }) {
 					onPress: () => {
 						deleteVisit(VISIT_ID, (success, errorMessage) => {
 							if (success) {
-								console.log(`Wizyta została usunięta`)
 								Dialog.show({
 									type: ALERT_TYPE.SUCCESS,
 									title: 'Sukces',
@@ -461,7 +485,6 @@ export default function ManageVisit({ route }) {
 									},
 								})
 							} else {
-								console.log(`Wystąpił błąd poczas usuwania wizyty: ${errorMessage}`)
 								Dialog.show({
 									type: ALERT_TYPE.DANGER,
 									title: 'Wystąpił błąd',
@@ -478,6 +501,42 @@ export default function ManageVisit({ route }) {
 			],
 			{ cancelable: false }
 		)
+	}
+
+	const handleSendReminder = async () => {
+		const date = displayDateText(selectedVisitDate)
+		const time_start = format(new Date(selectedVisitTimeStart), 'HH:mm')
+		const time_end = format(new Date(selectedVisitTimeEnd), 'HH:mm')
+
+		const phoneNumber = selectedPatient.phone_number
+		const messageContent = `Witam serdecznie,\nPrzypominam o zaplanowanej wizycie fizjoterapeutycznej na dzień: ${date} w godzinach ${time_start} - ${time_end}. Bardzo proszę o informację, jeśli wizyta nie będzie mogła się odbyć.\nPozdrawiam, ${settings.user}.`
+
+		await SMS.sendSMSAsync(phoneNumber, messageContent)
+	}
+
+	const handlePhoneCall = () => {
+		if (Platform.OS === 'android') {
+			Linking.openURL(`tel:${selectedPatient.phone_number}`)
+			return
+		}
+		if (Platform.OS === 'ios') {
+			Linking.openURL(`telprompt:${selectedPatient.phone_number}`)
+			return
+		}
+	}
+
+	const handleNavigateMaps = () => {
+		const address = patientLocationInputValue.id
+			? patientLocationInputValue.text
+			: patientLocationInputValue
+		const navigationUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+			address
+		)}`
+		if (Linking.canOpenURL(navigationUrl)) {
+			Linking.openURL(navigationUrl)
+		} else {
+			console.log('Nie można otworzyć URL-a')
+		}
 	}
 
 	return (
@@ -643,6 +702,35 @@ export default function ManageVisit({ route }) {
 													</View>
 												</View>
 
+												<View style={{ marginTop: 20 }}>
+													<Text style={[globalStyles.containerMediumText, { textAlign: 'center' }]}>
+														Czynności
+													</Text>
+													<ActionComponent
+														icon={{ icon: 'phone-alt', backgroundColor: COLORS.element_color_2 }}
+														text={'Zadzwoń do pacjenta'}
+														action={handlePhoneCall}
+													/>
+													<ActionComponent
+														icon={{ icon: 'bell', backgroundColor: COLORS.element_color_3 }}
+														text={'Wyślij przypomnienie'}
+														action={handleSendReminder}
+													/>
+													<ActionComponent
+														icon={{
+															icon: 'location-arrow',
+															backgroundColor: COLORS.element_color_1,
+														}}
+														text={'Nawigacja do adresu'}
+														action={handleNavigateMaps}
+													/>
+													<ActionComponent
+														icon={{ icon: 'user', backgroundColor: COLORS.element_color_4 }}
+														text={'Dane pacjenta'}
+														action={() => navigate('ManagePatient', { id: selectedPatient.id })}
+													/>
+												</View>
+
 												<DateTimePickerModal
 													isVisible={isDatePickerVisible ? true : false}
 													mode='date'
@@ -668,7 +756,7 @@ export default function ManageVisit({ route }) {
 									</View>
 								</View>
 
-								<View style={{ justifyContent: 'flex-end' }}>
+								<View style={{ justifyContent: 'flex-end', marginTop: 30 }}>
 									<Button
 										text={VISIT_ID ? 'Edytuj wizytę' : 'Dodaj wizytę'}
 										onPress={handleSubmitVisit}
@@ -761,18 +849,49 @@ const generateStyles = COLORS =>
 			flexDirection: 'row',
 			paddingHorizontal: 50,
 			paddingTop: 10,
+			paddingBottom: 6,
 			alignItems: 'center',
 		},
 
 		visitTimeContainerTitle: {
 			fontFamily: 'Poppins-SemiBold',
 			fontSize: 18,
+			color: COLORS.main_text_dark_color,
 		},
 
 		visitTimeContainerTime: {
 			fontFamily: 'Poppins-Bold',
 			color: COLORS.main,
 			fontSize: 30,
-			marginTop: -10,
+			marginTop: -8,
+		},
+
+		actionContainer: {
+			flexDirection: 'row',
+			justifyContent: 'space-between',
+			alignItems: 'center',
+			marginTop: 15,
+			borderRadius: 10,
+		},
+
+		actionIcon: {
+			width: 30,
+			height: 30,
+			justifyContent: 'center',
+			alignItems: 'center',
+			backgroundColor: 'red',
+			borderRadius: 6,
+			marginEnd: 10,
+		},
+
+		actionText: {
+			flex: 1,
+			fontFamily: 'Poppins-SemiBold',
+			fontSize: 17,
+			color: COLORS.text_gray_color,
+		},
+
+		actionRightIcon: {
+			marginEnd: 10,
 		},
 	})
