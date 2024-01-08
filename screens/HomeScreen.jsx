@@ -52,7 +52,6 @@ export default function HomeScreen() {
 	const fetchData = async () => {
 		fetchAllVisitsThisWeek(data => {
 			const sortedData = data.sort((a, b) => new Date(a.date) - new Date(b.date))
-
 			setAllMeetings(sortedData)
 		})
 		fetchUpcomingVisits(data => {
@@ -104,11 +103,10 @@ export default function HomeScreen() {
 	}
 
 	useEffect(() => {
-		if (!selectedWeekDay) return
-
+		if (!allMeetings && !selectedWeekDay) return
 		const dayMeetings = allMeetings.filter(meeting => meeting.date === selectedWeekDay.date)
 		setSelectedDayMeetings(dayMeetings)
-	}, [selectedWeekDay])
+	}, [selectedWeekDay, allMeetings])
 
 	return (
 		<View style={{ flex: 1, backgroundColor: COLORS.app_background }}>

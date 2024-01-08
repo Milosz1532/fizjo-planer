@@ -532,9 +532,17 @@ const fetchAllVisitsThisWeek = callback => {
 	const currentDate = new Date()
 
 	const startOfCurrentWeek = startOfWeek(currentDate, { weekStartsOn: 1, locale: plLocale })
+	const endOfCurrentWeek = addDays(startOfCurrentWeek, 6)
 
-	const formattedStartOfWeek = startOfCurrentWeek.toLocaleDateString('pl-PL')
-	const formattedEndOfWeek = addDays(startOfCurrentWeek, 6).toLocaleDateString().split('T')[0]
+	const formattedStartOfWeek = `${startOfCurrentWeek.getFullYear()}-${(
+		startOfCurrentWeek.getMonth() + 1
+	)
+		.toString()
+		.padStart(2, '0')}-${startOfCurrentWeek.getDate().toString().padStart(2, '0')}`
+
+	const formattedEndOfWeek = `${endOfCurrentWeek.getFullYear()}-${(endOfCurrentWeek.getMonth() + 1)
+		.toString()
+		.padStart(2, '0')}-${endOfCurrentWeek.getDate().toString().padStart(2, '0')}`
 
 	db.transaction(
 		tx => {
