@@ -1,6 +1,10 @@
 import * as SQLite from 'expo-sqlite'
+import * as DocumentPicker from 'expo-document-picker'
+import * as Sharing from 'expo-sharing'
+import * as FileSystem from 'expo-file-system'
 import { startOfWeek, endOfWeek, format, addDays } from 'date-fns'
 import plLocale from 'date-fns/locale/pl'
+import { Platform } from 'react-native'
 
 const db = SQLite.openDatabase('fp_sqlite', '1.0')
 
@@ -695,6 +699,64 @@ const deletePatient = (id, callback) => {
 	)
 }
 
+const exportDatabase = async () => {
+	if (Platform.OS === 'android') {
+		const permissions = await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync()
+		if (permissions.granted) {
+			const base64 = await FileSystem.readAsStringAsync(
+				FileSystem.documentDirectory + 'SQLite/fp_sqlite.db',
+				{
+					encoding: FileSystem.EncodingType.Base64,
+				}
+			)
+
+			await FileSystem.StorageAccessFramework.createFileAsync(
+				permissions.directoryUri,
+				'fp_sqlite.db',
+				'application/octet-stream'
+			)
+				.then(async uri => {
+					await FileSystem.writeAsStringAsync(uri, base64, {
+						encoding: FileSystem.EncodingType.Base64,
+					})
+				})
+				.catch(e => console.log(e))
+		} else {
+			console.log(`Permission not granted`)
+		}
+	} else {
+		await Sharing.shareAsync(FileSystem.documentDirectory + 'fp_sqlite.db')
+	}
+}
+
+const importDatabase = async () => {
+	let result = await DocumentPicker.getDocumentAsync({
+		copyToCacheDirectory: true,
+	})
+
+	if (result.type === 'success') {
+		console.log('Wczytuje')
+
+		if (!(await FileSystem.getInfoAsync(FileSystem.documentDirectory + 'SQLite')).exists) {
+			await FileSystem.makeDirectoryAsync(FileSystem.documentDirectory + 'SQLite')
+		}
+	}
+
+	const base64 = await FileSystem.readAsStringAsync(result.uri, {
+		encoding: FileSystem.EncodingType.Base64,
+	})
+
+	await FileSystem.writeAsStringAsync(
+		FileSystem.documentDirectory + 'SQLite/fp_sqlite.db',
+		base64,
+		{
+			encoding: FileSystem.EncodingType.Base64,
+		}
+	)
+	await db.closeAsync()
+	//setDb(SQLite.openDatabase('example.db'))
+}
+
 export {
 	initDatabase,
 	insertPatient,
@@ -711,4 +773,5 @@ export {
 	fetchUpcomingVisits,
 	deleteVisit,
 	deletePatient,
+	exportDatabase,
 }

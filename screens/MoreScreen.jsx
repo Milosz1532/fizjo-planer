@@ -1,5 +1,14 @@
-import React, { useState } from 'react'
-import { ScrollView, View, Text, StyleSheet } from 'react-native'
+import React, { useState, useEffect, useRef } from 'react'
+import {
+	AppState,
+	ScrollView,
+	View,
+	Text,
+	StyleSheet,
+	Button,
+	Linking,
+	Platform,
+} from 'react-native'
 import { FontAwesome } from '@expo/vector-icons'
 import { useGlobalStyles } from '../assets/styles'
 import { useGlobalColors } from '../assets/colors'
@@ -7,15 +16,37 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { StatusBar } from 'expo-status-bar'
 import { useSettings } from '../SettingsContext'
 import ToggleSwitch from 'toggle-switch-react-native'
+import { registerForPushNotificationsAsync } from '../services/NotificationService'
+import { useFocusEffect } from '@react-navigation/native'
 
 import UserProfile from '../components/MoreScreen/UserProfile'
 import SettingsItem from '../components/MoreScreen/SettingsItem'
 import ToggleSettingsItem from '../components/MoreScreen/ToggleSettingsItem'
+import { exportDatabase } from '../services/Database'
 
 export default function MoreScreen() {
 	const { settings, updateSetting } = useSettings()
-
+	const [notificationsEnabled, setNotificationsEnabled] = useState(false)
 	const isDarkMode = settings.darkMode || false
+
+	const appState = useRef(AppState.currentState)
+	const [appStateVisible, setAppStateVisible] = useState(appState.current)
+
+	useEffect(() => {
+		const subscription = AppState.addEventListener('change', nextAppState => {
+			if (appState.current.match(/inactive|background/) && nextAppState === 'active') {
+				console.log('App has come to the foreground!')
+			}
+
+			appState.current = nextAppState
+			setAppStateVisible(appState.current)
+			checkNotificationPermissions()
+		})
+
+		return () => {
+			subscription.remove()
+		}
+	}, [])
 
 	const toggleDarkMode = () => {
 		const newDarkModeValue = !isDarkMode
@@ -24,6 +55,33 @@ export default function MoreScreen() {
 
 	const COLORS = useGlobalColors()
 	const globalStyles = useGlobalStyles()
+
+	useFocusEffect(
+		React.useCallback(() => {
+			checkNotificationPermissions()
+		}, [])
+	)
+
+	const checkNotificationPermissions = async () => {
+		const status = await registerForPushNotificationsAsync()
+		if (status) {
+			setNotificationsEnabled(true)
+		} else {
+			setNotificationsEnabled(false)
+		}
+	}
+
+	const toggleNotifications = async () => {
+		if (Platform.OS === 'ios') {
+			Linking.openURL('app-settings:')
+		} else if (Platform.OS === 'android') {
+			Linking.openSettings()
+		}
+	}
+
+	const handleExportDb = () => {
+		exportDatabase()
+	}
 
 	return (
 		<View style={{ flex: 1, backgroundColor: COLORS.main }}>
@@ -55,7 +113,8 @@ export default function MoreScreen() {
 						<ToggleSettingsItem
 							icon={{ name: 'bell', backgroundColor: COLORS.element_color_2 }}
 							label='Powiadomienia'
-							initialValue={false}
+							initialValue={notificationsEnabled}
+							onToggle={toggleNotifications} // Ustaw funkcję obsługującą zmianę stanu suwaka
 						/>
 						<ToggleSettingsItem
 							icon={{ name: 'moon-o', backgroundColor: COLORS.element_color_6 }}
@@ -71,6 +130,8 @@ export default function MoreScreen() {
 							icon={{ name: 'language', backgroundColor: COLORS.primary }}
 							label='Język aplikacji'
 						/>
+
+						<Button title='test' onPress={handleExportDb}></Button>
 					</ScrollView>
 				</View>
 			</SafeAreaView>
