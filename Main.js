@@ -15,14 +15,6 @@ const Stack = createNativeStackNavigator()
 export default function Main() {
 	const { isDataLoaded, settings } = useSettings()
 
-	// if (!isDataLoaded) {
-	// 	return (
-	// 		<View style={{ flex: 1, backgroundColor: 'red' }}>
-	// 			<Text>Ładowanie</Text>
-	// 		</View>
-	// 	)
-	// }
-
 	if (!isDataLoaded) {
 		return undefined
 	}

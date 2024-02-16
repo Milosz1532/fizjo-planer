@@ -34,4 +34,27 @@ async function registerForPushNotificationsAsync() {
 	return registerStatus
 }
 
-export { registerForPushNotificationsAsync }
+async function pushNotification(title, body, time) {
+	const now = new Date()
+	const notificationTime = new Date(time)
+	const delayInSeconds = Math.floor((notificationTime - now) / 1000)
+
+	if (delayInSeconds <= 0) {
+		throw new Error('Scheduled time must be in the future')
+	}
+
+	const id = await Notifications.scheduleNotificationAsync({
+		content: {
+			title: title,
+			body: body,
+			sound: 'default',
+		},
+		trigger: {
+			seconds: delayInSeconds, // Opóźnienie w sekundach
+		},
+	})
+
+	return id
+}
+
+export { registerForPushNotificationsAsync, pushNotification }

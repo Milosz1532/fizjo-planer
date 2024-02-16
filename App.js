@@ -22,10 +22,10 @@ import AppIntro from './AppIntro'
 import Main from './Main'
 import * as SplashScreen from 'expo-splash-screen'
 
-import * as Device from 'expo-device'
 import * as Notifications from 'expo-notifications'
-import Constants from 'expo-constants'
+import { registerForPushNotificationsAsync } from './services/NotificationService'
 
+import { register, unregister } from './services/BackgroundService'
 
 Notifications.setNotificationHandler({
 	handleNotification: async () => ({
@@ -40,21 +40,27 @@ export default function App() {
 	const responseListener = useRef()
 
 	useEffect(() => {
-		// registerForPushNotificationsAsync().then(token => setExpoPushToken(token))
+		registerForPushNotificationsAsync()
 
 		responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
 			console.log(response)
 			console.log(`Wykonuje czynność związaną z powiadomieniem`)
+			console.log(`objec`)
 		})
 
 		return () => {
-			Notifications.removeNotificationSubscription(notificationListener.current)
-			Notifications.removeNotificationSubscription(responseListener.current)
+			if (notificationListener.current) {
+				Notifications.removeNotificationSubscription(notificationListener.current)
+			}
+			if (responseListener.current) {
+				Notifications.removeNotificationSubscription(responseListener.current)
+			}
 		}
 	}, [])
 
 	useEffect(() => {
 		initDatabase()
+		register().then(() => console.log(`Task registered`))
 	}, [])
 
 	let [fontsLoaded] = useFonts({
@@ -109,28 +115,4 @@ export default function App() {
 			</EventProvider>
 		</AlertNotificationRoot>
 	)
-}
-
-async function schedulePushNotification(title, body, time) {
-	const now = new Date()
-	const notificationTime = new Date(time)
-	const delayInSeconds = Math.floor((notificationTime - now) / 1000)
-
-	if (delayInSeconds <= 0) {
-		throw new Error('Scheduled time must be in the future')
-	}
-
-	const id = await Notifications.scheduleNotificationAsync({
-		content: {
-			title: title,
-			body: body,
-			sound: 'default',
-		},
-		trigger: {
-			seconds: delayInSeconds, // Opóźnienie w sekundach
-		},
-	})
-
-	console.log('Notification scheduled successfully with ID:', id)
-	return id
 }
