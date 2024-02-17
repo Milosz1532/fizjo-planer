@@ -1,8 +1,5 @@
-import React, { useEffect, useState, useRef } from 'react'
-import BottomTabNavigation from './BottomTabNavigation'
-import { NavigationContainer } from '@react-navigation/native'
-import { createNativeStackNavigator } from '@react-navigation/native-stack'
-import { Text, View } from 'react-native'
+import React, { useEffect, useRef } from 'react'
+
 import {
 	useFonts,
 	Poppins_400Regular,
@@ -13,19 +10,16 @@ import {
 import { AlertNotificationRoot } from 'react-native-alert-notification'
 import { EventProvider } from 'react-native-outside-press'
 
-import { initDatabase, fetchPatientData } from './services/Database'
-import ManagePatient from './screens/ManagementScreens/ManagePatient'
-import ManageVisit from './screens/ManagementScreens/ManageVisit'
+import { initDatabase } from './services/Database'
 
 import { SettingsProvider } from './SettingsContext'
-import AppIntro from './AppIntro'
 import Main from './Main'
 import * as SplashScreen from 'expo-splash-screen'
 
 import * as Notifications from 'expo-notifications'
 import { registerForPushNotificationsAsync } from './services/NotificationService'
 
-import { register, unregister } from './services/BackgroundService'
+import { register } from './services/BackgroundService'
 
 Notifications.setNotificationHandler({
 	handleNotification: async () => ({
@@ -45,7 +39,6 @@ export default function App() {
 		responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
 			console.log(response)
 			console.log(`Wykonuje czynność związaną z powiadomieniem`)
-			console.log(`objec`)
 		})
 
 		return () => {
@@ -81,30 +74,6 @@ export default function App() {
 	} else {
 		SplashScreen.hideAsync()
 	}
-
-	// Testowanie systemu powiadomień
-	// return (
-	// 	<View style={{ marginTop: 50 }}>
-	// 		<Button
-	// 			title='Klknij se byczku '
-	// 			onPress={async () => {
-	// 				try {
-	// 					const currentTime = new Date()
-
-	// 					currentTime.setSeconds(currentTime.getSeconds() + 3)
-	// 					await schedulePushNotification(
-	// 						'Super powiadomienie',
-	// 						'Super gruby pacjent czeka',
-	// 						currentTime
-	// 					)
-	// 					console.log(`Notification scheduled successfully!`)
-	// 				} catch (error) {
-	// 					console.log('Error scheduling notification: ' + error.message)
-	// 				}
-	// 			}}
-	// 		/>
-	// 	</View>
-	// )
 
 	return (
 		<AlertNotificationRoot>

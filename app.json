@@ -17,7 +17,7 @@
 			"bundleIdentifier": "com.milosz1532.fizjoplaner",
 			"permissions": ["BACKGROUND_FETCH"],
 			"infoPlist": {
-				"UIBackgroundModes": ["location", "fetch"]
+				"UIBackgroundModes": ["location", "fetch", "remote-notification"]
 			}
 		},
 		"android": {
