@@ -1,9 +1,8 @@
 import * as Notifications from 'expo-notifications'
-import Constants from 'expo-constants'
 
 async function registerForPushNotificationsAsync() {
 	let registerStatus = false
-	if (Constants.isDevice) {
+	if (Platform.OS !== 'web') {
 		const { status: existingStatus } = await Notifications.getPermissionsAsync()
 		let finalStatus = existingStatus
 		if (existingStatus !== 'granted') {
@@ -34,7 +33,7 @@ async function registerForPushNotificationsAsync() {
 	return registerStatus
 }
 
-async function pushNotification(title, body, time) {
+async function pushNotification(title, body, time, visitId) {
 	const now = new Date()
 	const notificationTime = new Date(time)
 	const delayInSeconds = Math.floor((notificationTime - now) / 1000)
@@ -43,18 +42,35 @@ async function pushNotification(title, body, time) {
 		throw new Error('Scheduled time must be in the future')
 	}
 
+	const notificationContent = {
+		title: title,
+		body: body,
+		sound: true,
+		data: { visitId: visitId },
+	}
+
 	const id = await Notifications.scheduleNotificationAsync({
-		content: {
-			title: title,
-			body: body,
-			sound: 'default',
-		},
+		content: notificationContent,
 		trigger: {
-			seconds: delayInSeconds, // Opóźnienie w sekundach
+			seconds: delayInSeconds,
 		},
 	})
 
 	return id
 }
 
-export { registerForPushNotificationsAsync, pushNotification }
+async function checkNotificationPermissions() {
+	let hasPermission = false
+	if (Platform.OS !== 'web') {
+		const { status: existingStatus } = await Notifications.getPermissionsAsync()
+		console.log(existingStatus)
+
+		if (existingStatus === 'granted') {
+			hasPermission = true
+		}
+	}
+
+	return hasPermission
+}
+
+export { registerForPushNotificationsAsync, checkNotificationPermissions, pushNotification }

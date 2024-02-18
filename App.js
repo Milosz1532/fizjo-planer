@@ -9,6 +9,7 @@ import {
 
 import { AlertNotificationRoot } from 'react-native-alert-notification'
 import { EventProvider } from 'react-native-outside-press'
+import { NavigationContainer } from '@react-navigation/native'
 
 import { initDatabase } from './services/Database'
 
@@ -16,41 +17,9 @@ import { SettingsProvider } from './SettingsContext'
 import Main from './Main'
 import * as SplashScreen from 'expo-splash-screen'
 
-import * as Notifications from 'expo-notifications'
-import { registerForPushNotificationsAsync } from './services/NotificationService'
-
 import { register } from './services/BackgroundService'
 
-Notifications.setNotificationHandler({
-	handleNotification: async () => ({
-		shouldShowAlert: true,
-		shouldPlaySound: true,
-		shouldSetBadge: true,
-	}),
-})
-
 export default function App() {
-	const notificationListener = useRef()
-	const responseListener = useRef()
-
-	useEffect(() => {
-		registerForPushNotificationsAsync()
-
-		responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
-			console.log(response)
-			console.log(`Wykonuje czynność związaną z powiadomieniem`)
-		})
-
-		return () => {
-			if (notificationListener.current) {
-				Notifications.removeNotificationSubscription(notificationListener.current)
-			}
-			if (responseListener.current) {
-				Notifications.removeNotificationSubscription(responseListener.current)
-			}
-		}
-	}, [])
-
 	useEffect(() => {
 		initDatabase()
 		register().then(() => console.log(`Task registered`))
@@ -76,12 +45,14 @@ export default function App() {
 	}
 
 	return (
-		<AlertNotificationRoot>
-			<EventProvider>
-				<SettingsProvider>
-					<Main />
-				</SettingsProvider>
-			</EventProvider>
-		</AlertNotificationRoot>
+		<NavigationContainer>
+			<AlertNotificationRoot>
+				<EventProvider>
+					<SettingsProvider>
+						<Main />
+					</SettingsProvider>
+				</EventProvider>
+			</AlertNotificationRoot>
+		</NavigationContainer>
 	)
 }

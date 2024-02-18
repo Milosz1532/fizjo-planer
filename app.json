@@ -25,7 +25,7 @@
 				"foregroundImage": "./assets/adaptive-icon.png",
 				"backgroundColor": "#ffffff"
 			},
-			"permissions": ["WRITE_EXTERNAL_STORAGE", "BACKGROUND_FETCH"],
+			"permissions": ["NOTIFICATIONS", "WRITE_EXTERNAL_STORAGE", "BACKGROUND_FETCH"],
 			"package": "com.milosz1532.fizjoplaner"
 		},
 		"web": {

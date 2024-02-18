@@ -16,7 +16,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { StatusBar } from 'expo-status-bar'
 import { useSettings } from '../SettingsContext'
 import ToggleSwitch from 'toggle-switch-react-native'
-import { registerForPushNotificationsAsync } from '../services/NotificationService'
+import { checkNotificationPermissions } from '../services/NotificationService'
 import { useFocusEffect } from '@react-navigation/native'
 
 import UserProfile from '../components/MoreScreen/UserProfile'
@@ -40,7 +40,7 @@ export default function MoreScreen() {
 
 			appState.current = nextAppState
 			setAppStateVisible(appState.current)
-			checkNotificationPermissions()
+			setNotificationsStatus()
 		})
 
 		return () => {
@@ -58,12 +58,12 @@ export default function MoreScreen() {
 
 	useFocusEffect(
 		React.useCallback(() => {
-			checkNotificationPermissions()
+			setNotificationsStatus()
 		}, [])
 	)
 
-	const checkNotificationPermissions = async () => {
-		const status = await registerForPushNotificationsAsync()
+	const setNotificationsStatus = async () => {
+		const status = await checkNotificationPermissions()
 		if (status) {
 			setNotificationsEnabled(true)
 		} else {

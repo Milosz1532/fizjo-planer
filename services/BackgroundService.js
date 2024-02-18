@@ -28,7 +28,7 @@ const pushNotificationAsync = async () => {
 
 					const notificationTime = addHours(visitDateTime, -1)
 
-					pushNotification(notificationTitle, notificationMessage, notificationTime)
+					pushNotification(notificationTitle, notificationMessage, notificationTime, visit.id)
 					console.log(`Dodaję nowe powiadomienie do kolejki o godzinie ${notificationTime}`)
 				}
 			})
