@@ -68,7 +68,7 @@ LocaleConfig.locales['pl'] = {
 		'Déc.',
 	],
 	dayNames: ['Niedziela', 'Poniedziałek', 'Wtorek', 'Środa', 'Czwartek', 'Piątek', 'Sobota'],
-	dayNamesShort: ['Pn', 'Wt', 'Śr', 'Czw', 'Pt', 'Sob', 'Nd'],
+	dayNamesShort: ['Nd', 'Pn', 'Wt', 'Śr', 'Czw', 'Pt', 'Sob'],
 }
 
 LocaleConfig.defaultLocale = 'pl'
@@ -344,6 +344,13 @@ export default function ManageVisit({ route }) {
 
 	const handleSubmitVisit = () => {
 		let errorMessage = false
+
+		const datesWithTimestamps = selectedDates.map(date => ({
+			...date,
+			timeStart: date.timeStart.getTime(),
+			timeEnd: date.timeEnd.getTime(),
+		}))
+
 		if (!selectedPatient) {
 			errorMessage = 'Musisz wybrać pacjenta przed dodaniem wizyty'
 		} else if (patientLocationInputValue === '') {
