@@ -12,7 +12,7 @@ const initDatabase = () => {
 	db.transaction(tx => {
 		// Patient Table
 		tx.executeSql(
-			'CREATE TABLE IF NOT EXISTS patients (id INTEGER PRIMARY KEY AUTOINCREMENT, full_name TEXT, date_of_birth DATE, phone_number TEXT, note TEXT)',
+			'CREATE TABLE IF NOT EXISTS patients (id INTEGER PRIMARY KEY AUTOINCREMENT, full_name TEXT, date_of_birth DATE, phone_number TEXT, note TEXT, is_deleted INTEGER DEFAULT 0)',
 			[],
 			(_, results) => {
 				console.log('Table patient created successfully')
@@ -24,7 +24,7 @@ const initDatabase = () => {
 
 		// Patient_problem Table
 		tx.executeSql(
-			'CREATE TABLE IF NOT EXISTS patient_problem (id INTEGER PRIMARY KEY AUTOINCREMENT, patient_id INTEGER, text TEXT)',
+			'CREATE TABLE IF NOT EXISTS patient_problem (id INTEGER PRIMARY KEY AUTOINCREMENT, patient_id INTEGER, text TEXT, is_deleted INTEGER DEFAULT 0)',
 			[],
 			(_, results) => {
 				console.log('Table patient_problem created successfully')
@@ -36,7 +36,7 @@ const initDatabase = () => {
 
 		// Patient_address Table
 		tx.executeSql(
-			'CREATE TABLE IF NOT EXISTS patient_address (id INTEGER PRIMARY KEY AUTOINCREMENT, patient_id INTEGER, text TEXT)',
+			'CREATE TABLE IF NOT EXISTS patient_address (id INTEGER PRIMARY KEY AUTOINCREMENT, patient_id INTEGER, text TEXT, is_deleted INTEGER DEFAULT 0, is_disposable INTEGER DEFAULT 0)',
 			[],
 			(_, results) => {
 				console.log('Table patient_address created successfully')
@@ -48,7 +48,7 @@ const initDatabase = () => {
 
 		// Visit Table
 		tx.executeSql(
-			'CREATE TABLE IF NOT EXISTS visit (id INTEGER PRIMARY KEY AUTOINCREMENT, patient_id INTEGER, address TEXT, note TEXT, date INTEGER, time_start INTEGER, time_end INTEGER)',
+			'CREATE TABLE IF NOT EXISTS visit (id INTEGER PRIMARY KEY AUTOINCREMENT, patient_id INTEGER, address_id INTEGER, note TEXT, date INTEGER, time_start INTEGER, time_end INTEGER, is_deleted INTEGER DEFAULT 0)',
 			[],
 			(_, results) => {
 				console.log('Table visit created successfully')
@@ -60,26 +60,135 @@ const initDatabase = () => {
 	})
 }
 
-const updateVisit = (visit_id, patient_id, address, note, date, time_start, time_end, callback) => {
+// const updateVisit = (visit_id, patient_id, address, note, date, time_start, time_end, callback) => {
+// 	db.transaction(
+// 		tx => {
+// 			tx.executeSql(
+// 				'UPDATE visit SET patient_id = ?, address = ?, note = ?, date = ?, time_start = ?, time_end = ? WHERE id = ?',
+// 				[patient_id, address, note, date, time_start, time_end, visit_id],
+// 				(_, results) => {
+// 					if (results.rowsAffected > 0) {
+// 						console.log('Visit data updated successfully')
+// 						callback({ success: true, message: 'Visit data updated successfully' })
+// 					} else {
+// 						console.log('No rows updated')
+// 						callback({ success: false, message: 'No rows updated' })
+// 					}
+// 				},
+// 				(tx, error) => {
+// 					console.log('Error updating visit data:', error)
+// 					callback({ success: false, message: 'Error updating visit data' })
+// 				}
+// 			)
+// 		},
+// 		error => {
+// 			console.log('Transaction error:', error)
+// 			callback({ success: false, message: 'Transaction failed' })
+// 		}
+// 	)
+// }
+
+const updateVisit = (
+	visit_id,
+	patient_id,
+	address_id,
+	address_text,
+	note,
+	date,
+	time_start,
+	time_end,
+	callback
+) => {
 	db.transaction(
 		tx => {
-			tx.executeSql(
-				'UPDATE visit SET patient_id = ?, address = ?, note = ?, date = ?, time_start = ?, time_end = ? WHERE id = ?',
-				[patient_id, address, note, date, time_start, time_end, visit_id],
-				(_, results) => {
-					if (results.rowsAffected > 0) {
-						console.log('Visit data updated successfully')
-						callback({ success: true, message: 'Visit data updated successfully' })
-					} else {
-						console.log('No rows updated')
-						callback({ success: false, message: 'No rows updated' })
+			const updateVisitWithAddress = (
+				visit_id,
+				patient_id,
+				address_id,
+				note,
+				date,
+				time_start,
+				time_end,
+				callback
+			) => {
+				tx.executeSql(
+					'UPDATE visit SET patient_id = ?, address_id = ?, note = ?, date = ?, time_start = ?, time_end = ? WHERE id = ?',
+					[patient_id, address_id, note, date, time_start, time_end, visit_id],
+					(_, results) => {
+						if (results.rowsAffected > 0) {
+							console.log('Visit data updated successfully')
+							callback({ success: true, message: 'Visit data updated successfully' })
+						} else {
+							console.log('No rows updated')
+							callback({ success: false, message: 'No rows updated' })
+						}
+					},
+					(tx, error) => {
+						console.log('Error updating visit data:', error)
+						callback({ success: false, message: 'Error updating visit data' })
 					}
-				},
-				(tx, error) => {
-					console.log('Error updating visit data:', error)
-					callback({ success: false, message: 'Error updating visit data' })
-				}
-			)
+				)
+			}
+
+			if (address_id !== null) {
+				updateVisitWithAddress(
+					visit_id,
+					patient_id,
+					address_id,
+					note,
+					date,
+					time_start,
+					time_end,
+					callback
+				)
+			} else {
+				// Sprawdź, czy istnieje adres o podanym tekście
+				tx.executeSql(
+					'SELECT id FROM patient_address WHERE text = ? AND is_deleted = 0',
+					[address_text],
+					(_, { rows }) => {
+						if (rows.length > 0) {
+							const existingAddressId = rows.item(0).id
+							updateVisitWithAddress(
+								visit_id,
+								patient_id,
+								existingAddressId,
+								note,
+								date,
+								time_start,
+								time_end,
+								callback
+							)
+						} else {
+							// Dodaj nowy adres do bazy danych
+							tx.executeSql(
+								'INSERT INTO patient_address (patient_id, text) VALUES (?, ?)',
+								[patient_id, address_text],
+								(_, { insertId }) => {
+									updateVisitWithAddress(
+										visit_id,
+										patient_id,
+										insertId,
+										note,
+										date,
+										time_start,
+										time_end,
+										callback
+									)
+								},
+								error => {
+									console.log('Error inserting new Address data:', error)
+									throw new Error('Update failed')
+								}
+							)
+						}
+					},
+					error => {
+						console.log('Error checking existing Address:', error)
+						throw new Error('Transaction failed')
+					}
+				)
+			}
 		},
 		error => {
 			console.log('Transaction error:', error)
@@ -245,13 +354,13 @@ const fetchPatientData = (patientId, callback) => {
 		tx.executeSql(
 			'SELECT p.id as patientId, p.full_name, p.phone_number, p.date_of_birth, p.note, ' +
 				'pp.id as problemId, pp.text as problemText, pa.id as addressId, pa.text as addressText, ' +
-				"v.id as visitId, v.address as visitAddress, v.note as visitNote, strftime('%Y-%m-%d', v.date/1000, 'unixepoch', 'localtime') as visitDate, " +
+				'v.id as visitId, v.note as visitNote, v.address_id as visitAddressId, strftime("%Y-%m-%d", v.date/1000, "unixepoch", "localtime") as visitDate, ' +
 				'v.time_start as visitTimeStart, v.time_end as visitTimeEnd ' +
 				'FROM patients p ' +
-				'LEFT JOIN patient_problem pp ON p.id = pp.patient_id ' +
-				'LEFT JOIN patient_address pa ON p.id = pa.patient_id ' +
-				'LEFT JOIN visit v ON p.id = v.patient_id ' +
-				'WHERE p.id = ? ' +
+				'LEFT JOIN patient_problem pp ON p.id = pp.patient_id AND pp.is_deleted = 0 ' +
+				'LEFT JOIN patient_address pa ON p.id = pa.patient_id AND pa.is_deleted = 0 ' +
+				'LEFT JOIN visit v ON p.id = v.patient_id AND v.is_deleted = 0 ' +
+				'WHERE p.id = ? AND p.is_deleted = 0 ' +
 				'ORDER BY visitDate ASC',
 			[patientId],
 			(_, { rows }) => {
@@ -300,9 +409,12 @@ const fetchPatientData = (patientId, callback) => {
 						const visitDate = new Date(current.visitDate)
 						if (visitDate >= currentDate) {
 							if (!patientData.visits.some(visit => visit.id === current.visitId)) {
+								const visitAddress = data.find(
+									address => address.addressId === current.visitAddressId
+								)
 								patientData.visits.push({
 									id: current.visitId,
-									address: current.visitAddress,
+									address: visitAddress ? visitAddress.addressText : null, // Dodaj adres wizyty
 									note: current.visitNote,
 									date: current.visitDate,
 									time_start: current.visitTimeStart,
@@ -338,6 +450,7 @@ const fetchPatientList = callback => {
 			'SELECT p.id, p.full_name, p.date_of_birth, COUNT(v.id) as upcoming_visits_count ' +
 				'FROM patients p ' +
 				"LEFT JOIN visit v ON p.id = v.patient_id AND strftime('%Y-%m-%d', v.date/1000, 'unixepoch', 'localtime') >= ? " +
+				'WHERE p.is_deleted = 0 ' +
 				'GROUP BY p.id, p.full_name ' +
 				'ORDER BY upcoming_visits_count DESC',
 			[formattedCurrentDate],
@@ -362,7 +475,8 @@ const fetchPatientListWithAddresses = callback => {
 		tx.executeSql(
 			'SELECT p.id as patientId, p.full_name, p.date_of_birth, p.phone_number, p.note, pa.id as addressId, pa.text as addressText ' +
 				'FROM patients p ' +
-				'LEFT JOIN patient_address pa ON p.id = pa.patient_id',
+				'LEFT JOIN patient_address pa ON p.id = pa.patient_id ' +
+				'WHERE pa.is_deleted = 0 AND pa.is_disposable = 0',
 			[],
 			(_, { rows }) => {
 				const data = rows._array
@@ -401,7 +515,7 @@ const fetchPatientListWithAddresses = callback => {
 				}, [])
 
 				if (callback) {
-					callback(patientsWithAddresses.length > 0 ? patientsWithAddresses : null)
+					callback(patientsWithAddresses.length > 0 ? patientsWithAddresses : [])
 				}
 			},
 			error => {
@@ -414,22 +528,60 @@ const fetchPatientListWithAddresses = callback => {
 	})
 }
 
-const insertVisit = (patient_id, address, note, dateList) => {
+const insertVisit = (patient_id, address_id, address_text, note, dateList) => {
+	console.log(`Address_id: ${address_id}`)
+	console.log(`Address_text: ${address_text}`)
+
 	db.transaction(
 		tx => {
-			dateList.forEach(date => {
+			const insertVisitWithAddress = (patient_id, address_id, note, dateList) => {
+				dateList.forEach(date => {
+					tx.executeSql(
+						'INSERT INTO visit (patient_id, address_id, note, date, time_start, time_end) VALUES (?, ?, ?, ?, ?, ?)',
+						[patient_id, address_id, note, date.date, date.timeStart, date.timeEnd],
+						(_, results) => {
+							console.log('Visit data inserted successfully')
+						},
+						error => {
+							console.log('Error inserting Visit data:', error)
+							throw new Error('Insert failed')
+						}
+					)
+				})
+			}
+
+			if (address_id !== null) {
+				insertVisitWithAddress(patient_id, address_id, note, dateList)
+			} else {
+				// Sprawdź, czy istnieje adres o podanym tekście
 				tx.executeSql(
-					'INSERT INTO visit (patient_id, address, note, date, time_start, time_end) VALUES (?, ?, ?, ?, ?, ?)',
-					[patient_id, address, note, date.date, date.timeStart, date.timeEnd],
-					(_, results) => {
-						console.log('Visit data inserted successfully')
+					'SELECT id FROM patient_address WHERE text = ? AND is_deleted = 0',
+					[address_text],
+					(_, { rows }) => {
+						if (rows.length > 0) {
+							const existingAddressId = rows.item(0).id
+							insertVisitWithAddress(patient_id, existingAddressId, note, dateList)
+						} else {
+							// Dodaj nowy adres do bazy danych
+							tx.executeSql(
+								'INSERT INTO patient_address (patient_id, text, is_disposable) VALUES (?, ?, ?)',
+								[patient_id, address_text, 1],
+								(_, { insertId }) => {
+									insertVisitWithAddress(patient_id, insertId, note, dateList)
+								},
+								error => {
+									console.log('Error inserting new Address data:', error)
+									throw new Error('Insert failed')
+								}
+							)
+						}
 					},
 					error => {
-						console.log('Error inserting Visit data:', error)
-						throw new Error('Insert failed')
+						console.log('Error checking existing Address:', error)
+						throw new Error('Transaction failed')
 					}
 				)
-			})
+			}
 		},
 		error => {
 			console.log('Transaction error:', error)
@@ -438,15 +590,60 @@ const insertVisit = (patient_id, address, note, dateList) => {
 	)
 }
 
+// const fetchAllVisits = callback => {
+// 	db.transaction(
+// 		tx => {
+// 			tx.executeSql(
+// 				'SELECT v.id as visitId, v.patient_id, v.address, v.note, v.date, v.time_start, v.time_end, ' +
+// 					'p.full_name ' +
+// 					'FROM visit v ' +
+// 					'LEFT JOIN patients p ON v.patient_id = p.id ' +
+// 					'WHERE v.is_deleted = 0',
+// 				[],
+// 				(_, { rows }) => {
+// 					const data = rows._array
+
+// 					const visits = data.map(current => ({
+// 						id: current.visitId,
+// 						patient_id: current.patient_id,
+// 						address: current.address,
+// 						note: current.note,
+// 						date: current.date,
+// 						time_start: current.time_start,
+// 						time_end: current.time_end,
+// 						patient_full_name: current.full_name,
+// 					}))
+
+// 					if (callback) {
+// 						callback(visits)
+// 					}
+// 				},
+// 				(tx, error) => {
+// 					console.log('Transaction error:', error)
+
+// 					if (callback) {
+// 						callback([], error)
+// 					}
+// 				}
+// 			)
+// 		},
+// 		error => {
+// 			console.log('Transaction error:', error)
+// 			throw new Error('Transaction failed')
+// 		}
+// 	)
+// }
+
 const fetchAllVisits = callback => {
 	db.transaction(
 		tx => {
 			tx.executeSql(
-				'SELECT v.id as visitId, v.patient_id, v.address, v.note, v.date, v.time_start, v.time_end, ' +
-					'p.full_name ' +
+				'SELECT v.id as visitId, v.patient_id, v.address_id, v.note, v.date, v.time_start, v.time_end, ' +
+					'p.full_name, pa.text as addressText ' +
 					'FROM visit v ' +
 					'LEFT JOIN patients p ON v.patient_id = p.id ' +
-					'WHERE 1',
+					'LEFT JOIN patient_address pa ON v.address_id = pa.id ' +
+					'WHERE v.is_deleted = 0',
 				[],
 				(_, { rows }) => {
 					const data = rows._array
@@ -454,7 +651,7 @@ const fetchAllVisits = callback => {
 					const visits = data.map(current => ({
 						id: current.visitId,
 						patient_id: current.patient_id,
-						address: current.address,
+						address: current.addressText,
 						note: current.note,
 						date: current.date,
 						time_start: current.time_start,
@@ -486,42 +683,35 @@ const fetchVisitById = (visitId, callback) => {
 	db.transaction(
 		tx => {
 			tx.executeSql(
-				'SELECT v.id as visitId, v.patient_id, v.address, v.note, v.date, v.time_start, v.time_end, ' +
-					'p.full_name ' +
+				'SELECT v.id as visitId, v.patient_id, v.address_id, v.note, v.date, v.time_start, v.time_end, ' +
+					'p.full_name, pa.text as addressText ' +
 					'FROM visit v ' +
 					'LEFT JOIN patients p ON v.patient_id = p.id ' +
-					'WHERE v.id = ?',
+					'LEFT JOIN patient_address pa ON v.address_id = pa.id ' +
+					'WHERE v.id = ? AND v.is_deleted = 0',
 				[visitId],
 				(_, { rows }) => {
-					const data = rows._array
-
-					if (data.length > 0) {
+					if (rows.length > 0) {
+						const visitData = rows.item(0)
 						const visit = {
-							id: data[0].visitId,
-							patient_id: data[0].patient_id,
-							address: data[0].address,
-							note: data[0].note,
-							date: data[0].date,
-							time_start: data[0].time_start,
-							time_end: data[0].time_end,
-							patient_full_name: data[0].full_name,
+							id: visitData.visitId,
+							patient_id: visitData.patient_id,
+							address_id: visitData.address_id,
+							address: visitData.addressText,
+							note: visitData.note,
+							date: visitData.date,
+							time_start: visitData.time_start,
+							time_end: visitData.time_end,
+							patient_full_name: visitData.full_name,
 						}
-
-						if (callback) {
-							callback(visit)
-						}
+						callback(visit)
 					} else {
-						if (callback) {
-							callback(null, { message: 'Visit not found', code: 'VISIT_NOT_FOUND' })
-						}
+						callback(null, 'Visit not found')
 					}
 				},
 				(tx, error) => {
 					console.log('Transaction error:', error)
-
-					if (callback) {
-						callback(null, error)
-					}
+					callback(null, 'Error fetching visit')
 				}
 			)
 		},
@@ -551,10 +741,11 @@ const fetchAllVisitsThisWeek = callback => {
 	db.transaction(
 		tx => {
 			tx.executeSql(
-				"SELECT v.id as visitId, v.patient_id, v.address, v.note, strftime('%Y-%m-%d', v.date/1000, 'unixepoch') as formattedDate, v.time_start, v.time_end, p.full_name " +
+				"SELECT v.id as visitId, v.patient_id, v.note, strftime('%Y-%m-%d', v.date/1000, 'unixepoch') as formattedDate, v.time_start, v.time_end, p.full_name, pa.text as addressText " +
 					'FROM visit v ' +
 					'LEFT JOIN patients p ON v.patient_id = p.id ' +
-					'WHERE formattedDate BETWEEN ? AND ?',
+					'LEFT JOIN patient_address pa ON v.address_id = pa.id ' +
+					'WHERE formattedDate BETWEEN ? AND ? AND v.is_deleted = 0',
 				[formattedStartOfWeek, formattedEndOfWeek],
 				(_, { rows }) => {
 					const data = rows._array
@@ -562,7 +753,7 @@ const fetchAllVisitsThisWeek = callback => {
 					const visits = data.map(current => ({
 						id: current.visitId,
 						patient_id: current.patient_id,
-						address: current.address,
+						address: current.addressText,
 						note: current.note,
 						date: current.formattedDate,
 						time_start: current.time_start,
@@ -599,10 +790,11 @@ const fetchUpcomingVisits = callback => {
 	db.transaction(
 		tx => {
 			tx.executeSql(
-				"SELECT v.id as visitId, v.patient_id, v.address, v.note, strftime('%Y-%m-%d', v.date/1000, 'unixepoch', 'localtime') as formattedDate, v.time_start, v.time_end, p.full_name " +
+				"SELECT v.id as visitId, v.patient_id, pa.text as addressText, v.note, strftime('%Y-%m-%d', v.date/1000, 'unixepoch', 'localtime') as formattedDate, v.time_start, v.time_end, p.full_name " +
 					'FROM visit v ' +
 					'LEFT JOIN patients p ON v.patient_id = p.id ' +
-					'WHERE formattedDate >= ? ' +
+					'LEFT JOIN patient_address pa ON v.address_id = pa.id ' +
+					'WHERE formattedDate >= ? AND v.is_deleted = 0 ' +
 					'ORDER BY formattedDate ASC ' +
 					'LIMIT 10',
 				[formattedCurrentDate],
@@ -612,7 +804,7 @@ const fetchUpcomingVisits = callback => {
 					const visits = data.map(current => ({
 						id: current.visitId,
 						patient_id: current.patient_id,
-						address: current.address,
+						address: current.addressText,
 						note: current.note,
 						date: current.formattedDate,
 						time_start: current.time_start,
@@ -644,7 +836,7 @@ const deleteVisit = (id, callback) => {
 	db.transaction(
 		tx => {
 			tx.executeSql(
-				'DELETE FROM visit WHERE id = ?',
+				'UPDATE visit SET is_deleted = 1 WHERE id = ?',
 				[id],
 				(_, results) => {
 					if (results.rowsAffected > 0) {
@@ -668,21 +860,21 @@ const deletePatient = (id, callback) => {
 	db.transaction(
 		tx => {
 			tx.executeSql(
-				'DELETE FROM patients WHERE id = ?',
+				'UPDATE patients SET is_deleted = 1 WHERE id = ?',
 				[id],
 				(_, results) => {
 					if (results.rowsAffected > 0) {
 						tx.executeSql(
-							'DELETE FROM patient_problem WHERE patient_id = ?',
+							'UPDATE patient_problem SET is_deleted = 1 WHERE patient_id = ?',
 							[id],
 							(_, results) => {}
 						)
 						tx.executeSql(
-							'DELETE FROM patient_address WHERE patient_id= ?',
+							'UPDATE patient_address SET is_deleted = 1 WHERE patient_id = ?',
 							[id],
 							(_, results) => {}
 						)
-						tx.executeSql('DELETE FROM visit WHERE patient_id = ?', [id], (_, results) => {})
+
 						callback(true)
 					} else {
 						callback(false, '[record not found]')
@@ -706,10 +898,12 @@ const fetchVisitsByDate = (date, callback) => {
 	db.transaction(
 		tx => {
 			tx.executeSql(
-				`SELECT v.id, v.patient_id, v.address, v.note, v.time_start, v.time_end, p.full_name AS patient_name 
+				`SELECT v.id, v.patient_id, v.note, v.time_start, v.time_end, p.full_name AS patient_name,
+				pa.text as addressText 
                 FROM visit v 
                 LEFT JOIN patients p ON v.patient_id = p.id 
-                WHERE v.date BETWEEN ? AND ?`,
+				LEFT JOIN patient_address pa ON v.address_id = pa.id 
+                WHERE v.date BETWEEN ? AND ? AND v.is_deleted = 0`,
 				[startOfDayTimestamp, endOfDayTimestamp],
 				(_, { rows }) => {
 					const data = rows._array
@@ -717,7 +911,7 @@ const fetchVisitsByDate = (date, callback) => {
 						id: current.id,
 						patient_id: current.patient_id,
 						patient_name: current.patient_name,
-						address: current.address,
+						address: current.addressText,
 						note: current.note,
 						time_start: current.time_start,
 						time_end: current.time_end,

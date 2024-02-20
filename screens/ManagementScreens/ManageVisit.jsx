@@ -25,7 +25,7 @@ import {
 	deleteVisit,
 } from '../../services/Database'
 import DateTimePickerModal from 'react-native-modal-datetime-picker'
-import { format } from 'date-fns'
+import { addMinutes, format } from 'date-fns'
 import { ALERT_TYPE, Dialog } from 'react-native-alert-notification'
 import * as SMS from 'expo-sms'
 
@@ -304,7 +304,11 @@ export default function ManageVisit({ route }) {
 									if (visit) {
 										const findPatient = data.find(patient => patient.id === visit.patient_id)
 										setSelectedPatient(findPatient)
-										setPatientLocationInputValue(visit.address)
+
+										setPatientLocationInputValue({
+											id: visit.address_id,
+											text: visit.address,
+										})
 										setNoteInputValue(visit.note)
 
 										setSelectedVisitDate(visit.date)
@@ -341,13 +345,22 @@ export default function ManageVisit({ route }) {
 	const handleSelectDay = day => {
 		const isDateAlreadySelected = selectedDates.some(date => date.date === day.timestamp)
 
+		const VISIT_INTERVAL = 60
+
 		if (!isDateAlreadySelected) {
+			let currentTime = new Date()
+			console.log(currentTime)
+			currentTime.setMinutes(Math.ceil(currentTime.getMinutes() / 30) * 30)
+
 			const newDay = {
 				id: selectedDates.length > 0 ? selectedDates[selectedDates.length - 1].id + 1 : 1,
 				date: day.timestamp,
-				timeStart: new Date(),
-				timeEnd: new Date(),
+				timeStart: new Date(currentTime),
 			}
+
+			let endTime = addMinutes(new Date(newDay.timeStart), VISIT_INTERVAL)
+			newDay.timeEnd = endTime
+
 			const updatedDates = [...selectedDates, newDay]
 			setSelectedDates(updatedDates)
 		} else {
@@ -429,7 +442,8 @@ export default function ManageVisit({ route }) {
 			updateVisit(
 				VISIT_ID,
 				selectedPatient.id,
-				patientLocationInputValue.id ? patientLocationInputValue.text : patientLocationInputValue,
+				patientLocationInputValue.id ? patientLocationInputValue.id : null,
+				patientLocationInputValue.id ? null : patientLocationInputValue,
 				noteInputValue,
 				selectedVisitDate,
 				selectedVisitTimeStart,
@@ -470,7 +484,8 @@ export default function ManageVisit({ route }) {
 			try {
 				insertVisit(
 					selectedPatient.id,
-					patientLocationInputValue.id ? patientLocationInputValue.text : patientLocationInputValue,
+					patientLocationInputValue.id ? patientLocationInputValue.id : null,
+					patientLocationInputValue.id ? null : patientLocationInputValue,
 					noteInputValue,
 					datesWithTimestamps
 				)

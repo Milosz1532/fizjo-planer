@@ -96,17 +96,18 @@ const SelectOnly = props => {
 
 				{isFocused && (
 					<View style={styles.dropDownContainer}>
-						{items.map(item => (
-							<TouchableOpacity key={item.id} onPress={() => handleItemPress(item)}>
-								<View style={styles.dropDownItem}>
-									{renderItem ? (
-										<Text style={styles.dropDownItemText}>{renderItem(item)}</Text>
-									) : (
-										<Text style={styles.dropDownItemText}>{item.name}</Text>
-									)}
-								</View>
-							</TouchableOpacity>
-						))}
+						{items.length > 0 &&
+							items.map(item => (
+								<TouchableOpacity key={item.id} onPress={() => handleItemPress(item)}>
+									<View style={styles.dropDownItem}>
+										{renderItem ? (
+											<Text style={styles.dropDownItemText}>{renderItem(item)}</Text>
+										) : (
+											<Text style={styles.dropDownItemText}>{item.name}</Text>
+										)}
+									</View>
+								</TouchableOpacity>
+							))}
 					</View>
 				)}
 			</View>
