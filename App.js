@@ -1,4 +1,6 @@
 import React, { useEffect, useRef } from 'react'
+import { GestureHandlerRootView } from 'react-native-gesture-handler'
+import { BottomSheetModalProvider } from '@gorhom/bottom-sheet'
 
 import {
 	useFonts,
@@ -45,14 +47,18 @@ export default function App() {
 	}
 
 	return (
-		<NavigationContainer>
-			<AlertNotificationRoot>
-				<EventProvider>
-					<SettingsProvider>
-						<Main />
-					</SettingsProvider>
-				</EventProvider>
-			</AlertNotificationRoot>
-		</NavigationContainer>
+		<GestureHandlerRootView style={{ flex: 1 }}>
+			<NavigationContainer>
+				<AlertNotificationRoot>
+					<EventProvider>
+						<SettingsProvider>
+							<BottomSheetModalProvider>
+								<Main />
+							</BottomSheetModalProvider>
+						</SettingsProvider>
+					</EventProvider>
+				</AlertNotificationRoot>
+			</NavigationContainer>
+		</GestureHandlerRootView>
 	)
 }

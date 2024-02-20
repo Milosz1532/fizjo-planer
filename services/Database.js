@@ -2,7 +2,7 @@ import * as SQLite from 'expo-sqlite'
 import * as DocumentPicker from 'expo-document-picker'
 import * as Sharing from 'expo-sharing'
 import * as FileSystem from 'expo-file-system'
-import { startOfWeek, endOfWeek, format, addDays } from 'date-fns'
+import { startOfWeek, endOfWeek, format, addDays, startOfDay, endOfDay } from 'date-fns'
 import plLocale from 'date-fns/locale/pl'
 import { Platform } from 'react-native'
 
@@ -699,6 +699,48 @@ const deletePatient = (id, callback) => {
 	)
 }
 
+const fetchVisitsByDate = (date, callback) => {
+	const startOfDayTimestamp = startOfDay(date).getTime()
+	const endOfDayTimestamp = endOfDay(date).getTime()
+
+	db.transaction(
+		tx => {
+			tx.executeSql(
+				`SELECT v.id, v.patient_id, v.address, v.note, v.time_start, v.time_end, p.full_name AS patient_name 
+                FROM visit v 
+                LEFT JOIN patients p ON v.patient_id = p.id 
+                WHERE v.date BETWEEN ? AND ?`,
+				[startOfDayTimestamp, endOfDayTimestamp],
+				(_, { rows }) => {
+					const data = rows._array
+					const visits = data.map(current => ({
+						id: current.id,
+						patient_id: current.patient_id,
+						patient_name: current.patient_name,
+						address: current.address,
+						note: current.note,
+						time_start: current.time_start,
+						time_end: current.time_end,
+					}))
+					if (callback) {
+						callback(visits)
+					}
+				},
+				(_, error) => {
+					console.log('Error fetching visits by date:', error)
+					if (callback) {
+						callback([], error)
+					}
+				}
+			)
+		},
+		error => {
+			console.log('Transaction error:', error)
+			throw new Error('Transaction failed')
+		}
+	)
+}
+
 const exportDatabase = async () => {
 	if (Platform.OS === 'android') {
 		const permissions = await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync()
@@ -773,5 +815,6 @@ export {
 	fetchUpcomingVisits,
 	deleteVisit,
 	deletePatient,
+	fetchVisitsByDate,
 	exportDatabase,
 }

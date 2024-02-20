@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react'
+import React, { useState, useMemo, useCallback, useRef } from 'react'
 import {
 	ScrollView,
 	View,
@@ -21,6 +21,7 @@ import {
 	insertVisit,
 	fetchVisitById,
 	updateVisit,
+	fetchVisitsByDate,
 	deleteVisit,
 } from '../../services/Database'
 import DateTimePickerModal from 'react-native-modal-datetime-picker'
@@ -37,6 +38,10 @@ import SelectOnly from '../../components/SelectOnly'
 import Button from '../../components/Button'
 import LoadingScreen from '../../components/LoadingScreen'
 import { useSettings } from '../../SettingsContext'
+
+import { BottomSheetModal, BottomSheetBackdrop } from '@gorhom/bottom-sheet'
+
+import SugestionsDetails from '../../components/ManageVisit/SugestionsDetails'
 
 LocaleConfig.locales['pl'] = {
 	monthNames: [
@@ -114,6 +119,7 @@ const DateComponent = ({
 	timeEnd,
 	selectStartTime,
 	selectEndTime,
+	selectTime,
 	onRemove,
 }) => {
 	const [isDatePickerVisible, setDatePickerVisibility] = useState(false)
@@ -136,6 +142,28 @@ const DateComponent = ({
 
 	const COLORS = useGlobalColors()
 	const styles = generateStyles(COLORS)
+
+	const bottomSheetModalRef = useRef(null)
+
+	const snapPoints = useMemo(() => ['25%', '50%'], [])
+
+	const [details, setDetails] = useState(null)
+
+	const handleSugestionClick = async (time_start, time_end) => {
+		selectTime(id, time_start, time_end)
+		bottomSheetModalRef.current?.close()
+	}
+
+	const handlePresentModalPress = useCallback(() => {
+		fetchVisitsByDate(date, (visits, error) => {
+			setDetails(visits)
+
+			bottomSheetModalRef.current?.present()
+		})
+	}, [])
+
+	const formattedStartTime = format(new Date(timeStart), 'HH:mm')
+	const formattedEndTime = format(new Date(timeEnd), 'HH:mm')
 
 	return (
 		<View style={styles.dateContainer}>
@@ -160,22 +188,27 @@ const DateComponent = ({
 						flexDirection: 'row',
 						alignItems: 'center',
 					}}>
-					<TouchableOpacity onPress={() => setDatePickerVisibility('start')}>
-						<View style={styles.dateTimeButton}>
-							<Text style={styles.dateTimeButtonText}>{`${('0' + timeStart.getHours()).slice(
-								-2
-							)}:${('0' + timeStart.getMinutes()).slice(-2)}`}</Text>
+					<View style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}>
+						<TouchableOpacity onPress={() => setDatePickerVisibility('start')}>
+							<View style={styles.dateTimeButton}>
+								<Text style={styles.dateTimeButtonText}>{formattedStartTime}</Text>
+							</View>
+						</TouchableOpacity>
+						<View style={{ paddingHorizontal: 10 }}>
+							<FontAwesome name={'angle-right'} size={18} color={COLORS.main} />
 						</View>
-					</TouchableOpacity>
+						<TouchableOpacity onPress={() => setDatePickerVisibility('end')}>
+							<View style={styles.dateTimeButton}>
+								<Text style={styles.dateTimeButtonText}>{formattedEndTime}</Text>
+							</View>
+						</TouchableOpacity>
+					</View>
 
-					<View style={{ paddingHorizontal: 20 }}></View>
-					<TouchableOpacity onPress={() => setDatePickerVisibility('end')}>
-						<View style={styles.dateTimeButton}>
-							<Text style={styles.dateTimeButtonText}>{`${('0' + timeEnd.getHours()).slice(-2)}:${(
-								'0' + timeEnd.getMinutes()
-							).slice(-2)}`}</Text>
-						</View>
-					</TouchableOpacity>
+					<View>
+						<TouchableOpacity style={styles.sugestionButton} onPress={handlePresentModalPress}>
+							<Text style={styles.sugestionButtonText}>Sugestie</Text>
+						</TouchableOpacity>
+					</View>
 				</View>
 			</View>
 			{timeStart.getTime() > timeEnd.getTime() && (
@@ -191,6 +224,14 @@ const DateComponent = ({
 				mode='time'
 				onConfirm={handleConfirm}
 				onCancel={hideDatePicker}
+			/>
+
+			<SugestionsDetails
+				bottomSheetModalRef={bottomSheetModalRef}
+				snapPoints={snapPoints}
+				styles={styles}
+				details={details}
+				handleSugestionClick={handleSugestionClick}
 			/>
 		</View>
 	)
@@ -335,6 +376,20 @@ export default function ManageVisit({ route }) {
 				return {
 					...date,
 					timeEnd: selectedTime,
+				}
+			}
+			return date
+		})
+		setSelectedDates(updatedDates)
+	}
+
+	const handleSelectTime = (id, selectedStartTime, selectedEndTime) => {
+		const updatedDates = selectedDates.map(date => {
+			if (date.id === id) {
+				return {
+					...date,
+					timeStart: selectedStartTime,
+					timeEnd: selectedEndTime,
 				}
 			}
 			return date
@@ -656,6 +711,7 @@ export default function ManageVisit({ route }) {
 															date={el.date}
 															selectStartTime={handleStartTime}
 															selectEndTime={handleEndTime}
+															selectTime={handleSelectTime}
 															timeStart={el.timeStart}
 															timeEnd={el.timeEnd}
 															onRemove={handleRemoveDatetime}
@@ -900,5 +956,21 @@ const generateStyles = COLORS =>
 
 		actionRightIcon: {
 			marginEnd: 10,
+		},
+
+		sugestionButton: {
+			flex: 1,
+			flexDirection: 'row',
+			alignItems: 'center',
+			borderRadius: 10,
+			backgroundColor: COLORS.element_color_2,
+		},
+
+		sugestionButtonText: {
+			fontFamily: 'Poppins-Regular',
+			fontSize: 13,
+			color: COLORS.main_text_light_color,
+			paddingHorizontal: 10,
+			paddingVertical: 5,
 		},
 	})
