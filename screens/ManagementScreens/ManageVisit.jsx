@@ -347,8 +347,10 @@ export default function ManageVisit({ route }) {
 
 		const VISIT_INTERVAL = 60
 
+		console.log(day.timestamp)
+
 		if (!isDateAlreadySelected) {
-			let currentTime = new Date()
+			let currentTime = new Date(day.timestamp)
 			console.log(currentTime)
 			currentTime.setMinutes(Math.ceil(currentTime.getMinutes() / 30) * 30)
 
