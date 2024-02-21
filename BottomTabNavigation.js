@@ -1,6 +1,5 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { useNavigation } from '@react-navigation/native'
-
 import { Entypo } from '@expo/vector-icons'
 import FontAwesome from '@expo/vector-icons/FontAwesome5'
 
@@ -12,6 +11,8 @@ import ManageVisit from './screens/ManagementScreens/ManageVisit'
 
 import { useGlobalColors } from './assets/colors'
 import { TouchableOpacity } from 'react-native'
+
+import MoreStackNavigation from './routes/MoreStackNavigation'
 
 const Tab = createBottomTabNavigator()
 
@@ -31,7 +32,7 @@ const BottomTabNavigation = () => {
 		tabBarStyle: {
 			margin: 0,
 			padding: 0,
-			backgroundColor: COLORS.navigation_background
+			backgroundColor: COLORS.navigation_background,
 		},
 	}
 
@@ -112,17 +113,15 @@ const BottomTabNavigation = () => {
 			/>
 			<Tab.Screen
 				name='more'
-				component={MoreScreen}
+				component={MoreStackNavigation}
 				options={{
-					tabBarIcon: ({ focused }) => {
-						return (
-							<Entypo
-								name={'dots-three-horizontal'}
-								size={24}
-								color={focused ? COLORS.nav_element_color : 'gray'}
-							/>
-						)
-					},
+					tabBarIcon: ({ focused }) => (
+						<Entypo
+							name={'dots-three-horizontal'}
+							size={24}
+							color={focused ? COLORS.nav_element_color : 'gray'}
+						/>
+					),
 				}}
 			/>
 		</Tab.Navigator>

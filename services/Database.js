@@ -414,7 +414,7 @@ const fetchPatientData = (patientId, callback) => {
 								)
 								patientData.visits.push({
 									id: current.visitId,
-									address: visitAddress ? visitAddress.addressText : null, // Dodaj adres wizyty
+									address: visitAddress ? visitAddress.addressText : null,
 									note: current.visitNote,
 									date: current.visitDate,
 									time_start: current.visitTimeStart,

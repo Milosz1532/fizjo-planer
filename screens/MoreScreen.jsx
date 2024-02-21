@@ -23,6 +23,7 @@ import UserProfile from '../components/MoreScreen/UserProfile'
 import SettingsItem from '../components/MoreScreen/SettingsItem'
 import ToggleSettingsItem from '../components/MoreScreen/ToggleSettingsItem'
 import { exportDatabase } from '../services/Database'
+import { useNavigation } from '@react-navigation/native'
 
 export default function MoreScreen() {
 	const { settings, updateSetting } = useSettings()
@@ -31,6 +32,8 @@ export default function MoreScreen() {
 
 	const appState = useRef(AppState.currentState)
 	const [appStateVisible, setAppStateVisible] = useState(appState.current)
+
+	const { navigate } = useNavigation()
 
 	useEffect(() => {
 		const subscription = AppState.addEventListener('change', nextAppState => {
@@ -98,13 +101,11 @@ export default function MoreScreen() {
 						<Text style={[globalStyles.containerMediumText, { marginTop: 20 }]}>
 							Ustawienia konta
 						</Text>
-						<SettingsItem
-							icon={{ name: 'envelope', backgroundColor: COLORS.element_color_3 }}
-							label='Zmiana adresu e-mail'
-						/>
+
 						<SettingsItem
 							icon={{ name: 'user-circle-o', backgroundColor: COLORS.warning_color }}
 							label='Zmiana danych konta'
+							onPress={() => navigate('ChangePersonalData')}
 						/>
 
 						<Text style={[globalStyles.containerMediumText, { marginTop: 20 }]}>
@@ -114,7 +115,7 @@ export default function MoreScreen() {
 							icon={{ name: 'bell', backgroundColor: COLORS.element_color_2 }}
 							label='Powiadomienia'
 							initialValue={notificationsEnabled}
-							onToggle={toggleNotifications} // Ustaw funkcję obsługującą zmianę stanu suwaka
+							onToggle={toggleNotifications}
 						/>
 						<ToggleSettingsItem
 							icon={{ name: 'moon-o', backgroundColor: COLORS.element_color_6 }}
@@ -127,8 +128,9 @@ export default function MoreScreen() {
 							label='Zgłoś błąd aplikacji'
 						/>
 						<SettingsItem
-							icon={{ name: 'language', backgroundColor: COLORS.primary }}
-							label='Język aplikacji'
+							icon={{ name: 'info-circle', backgroundColor: COLORS.primary }}
+							label='O aplikacji'
+							onPress={() => navigate('AboutApp')}
 						/>
 
 						<Button title='test' onPress={handleExportDb}></Button>

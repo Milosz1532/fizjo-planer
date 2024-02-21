@@ -1,5 +1,5 @@
 import React from 'react'
-import { View, Text, StyleSheet } from 'react-native'
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native'
 import { FontAwesome } from '@expo/vector-icons'
 import { useGlobalColors } from '../../assets/colors'
 
@@ -18,6 +18,7 @@ export default function SettingsItem({ icon, label, onPress }) {
 		settingsItemIconContainer: {
 			padding: 8,
 			borderRadius: 8,
+			width: 30,
 		},
 		settingsItemIcon: {
 			fontSize: 15,
@@ -36,7 +37,7 @@ export default function SettingsItem({ icon, label, onPress }) {
 	})
 
 	return (
-		<View style={styles.settingsItemContainer}>
+		<TouchableOpacity style={styles.settingsItemContainer} onPress={onPress}>
 			<View style={[styles.settingsItemIconContainer, { backgroundColor: icon.backgroundColor }]}>
 				<FontAwesome name={icon.name} style={styles.settingsItemIcon} />
 			</View>
@@ -44,6 +45,6 @@ export default function SettingsItem({ icon, label, onPress }) {
 			<View style={styles.settingsItemArrowIconContainer}>
 				<FontAwesome name='angle-right' size={18} color={COLORS.tab_gray_element_color} />
 			</View>
-		</View>
+		</TouchableOpacity>
 	)
 }

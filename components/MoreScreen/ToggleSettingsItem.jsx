@@ -19,6 +19,7 @@ export default ToggleSettingsItem = ({ icon, label, initialValue, onToggle }) =>
 		toggleSettingsItemIconContainer: {
 			padding: 8,
 			borderRadius: 8,
+			width: 30,
 		},
 		toggleSettingsItemIcon: {
 			fontSize: 15,
