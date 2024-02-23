@@ -305,6 +305,7 @@ export default function ManagePatient({ route }) {
 					<ScrollView
 						style={[globalStyles.screenContainer]}
 						ref={scrollViewRef}
+						keyboardShouldPersistTaps='handled'
 						contentContainerStyle={{
 							flexGrow: 1,
 							justifyContent: 'space-between',

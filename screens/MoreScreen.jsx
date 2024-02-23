@@ -1,23 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react'
-import {
-	AppState,
-	ScrollView,
-	View,
-	Text,
-	StyleSheet,
-	Button,
-	Linking,
-	Platform,
-} from 'react-native'
-import { FontAwesome } from '@expo/vector-icons'
+import { AppState, ScrollView, View, Text, Button, Linking, Platform } from 'react-native'
 import { useGlobalStyles } from '../assets/styles'
 import { useGlobalColors } from '../assets/colors'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { StatusBar } from 'expo-status-bar'
 import { useSettings } from '../SettingsContext'
-import ToggleSwitch from 'toggle-switch-react-native'
 import { checkNotificationPermissions } from '../services/NotificationService'
 import { useFocusEffect } from '@react-navigation/native'
+import { ALERT_TYPE, Dialog } from 'react-native-alert-notification'
 
 import UserProfile from '../components/MoreScreen/UserProfile'
 import SettingsItem from '../components/MoreScreen/SettingsItem'
@@ -86,6 +76,50 @@ export default function MoreScreen() {
 		exportDatabase()
 	}
 
+	const submitErrorRaport = async () => {
+		const recipient = '11923@puz.wloclawek.pl'
+		const subject = 'Zgłoszenie błędu aplikacji Fizjo-Planer'
+		const body = `
+		Zgłaszam błąd w aplikacji fizjo-planer:
+		
+		Typ błędu: [Tutaj wpisz typ błędu, np. "Błąd wyświetlania grafiku"]
+		
+		Opis:
+		[Opisz tutaj, co się stało, jakie błędy zostały zauważone lub jakie zachowanie aplikacji było nieprawidłowe]
+		
+		Kroki do odtworzenia błędu:
+		1. [Pierwszy krok, np. "Włączanie aplikacji]
+		2. [Drugi krok, np. "Przejdź do sekcji kalendarza"]
+		3. [Następny krok, np. "Kliknięcie w starszą wizytę powoduje wyłączenie aplikacji"]
+		4. [Jeśli jest to możliwe, podaj dodatkowe kroki, które prowadzą do wystąpienia błędu]
+		
+		Dodatkowe informacje:
+		- Wersja aplikacji: [Tutaj podaj wersję aplikacji, jeśli jest to możliwe]
+		- Urządzenie: [Podaj nazwę urządzenia, na którym wystąpił błąd, np. "iPhone X"]
+		- System operacyjny: [Podaj wersję systemu operacyjnego, np. "iOS 15.2"]
+		
+		Dziękuję za zgłoszenie błędu.
+		`
+
+		const url = `mailto:${recipient}?subject=${encodeURIComponent(
+			subject
+		)}&body=${encodeURIComponent(body)}`
+
+		try {
+			await Linking.openURL(url)
+		} catch (error) {
+			Dialog.show({
+				type: ALERT_TYPE.DANGER,
+				title: 'Błąd',
+				textBody: `Nie można otworzyć aplikacji poczty e-mail`,
+				button: 'OK',
+				onPressButton: () => {
+					Dialog.hide()
+				},
+			})
+		}
+	}
+
 	return (
 		<View style={{ flex: 1, backgroundColor: COLORS.main }}>
 			<StatusBar style='dark' />
@@ -126,6 +160,7 @@ export default function MoreScreen() {
 						<SettingsItem
 							icon={{ name: 'bug', backgroundColor: COLORS.element_color_5 }}
 							label='Zgłoś błąd aplikacji'
+							onPress={() => submitErrorRaport()}
 						/>
 						<SettingsItem
 							icon={{ name: 'info-circle', backgroundColor: COLORS.primary }}
