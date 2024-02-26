@@ -12,7 +12,7 @@ import { ALERT_TYPE, Dialog } from 'react-native-alert-notification'
 import UserProfile from '../components/MoreScreen/UserProfile'
 import SettingsItem from '../components/MoreScreen/SettingsItem'
 import ToggleSettingsItem from '../components/MoreScreen/ToggleSettingsItem'
-import { exportDatabase } from '../services/Database'
+import { exportDatabase, importDatabase } from '../services/Database'
 import { useNavigation } from '@react-navigation/native'
 
 export default function MoreScreen() {
@@ -72,10 +72,6 @@ export default function MoreScreen() {
 		}
 	}
 
-	const handleExportDb = () => {
-		exportDatabase()
-	}
-
 	const submitErrorRaport = async () => {
 		const recipient = '11923@puz.wloclawek.pl'
 		const subject = 'Zgłoszenie błędu aplikacji Fizjo-Planer'
@@ -131,17 +127,14 @@ export default function MoreScreen() {
 
 					<ScrollView style={globalStyles.roundedContainer}>
 						<UserProfile />
-
 						<Text style={[globalStyles.containerMediumText, { marginTop: 20 }]}>
 							Ustawienia konta
 						</Text>
-
 						<SettingsItem
 							icon={{ name: 'user-circle-o', backgroundColor: COLORS.warning_color }}
 							label='Zmiana danych konta'
 							onPress={() => navigate('ChangePersonalData')}
 						/>
-
 						<Text style={[globalStyles.containerMediumText, { marginTop: 20 }]}>
 							Ustawienia ogólne
 						</Text>
@@ -167,8 +160,19 @@ export default function MoreScreen() {
 							label='O aplikacji'
 							onPress={() => navigate('AboutApp')}
 						/>
-
-						<Button title='test' onPress={handleExportDb}></Button>
+						<Text style={[globalStyles.containerMediumText, { marginTop: 20 }]}>
+							Dane aplikacji
+						</Text>
+						<SettingsItem
+							icon={{ name: 'cloud-download', backgroundColor: COLORS.element_color_1 }}
+							label='Eksportuj bazę danych'
+							onPress={() => exportDatabase()}
+						/>
+						<SettingsItem
+							icon={{ name: 'cloud-upload', backgroundColor: COLORS.element_color_4 }}
+							label='Importuj bazę danych'
+							onPress={() => importDatabase()}
+						/>
 					</ScrollView>
 				</View>
 			</SafeAreaView>

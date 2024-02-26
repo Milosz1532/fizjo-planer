@@ -18,10 +18,12 @@ export default function SettingsItem({ icon, label, onPress }) {
 		settingsItemIconContainer: {
 			padding: 8,
 			borderRadius: 8,
-			width: 30,
+			width: 35,
+			justifyContent: 'center',
+			alignItems: 'center',
 		},
 		settingsItemIcon: {
-			fontSize: 15,
+			fontSize: 16,
 			color: 'white',
 		},
 		settingsItemText: {

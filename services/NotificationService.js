@@ -63,8 +63,6 @@ async function checkNotificationPermissions() {
 	let hasPermission = false
 	if (Platform.OS !== 'web') {
 		const { status: existingStatus } = await Notifications.getPermissionsAsync()
-		console.log(existingStatus)
-
 		if (existingStatus === 'granted') {
 			hasPermission = true
 		}

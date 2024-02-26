@@ -14,6 +14,7 @@
 		"assetBundlePatterns": ["**/*"],
 		"ios": {
 			"supportsTablet": true,
+			"usesIcloudStorage": true,
 			"bundleIdentifier": "com.milosz1532.fizjoplaner",
 			"permissions": ["BACKGROUND_FETCH"],
 			"infoPlist": {
@@ -35,6 +36,14 @@
 			"eas": {
 				"projectId": "acaa0265-6f1e-4e66-a4ef-87bafa739638"
 			}
-		}
+		},
+		"plugins": [
+			[
+				"expo-document-picker",
+				{
+					"iCloudContainerEnvironment": "Development"
+				}
+			]
+		]
 	}
 }

@@ -2,11 +2,12 @@ import * as SQLite from 'expo-sqlite'
 import * as DocumentPicker from 'expo-document-picker'
 import * as Sharing from 'expo-sharing'
 import * as FileSystem from 'expo-file-system'
-import { startOfWeek, endOfWeek, format, addDays, startOfDay, endOfDay } from 'date-fns'
+import { startOfWeek, addDays, startOfDay, endOfDay } from 'date-fns'
 import plLocale from 'date-fns/locale/pl'
 import { Platform } from 'react-native'
+import { ALERT_TYPE, Dialog } from 'react-native-alert-notification'
 
-const db = SQLite.openDatabase('fp_sqlite', '1.0')
+const db = SQLite.openDatabase('fp_sqlite.db', '1.0')
 
 const initDatabase = () => {
 	db.transaction(tx => {
@@ -59,34 +60,6 @@ const initDatabase = () => {
 		)
 	})
 }
-
-// const updateVisit = (visit_id, patient_id, address, note, date, time_start, time_end, callback) => {
-// 	db.transaction(
-// 		tx => {
-// 			tx.executeSql(
-// 				'UPDATE visit SET patient_id = ?, address = ?, note = ?, date = ?, time_start = ?, time_end = ? WHERE id = ?',
-// 				[patient_id, address, note, date, time_start, time_end, visit_id],
-// 				(_, results) => {
-// 					if (results.rowsAffected > 0) {
-// 						console.log('Visit data updated successfully')
-// 						callback({ success: true, message: 'Visit data updated successfully' })
-// 					} else {
-// 						console.log('No rows updated')
-// 						callback({ success: false, message: 'No rows updated' })
-// 					}
-// 				},
-// 				(tx, error) => {
-// 					console.log('Error updating visit data:', error)
-// 					callback({ success: false, message: 'Error updating visit data' })
-// 				}
-// 			)
-// 		},
-// 		error => {
-// 			console.log('Transaction error:', error)
-// 			callback({ success: false, message: 'Transaction failed' })
-// 		}
-// 	)
-// }
 
 const updateVisit = (
 	visit_id,
@@ -590,50 +563,6 @@ const insertVisit = (patient_id, address_id, address_text, note, dateList) => {
 	)
 }
 
-// const fetchAllVisits = callback => {
-// 	db.transaction(
-// 		tx => {
-// 			tx.executeSql(
-// 				'SELECT v.id as visitId, v.patient_id, v.address, v.note, v.date, v.time_start, v.time_end, ' +
-// 					'p.full_name ' +
-// 					'FROM visit v ' +
-// 					'LEFT JOIN patients p ON v.patient_id = p.id ' +
-// 					'WHERE v.is_deleted = 0',
-// 				[],
-// 				(_, { rows }) => {
-// 					const data = rows._array
-
-// 					const visits = data.map(current => ({
-// 						id: current.visitId,
-// 						patient_id: current.patient_id,
-// 						address: current.address,
-// 						note: current.note,
-// 						date: current.date,
-// 						time_start: current.time_start,
-// 						time_end: current.time_end,
-// 						patient_full_name: current.full_name,
-// 					}))
-
-// 					if (callback) {
-// 						callback(visits)
-// 					}
-// 				},
-// 				(tx, error) => {
-// 					console.log('Transaction error:', error)
-
-// 					if (callback) {
-// 						callback([], error)
-// 					}
-// 				}
-// 			)
-// 		},
-// 		error => {
-// 			console.log('Transaction error:', error)
-// 			throw new Error('Transaction failed')
-// 		}
-// 	)
-// }
-
 const fetchAllVisits = callback => {
 	db.transaction(
 		tx => {
@@ -936,61 +865,97 @@ const fetchVisitsByDate = (date, callback) => {
 }
 
 const exportDatabase = async () => {
+	let status = {
+		state: ALERT_TYPE.DANGER,
+		value: 'Wystąpił błąd poczas zapisu pliku bazy danych. Spróbuj ponownie później.',
+	}
 	if (Platform.OS === 'android') {
 		const permissions = await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync()
 		if (permissions.granted) {
 			const base64 = await FileSystem.readAsStringAsync(
 				FileSystem.documentDirectory + 'SQLite/fp_sqlite.db',
-				{
-					encoding: FileSystem.EncodingType.Base64,
-				}
+				{ encoding: FileSystem.EncodingType.Base64 }
 			)
 
 			await FileSystem.StorageAccessFramework.createFileAsync(
 				permissions.directoryUri,
-				'fp_sqlite.db',
+				'Baza_danych_fizjo-planer.db',
 				'application/octet-stream'
 			)
 				.then(async uri => {
+					console.log('File created at:', uri) // Dodaj ten log
+
 					await FileSystem.writeAsStringAsync(uri, base64, {
 						encoding: FileSystem.EncodingType.Base64,
 					})
+					status = {
+						state: ALERT_TYPE.SUCCESS,
+						value: 'Plik z bazą danych został pomyślnie zapisany w pamięci telefonu.',
+					}
 				})
-				.catch(e => console.log(e))
+				.catch(e => console.log('Error while creating file:', e)) // Dodaj ten log
 		} else {
-			console.log(`Permission not granted`)
+			status.value = 'Plik z bazą danych nie został zapisany z powodu odmowy dostępu.'
 		}
 	} else {
 		await Sharing.shareAsync(FileSystem.documentDirectory + 'fp_sqlite.db')
 	}
+
+	Dialog.show({
+		type: status.state,
+		title: 'Zapis bazy danych',
+		textBody: status.value,
+		button: 'OK',
+		onPressButton: () => {
+			Dialog.hide()
+		},
+	})
 }
 
 const importDatabase = async () => {
+	let status = {
+		state: ALERT_TYPE.DANGER,
+		value: 'Wystąpił błąd poczas odczytu pliku bazy danych. Spróbuj ponownie później.',
+	}
+
 	let result = await DocumentPicker.getDocumentAsync({
 		copyToCacheDirectory: true,
 	})
 
-	if (result.type === 'success') {
-		console.log('Wczytuje')
-
+	if (result.assets) {
 		if (!(await FileSystem.getInfoAsync(FileSystem.documentDirectory + 'SQLite')).exists) {
 			await FileSystem.makeDirectoryAsync(FileSystem.documentDirectory + 'SQLite')
 		}
+
+		const base64 = await FileSystem.readAsStringAsync(result.assets[0].uri, {
+			encoding: FileSystem.EncodingType.Base64,
+		})
+
+		await FileSystem.writeAsStringAsync(
+			FileSystem.documentDirectory + 'SQLite/fp_sqlite.db',
+			base64,
+			{
+				encoding: FileSystem.EncodingType.Base64,
+			}
+		)
+		initDatabase()
+		status = {
+			state: ALERT_TYPE.SUCCESS,
+			value: 'Baza danych została pomyślnie wczytana do aplikacji',
+		}
+	} else {
+		status.value = 'Wybrany plik nie jest bazą danych fizjo-planer'
 	}
 
-	const base64 = await FileSystem.readAsStringAsync(result.uri, {
-		encoding: FileSystem.EncodingType.Base64,
+	Dialog.show({
+		type: status.state,
+		title: 'Odczyt bazy danych',
+		textBody: status.value,
+		button: 'OK',
+		onPressButton: () => {
+			Dialog.hide()
+		},
 	})
-
-	await FileSystem.writeAsStringAsync(
-		FileSystem.documentDirectory + 'SQLite/fp_sqlite.db',
-		base64,
-		{
-			encoding: FileSystem.EncodingType.Base64,
-		}
-	)
-	await db.closeAsync()
-	//setDb(SQLite.openDatabase('example.db'))
 }
 
 export {
@@ -1011,4 +976,5 @@ export {
 	deletePatient,
 	fetchVisitsByDate,
 	exportDatabase,
+	importDatabase,
 }
