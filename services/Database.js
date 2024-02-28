@@ -864,11 +864,14 @@ const fetchVisitsByDate = (date, callback) => {
 	)
 }
 
+const DATABASE_KEY = 'RklaSk8tUExBTkVSLURBVEFCQVNF'
+
 const exportDatabase = async () => {
 	let status = {
 		state: ALERT_TYPE.DANGER,
 		value: 'Wystąpił błąd poczas zapisu pliku bazy danych. Spróbuj ponownie później.',
 	}
+
 	if (Platform.OS === 'android') {
 		const permissions = await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync()
 		if (permissions.granted) {
@@ -877,15 +880,16 @@ const exportDatabase = async () => {
 				{ encoding: FileSystem.EncodingType.Base64 }
 			)
 
+			const databaseWithHeader = DATABASE_KEY + '\n' + base64
+
 			await FileSystem.StorageAccessFramework.createFileAsync(
 				permissions.directoryUri,
 				'Baza_danych_fizjo-planer.db',
 				'application/octet-stream'
 			)
 				.then(async uri => {
-					console.log('File created at:', uri) // Dodaj ten log
-
-					await FileSystem.writeAsStringAsync(uri, base64, {
+					console.log('File created at:', uri)
+					await FileSystem.writeAsStringAsync(uri, databaseWithHeader, {
 						encoding: FileSystem.EncodingType.Base64,
 					})
 					status = {
@@ -893,7 +897,7 @@ const exportDatabase = async () => {
 						value: 'Plik z bazą danych został pomyślnie zapisany w pamięci telefonu.',
 					}
 				})
-				.catch(e => console.log('Error while creating file:', e)) // Dodaj ten log
+				.catch(e => console.log('Error while creating file:', e))
 		} else {
 			status.value = 'Plik z bazą danych nie został zapisany z powodu odmowy dostępu.'
 		}
@@ -915,7 +919,7 @@ const exportDatabase = async () => {
 const importDatabase = async () => {
 	let status = {
 		state: ALERT_TYPE.DANGER,
-		value: 'Wystąpił błąd poczas odczytu pliku bazy danych. Spróbuj ponownie później.',
+		value: 'Wystąpił błąd podczas odczytu pliku bazy danych. Spróbuj ponownie później.',
 	}
 
 	let result = await DocumentPicker.getDocumentAsync({
@@ -931,20 +935,25 @@ const importDatabase = async () => {
 			encoding: FileSystem.EncodingType.Base64,
 		})
 
-		await FileSystem.writeAsStringAsync(
-			FileSystem.documentDirectory + 'SQLite/fp_sqlite.db',
-			base64,
-			{
-				encoding: FileSystem.EncodingType.Base64,
+		// Check if the file contains the correct header
+		const data = base64.slice(0, DATABASE_KEY.length)
+		if (data === DATABASE_KEY) {
+			const contentWithoutHeader = base64.slice(DATABASE_KEY.length)
+			await FileSystem.writeAsStringAsync(
+				FileSystem.documentDirectory + 'SQLite/fp_sqlite.db',
+				contentWithoutHeader,
+				{
+					encoding: FileSystem.EncodingType.Base64,
+				}
+			)
+			initDatabase()
+			status = {
+				state: ALERT_TYPE.SUCCESS,
+				value: 'Baza danych została pomyślnie wczytana do aplikacji',
 			}
-		)
-		initDatabase()
-		status = {
-			state: ALERT_TYPE.SUCCESS,
-			value: 'Baza danych została pomyślnie wczytana do aplikacji',
+		} else {
+			status.value = 'Wybrany plik nie jest bazą danych fizjo-planer'
 		}
-	} else {
-		status.value = 'Wybrany plik nie jest bazą danych fizjo-planer'
 	}
 
 	Dialog.show({

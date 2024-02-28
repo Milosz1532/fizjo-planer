@@ -25,7 +25,6 @@
     "expo": "~49.0.15",
     "expo-asset": "~8.10.1",
     "expo-background-fetch": "~11.3.0",
-    "expo-crypto": "^12.8.1",
     "expo-device": "~5.4.0",
     "expo-document-picker": "~11.5.4",
     "expo-file-system": "~15.4.5",
