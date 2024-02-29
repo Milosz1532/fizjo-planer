@@ -258,57 +258,98 @@ const updatePatient = (
 				}
 			)
 
+			// Update problems
 			tx.executeSql(
-				'DELETE FROM patient_problem WHERE patient_id = ?',
+				'SELECT id FROM patient_problem WHERE patient_id = ?',
 				[patientId],
-				(_, results) => {
-					console.log('Deleted old problems successfully')
+				(_, { rows }) => {
+					const currentProblems = rows._array.map(problem => problem.id)
+
+					currentProblems.forEach(problemId => {
+						const foundProblem = updatedProblems.find(problem => problem.id === problemId)
+						if (!foundProblem) {
+							tx.executeSql(
+								'UPDATE patient_problem SET is_deleted = 1 WHERE id = ?',
+								[problemId],
+								(_, results) => {
+									console.log('Problem marked as deleted:', problemId)
+								},
+								error => {
+									console.log('Error marking problem as deleted:', error)
+									throw new Error('Update failed')
+								}
+							)
+						}
+					})
+
+					// Insert new problems
+					updatedProblems.forEach(problem => {
+						if (!currentProblems.includes(problem.id)) {
+							tx.executeSql(
+								'INSERT INTO patient_problem (patient_id, text) VALUES (?, ?)',
+								[patientId, problem.text],
+								(_, results) => {
+									console.log('New problem inserted successfully:', results.insertId)
+								},
+								error => {
+									console.log('Error inserting new problem:', error)
+									throw new Error('Update failed')
+								}
+							)
+						}
+					})
 				},
 				error => {
-					console.log('Error deleting old problems:', error)
+					console.log('Error retrieving current problems:', error)
 					throw new Error('Update failed')
 				}
 			)
 
-			updatedProblems.forEach(problem => {
-				tx.executeSql(
-					'INSERT INTO patient_problem (patient_id, text) VALUES (?, ?)',
-					[patientId, problem.text],
-					(_, results) => {
-						console.log('Problem data inserted successfully')
-					},
-					error => {
-						console.log('Error inserting Problem data:', error)
-						throw new Error('Update failed')
-					}
-				)
-			})
-
 			tx.executeSql(
-				'DELETE FROM patient_address WHERE patient_id = ?',
+				'SELECT id FROM patient_address WHERE patient_id = ?',
 				[patientId],
-				(_, results) => {
-					console.log('Deleted old addresses successfully')
+				(_, { rows }) => {
+					const currentAddresses = rows._array.map(address => address.id)
+
+					currentAddresses.forEach(addressId => {
+						const foundAddress = updatedAddresses.find(address => address.id === addressId)
+						if (!foundAddress) {
+							tx.executeSql(
+								'UPDATE patient_address SET is_deleted = 1 WHERE id = ?',
+								[addressId],
+								(_, results) => {
+									console.log('Address marked as deleted:', addressId)
+								},
+								error => {
+									console.log('Error marking address as deleted:', error)
+									throw new Error('Update failed')
+								}
+							)
+						}
+					})
+
+					// Insert new addresses
+					updatedAddresses.forEach(address => {
+						if (!currentAddresses.includes(address.id)) {
+							tx.executeSql(
+								'INSERT INTO patient_address (patient_id, text) VALUES (?, ?)',
+								[patientId, address.text],
+								(_, results) => {
+									console.log('New address inserted successfully:', results.insertId)
+								},
+								error => {
+									console.log('Error inserting new address:', error)
+									throw new Error('Update failed')
+								}
+							)
+						}
+					})
 				},
 				error => {
-					console.log('Error deleting old addresses:', error)
+					console.log('Error retrieving current addresses:', error)
 					throw new Error('Update failed')
 				}
 			)
-
-			updatedAddresses.forEach(address => {
-				tx.executeSql(
-					'INSERT INTO patient_address (patient_id, text) VALUES (?, ?)',
-					[patientId, address.text],
-					(_, results) => {
-						console.log('Address data inserted successfully')
-					},
-					error => {
-						console.log('Error inserting Address data:', error)
-						throw new Error('Update failed')
-					}
-				)
-			})
 		},
 		error => {
 			console.log('Transaction error:', error)
