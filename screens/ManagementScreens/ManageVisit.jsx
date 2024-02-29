@@ -145,7 +145,7 @@ const DateComponent = ({
 
 	const bottomSheetModalRef = useRef(null)
 
-	const snapPoints = useMemo(() => ['25%', '50%'], [])
+	const snapPoints = useMemo(() => ['50%'], [])
 
 	const [details, setDetails] = useState(null)
 
@@ -302,8 +302,12 @@ export default function ManageVisit({ route }) {
 									})
 								} else {
 									if (visit) {
-										const findPatient = data.find(patient => patient.id === visit.patient_id)
-										setSelectedPatient(findPatient)
+										if (visit.patient_is_deleted) {
+											setSelectedPatient({ full_name: visit.patient_full_name })
+										} else {
+											const findPatient = data.find(patient => patient.id === visit.patient_id)
+											setSelectedPatient(findPatient)
+										}
 
 										setPatientLocationInputValue({
 											id: visit.address_id,
@@ -347,11 +351,8 @@ export default function ManageVisit({ route }) {
 
 		const VISIT_INTERVAL = 60
 
-		console.log(day.timestamp)
-
 		if (!isDateAlreadySelected) {
 			let currentTime = new Date(day.timestamp)
-			console.log(currentTime)
 			currentTime.setMinutes(Math.ceil(currentTime.getMinutes() / 30) * 30)
 
 			const newDay = {
@@ -664,7 +665,7 @@ export default function ManageVisit({ route }) {
 										<View style={{ marginTop: 20 }}>
 											<SelectField
 												label='Lokalizacja'
-												items={selectedPatient.addresses}
+												items={selectedPatient?.addresses || []}
 												editable={selectedPatient ? true : false}
 												value={
 													patientLocationInputValue.id

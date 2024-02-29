@@ -34,11 +34,7 @@ export default function Slider({
 				<Text style={styles.sliderTitle}>{title}</Text>
 				<Text style={styles.sliderSubTitle}>{description}</Text>
 
-				<TextField
-					value={''}
-					label='Imię i Nazwisko'
-					onChangeText={text => console.log(`object`)}
-				/>
+				<TextField value={''} label='Imię i Nazwisko' />
 
 				<View
 					style={[

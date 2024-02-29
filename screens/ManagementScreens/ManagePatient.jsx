@@ -9,6 +9,7 @@ import {
 	KeyboardAvoidingView,
 	Keyboard,
 	Alert,
+	TouchableWithoutFeedback,
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { StatusBar } from 'expo-status-bar'
@@ -74,6 +75,9 @@ export default function ManagePatient({ route }) {
 
 	const scrollViewRef = useRef(null)
 
+	const addProblemRef = useRef(null)
+	const addLocationRef = useRef(null)
+
 	const fetchData = async () => {
 		setIsLoading(true)
 		try {
@@ -93,7 +97,7 @@ export default function ManagePatient({ route }) {
 				}, {})
 				setPatientData({ ...result, groupedVisits })
 				setFullName(result.full_name)
-				setBirthday(new Date(result.date_of_birth))
+				setBirthday(result.date_of_birth ? new Date(result.date_of_birth) : null)
 				setPhoneNumber(result.phone_number)
 				setNote(result.note)
 				setProblemList(result.problems)
@@ -176,7 +180,7 @@ export default function ManagePatient({ route }) {
 	}
 
 	const handleAddPatient = () => {
-		if (fullName.trim().length === 0 || !birthday || phoneNumber.trim().length === 0) {
+		if (fullName.trim().length === 0 || phoneNumber.trim().length === 0) {
 			Dialog.show({
 				type: ALERT_TYPE.DANGER,
 				title: 'Problem',
@@ -191,7 +195,7 @@ export default function ManagePatient({ route }) {
 				updatePatient(
 					PATIENT_ID,
 					fullName,
-					birthday.getTime(),
+					birthday ? birthday.getTime() : null,
 					phoneNumber,
 					note,
 					problemList,
@@ -217,7 +221,14 @@ export default function ManagePatient({ route }) {
 			}
 		} else {
 			try {
-				insertPatient(fullName, birthday.getTime(), phoneNumber, note, problemList, locationList)
+				insertPatient(
+					fullName,
+					birthday ? birthday.getTime() : null,
+					phoneNumber,
+					note,
+					problemList,
+					locationList
+				)
 				Dialog.show({
 					type: ALERT_TYPE.SUCCESS,
 					title: 'Success',
@@ -395,16 +406,20 @@ export default function ManagePatient({ route }) {
 												))}
 
 												<View style={styles.addProblemContainer}>
-													<View style={styles.addProblemIcon}>
-														<FontAwesome
-															name={'plus'}
-															size={12}
-															color={COLORS.main_text_light_color}
-														/>
-													</View>
+													<TouchableWithoutFeedback onPress={() => addProblemRef.current.focus()}>
+														<View style={styles.addProblemIcon}>
+															<FontAwesome
+																name={'plus'}
+																size={12}
+																color={COLORS.main_text_light_color}
+															/>
+														</View>
+													</TouchableWithoutFeedback>
 													<TextInput
 														value={addProblemValue}
+														ref={addProblemRef}
 														style={styles.addProblemInput}
+														onBlur={handleAddNewProblem}
 														placeholder='Wprowadź problem...'
 														placeholderTextColor={COLORS.placeholder_color}
 														onChangeText={text => setAddProblemValue(text)}
@@ -435,21 +450,26 @@ export default function ManagePatient({ route }) {
 												))}
 
 												<View style={styles.addProblemContainer}>
-													<View style={styles.addProblemIcon}>
-														<FontAwesome
-															name={'plus'}
-															size={12}
-															color={COLORS.main_text_light_color}
-														/>
-													</View>
+													<TouchableWithoutFeedback onPress={() => addLocationRef.current.focus()}>
+														<View style={styles.addProblemIcon}>
+															<FontAwesome
+																name={'plus'}
+																size={12}
+																color={COLORS.main_text_light_color}
+															/>
+														</View>
+													</TouchableWithoutFeedback>
+
 													<TextInput
 														value={addLocationValue}
+														ref={addLocationRef}
 														style={styles.addProblemInput}
 														placeholder='Wprowadź lokalizcje...'
 														placeholderTextColor={COLORS.placeholder_color}
 														autoComplete='street-address'
 														onChangeText={text => setAddLocationValue(text)}
 														onSubmitEditing={handleAddNewLocation}
+														onBlur={handleAddNewLocation}
 														maxLength={40}
 														blurOnSubmit={false}
 													/>

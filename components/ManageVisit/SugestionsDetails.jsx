@@ -5,7 +5,7 @@ import { View, Text, ScrollView, StyleSheet } from 'react-native'
 import SugestionVisit from './SugestionVisit'
 import ScheduledVisit from './ScheduledVisit'
 
-import { BottomSheetModal, BottomSheetBackdrop } from '@gorhom/bottom-sheet'
+import { BottomSheetModal, BottomSheetBackdrop, BottomSheetScrollView } from '@gorhom/bottom-sheet'
 import { useGlobalColors } from '../../assets/colors'
 
 import { startOfDay, endOfDay, addMinutes } from 'date-fns'
@@ -76,60 +76,51 @@ export default function SugestionsDetails({
 
 	const sugestions = generateSuggestions(details)
 
-	// if (details) {
-	// 	console.log(sugestions)
-
-	// 	sugestions.map(sugestion => {
-	// 		console.log(`Propozycja: `)
-	// 		console.log(`Rozpoczęcie: ` + new Date(sugestion.start).toLocaleString('pl-PL'))
-
-	// 		console.log(`Zakończenie: ` + new Date(sugestion.end).toLocaleString('pl-PL'))
-	// 	})
-	// }
-
 	return (
-		<BottomSheetModal
-			ref={bottomSheetModalRef}
-			index={1}
-			snapPoints={snapPoints}
-			backdropComponent={props => (
-				<BottomSheetBackdrop {...props} onPress={() => bottomSheetModalRef.current?.close()} />
-			)}>
-			<ScrollView style={styles.BottomSheetContainer}>
-				<Text style={styles.BottomContainerTitle}>Zaplanowane wizyty</Text>
+		<View style={{ flex: 1 }}>
+			<BottomSheetModal
+				ref={bottomSheetModalRef}
+				index={0}
+				snapPoints={snapPoints}
+				backdropComponent={props => (
+					<BottomSheetBackdrop {...props} onPress={() => bottomSheetModalRef.current?.close()} />
+				)}>
+				<BottomSheetScrollView contentContainerStyle={styles.BottomSheetContainer}>
+					<Text style={styles.BottomContainerTitle}>Zaplanowane wizyty</Text>
 
-				<View>
-					{details &&
-						details.length > 0 &&
-						details.map(visit => {
-							return (
-								<ScheduledVisit
-									key={visit.id}
-									patient_name={visit.patient_name}
-									address={visit.address}
-									time_start={visit.time_start}
-									time_end={visit.time_end}
-								/>
-							)
-						})}
-				</View>
+					<View>
+						{details &&
+							details.length > 0 &&
+							details.map(visit => {
+								return (
+									<ScheduledVisit
+										key={visit.id}
+										patient_name={visit.patient_name}
+										address={visit.address}
+										time_start={visit.time_start}
+										time_end={visit.time_end}
+									/>
+								)
+							})}
+					</View>
 
-				<Text style={[styles.BottomContainerTitle, { marginTop: 20 }]}>Sugerowane godziny</Text>
-				<View style={{ marginBottom: 50 }}>
-					{sugestions.length > 0 &&
-						sugestions.map((sugestion, index) => {
-							return (
-								<SugestionVisit
-									key={index}
-									time_start={sugestion.start}
-									time_end={sugestion.end}
-									handleSugestionClick={handleSugestionClick}
-								/>
-							)
-						})}
-				</View>
-			</ScrollView>
-		</BottomSheetModal>
+					<Text style={[styles.BottomContainerTitle, { marginTop: 20 }]}>Sugerowane godziny</Text>
+					<View style={{ marginBottom: 50 }}>
+						{sugestions.length > 0 &&
+							sugestions.map((sugestion, index) => {
+								return (
+									<SugestionVisit
+										key={index}
+										time_start={sugestion.start}
+										time_end={sugestion.end}
+										handleSugestionClick={handleSugestionClick}
+									/>
+								)
+							})}
+					</View>
+				</BottomSheetScrollView>
+			</BottomSheetModal>
+		</View>
 	)
 }
 
@@ -137,7 +128,6 @@ const generateStyles = COLORS =>
 	StyleSheet.create({
 		BottomSheetContainer: {
 			padding: 20,
-			flex: 1,
 		},
 
 		BottomContainerTitle: {

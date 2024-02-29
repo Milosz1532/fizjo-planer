@@ -37,7 +37,6 @@ export default function Main() {
 			const visitId = response.notification.request.content.data.visitId
 			if (visitId) {
 				navigate('manageVisit', { id: visitId })
-				console.log(`Użytkownik kliknął powiadomienie o spotkaniu o identyfikatorze: ${visitId}`)
 			}
 		})
 

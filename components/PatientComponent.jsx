@@ -109,7 +109,9 @@ const PatientComponent = ({ fullName, dateOfBirth, upcomingVisitsCount, onPress 
 				<View style={styles.PatientComponentContent}>
 					<View>
 						<Text style={styles.PatientComponentName}>{fullName}</Text>
-						<Text style={styles.PatientComponentAge}>Wiek: {calculateAge(dateOfBirth)}</Text>
+						<Text style={styles.PatientComponentAge}>
+							Wiek: {dateOfBirth ? calculateAge(dateOfBirth) : 'Brak danych'}
+						</Text>
 					</View>
 					<View style={styles.PatientComponentTime}>
 						<FontAwesome name={'calendar'} size={18} color={COLORS.main} />

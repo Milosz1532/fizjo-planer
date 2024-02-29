@@ -26,7 +26,7 @@ const SugestionVisit = ({ time_start, time_end, handleSugestionClick }) => {
 				</View>
 				<View style={styles.timeContainer}>
 					<Text style={styles.timeText}>{formattedStartTime}</Text>
-					<View style={{ paddingHorizontal: 5 }}>
+					<View style={{ paddingHorizontal: 5, padding: 0 }}>
 						<FontAwesome name={'angle-right'} size={18} color={COLORS.main} />
 					</View>
 					<Text style={styles.timeText}>{formattedEndTime}</Text>
@@ -82,6 +82,7 @@ const generateStyles = COLORS =>
 			flexDirection: 'row',
 			flex: 2,
 			flexWrap: 'wrap',
+			alignItems: 'center',
 		},
 
 		timeText: {

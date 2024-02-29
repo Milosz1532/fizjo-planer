@@ -13,7 +13,7 @@ const initDatabase = () => {
 	db.transaction(tx => {
 		// Patient Table
 		tx.executeSql(
-			'CREATE TABLE IF NOT EXISTS patients (id INTEGER PRIMARY KEY AUTOINCREMENT, full_name TEXT, date_of_birth DATE, phone_number TEXT, note TEXT, is_deleted INTEGER DEFAULT 0)',
+			'CREATE TABLE IF NOT EXISTS patients (id INTEGER PRIMARY KEY AUTOINCREMENT, full_name TEXT, date_of_birth DATE NULL DEFAULT NULL , phone_number TEXT, note TEXT, is_deleted INTEGER DEFAULT 0)',
 			[],
 			(_, results) => {
 				console.log('Table patient created successfully')
@@ -446,53 +446,50 @@ const fetchPatientList = callback => {
 const fetchPatientListWithAddresses = callback => {
 	db.transaction(tx => {
 		tx.executeSql(
-			'SELECT p.id as patientId, p.full_name, p.date_of_birth, p.phone_number, p.note, pa.id as addressId, pa.text as addressText ' +
-				'FROM patients p ' +
-				'LEFT JOIN patient_address pa ON p.id = pa.patient_id ' +
-				'WHERE pa.is_deleted = 0 AND pa.is_disposable = 0',
+			'SELECT id, full_name, date_of_birth, phone_number, note FROM patients',
 			[],
 			(_, { rows }) => {
-				const data = rows._array
+				const patients = rows._array
+				const patientIds = patients.map(patient => patient.id)
 
-				const patientsWithAddresses = data.reduce((acc, current) => {
-					const existingPatient = acc.find(patient => patient.id === current.patientId)
+				// Pobierz adresy dla wszystkich pacjentów
+				tx.executeSql(
+					'SELECT patient_id, id AS addressId, text AS addressText FROM patient_address WHERE patient_id IN (' +
+						patientIds.join(',') +
+						') AND is_deleted = 0 AND is_disposable = 0',
+					[],
+					(_, { rows }) => {
+						const addresses = rows._array
 
-					if (!existingPatient) {
-						const newPatient = {
-							id: current.patientId,
-							full_name: current.full_name,
-							date_of_birth: current.date_of_birth,
-							phone_number: current.phone_number,
-							note: current.note,
-							addresses: current.addressId
-								? [
-										{
-											id: current.addressId,
-											text: current.addressText,
-										},
-								  ]
-								: [],
+						// Przetwórz dane pacjentów i adresów
+						const patientsWithAddresses = patients.map(patient => {
+							const patientAddresses = addresses
+								.filter(address => address.patient_id === patient.id)
+								.map(address => ({ id: address.addressId, text: address.addressText }))
+							return {
+								id: patient.id,
+								full_name: patient.full_name,
+								date_of_birth: patient.date_of_birth,
+								phone_number: patient.phone_number,
+								note: patient.note,
+								addresses: patientAddresses,
+							}
+						})
+
+						if (callback) {
+							callback(patientsWithAddresses)
 						}
-
-						acc.push(newPatient)
-					} else {
-						if (current.addressId) {
-							existingPatient.addresses.push({
-								id: current.addressId,
-								text: current.addressText,
-							})
+					},
+					error => {
+						console.log('Error fetching addresses:', error)
+						if (callback) {
+							callback([])
 						}
 					}
-
-					return acc
-				}, [])
-
-				if (callback) {
-					callback(patientsWithAddresses.length > 0 ? patientsWithAddresses : [])
-				}
+				)
 			},
 			error => {
-				console.log('Error fetching patient data with addresses:', error)
+				console.log('Error fetching patients:', error)
 				if (callback) {
 					callback([])
 				}
@@ -502,9 +499,6 @@ const fetchPatientListWithAddresses = callback => {
 }
 
 const insertVisit = (patient_id, address_id, address_text, note, dateList) => {
-	console.log(`Address_id: ${address_id}`)
-	console.log(`Address_text: ${address_text}`)
-
 	db.transaction(
 		tx => {
 			const insertVisitWithAddress = (patient_id, address_id, note, dateList) => {
@@ -613,7 +607,7 @@ const fetchVisitById = (visitId, callback) => {
 		tx => {
 			tx.executeSql(
 				'SELECT v.id as visitId, v.patient_id, v.address_id, v.note, v.date, v.time_start, v.time_end, ' +
-					'p.full_name, pa.text as addressText ' +
+					'p.full_name, pa.text as addressText, p.is_deleted as patientIsDeleted, pa.is_deleted ' +
 					'FROM visit v ' +
 					'LEFT JOIN patients p ON v.patient_id = p.id ' +
 					'LEFT JOIN patient_address pa ON v.address_id = pa.id ' +
@@ -632,6 +626,7 @@ const fetchVisitById = (visitId, callback) => {
 							time_start: visitData.time_start,
 							time_end: visitData.time_end,
 							patient_full_name: visitData.full_name,
+							patient_is_deleted: visitData.patientIsDeleted,
 						}
 						callback(visit)
 					} else {
