@@ -2,7 +2,15 @@ import * as SQLite from 'expo-sqlite'
 import * as DocumentPicker from 'expo-document-picker'
 import * as Sharing from 'expo-sharing'
 import * as FileSystem from 'expo-file-system'
-import { startOfWeek, addDays, startOfDay, endOfDay } from 'date-fns'
+import {
+	format,
+	startOfMonth,
+	endOfMonth,
+	startOfWeek,
+	addDays,
+	startOfDay,
+	endOfDay,
+} from 'date-fns'
 import plLocale from 'date-fns/locale/pl'
 import { Platform } from 'react-native'
 import { ALERT_TYPE, Dialog } from 'react-native-alert-notification'
@@ -643,6 +651,57 @@ const fetchAllVisits = callback => {
 	)
 }
 
+const fetchVisitsForMonth = (month, callback) => {
+	const from = format(startOfMonth(month), 'yyyy-MM-dd')
+	const till = format(endOfMonth(month), 'yyyy-MM-dd')
+
+	console.log(from)
+	console.log(till)
+
+	db.transaction(
+		tx => {
+			tx.executeSql(
+				"SELECT v.id as visitId, v.patient_id, v.address_id, v.note, v.date, strftime('%Y-%m-%d', v.date/1000, 'unixepoch') as formattedDate, v.time_start, v.time_end, " +
+					'p.full_name, pa.text as addressText ' +
+					'FROM visit v ' +
+					'LEFT JOIN patients p ON v.patient_id = p.id ' +
+					'LEFT JOIN patient_address pa ON v.address_id = pa.id ' +
+					'WHERE v.is_deleted = 0 AND formattedDate BETWEEN ? AND ?',
+				[from, till],
+				(_, { rows }) => {
+					const data = rows._array
+
+					const visits = data.map(current => ({
+						id: current.visitId,
+						patient_id: current.patient_id,
+						address: current.addressText,
+						note: current.note,
+						date: current.date,
+						time_start: current.time_start,
+						time_end: current.time_end,
+						patient_full_name: current.full_name,
+					}))
+
+					if (callback) {
+						callback(visits)
+					}
+				},
+				(tx, error) => {
+					console.log('Transaction error:', error)
+
+					if (callback) {
+						callback([], error)
+					}
+				}
+			)
+		},
+		error => {
+			console.log('Transaction error:', error)
+			throw new Error('Transaction failed')
+		}
+	)
+}
+
 const fetchVisitById = (visitId, callback) => {
 	db.transaction(
 		tx => {
@@ -1013,6 +1072,7 @@ export {
 	fetchPatientListWithAddresses,
 	insertVisit,
 	fetchAllVisits,
+	fetchVisitsForMonth,
 	fetchVisitById,
 	updateVisit,
 	fetchAllVisitsThisWeek,

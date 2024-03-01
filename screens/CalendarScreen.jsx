@@ -11,7 +11,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { StatusBar } from 'expo-status-bar'
 
-import { fetchAllVisits } from '../services/Database'
+import { fetchAllVisits, fetchVisitsForMonth } from '../services/Database'
 
 import moment from 'moment'
 import Timetable from 'react-native-calendar-timetable'
@@ -19,6 +19,7 @@ import Timetable from 'react-native-calendar-timetable'
 import ScheduleComponent from '../components/ScheduleComponent'
 
 import LoadingScreen from '../components/LoadingScreen'
+import { format } from 'date-fns'
 
 LocaleConfig.locales['pl'] = {
 	monthNames: [
@@ -67,8 +68,13 @@ export default function CalendaScreen() {
 	const [markedDates, setMarkedDates] = useState({})
 	const [isLoading, setIsLoading] = useState(true)
 
-	const fetchData = async () => {
-		fetchAllVisits(data => {
+	const [currentMonth, setCurrentMonth] = useState(format(new Date(), 'yyyy-MM-dd'))
+
+	const loadVisitsAsync = async month => {
+		console.log('Selected month:', month)
+		setIsLoading(true)
+		setSelectedDate(false)
+		fetchVisitsForMonth(month, data => {
 			setScheduleList(data)
 			const updatedMarkedDates = {}
 			data.forEach((item, index) => {
@@ -87,9 +93,8 @@ export default function CalendaScreen() {
 
 	useFocusEffect(
 		useCallback(() => {
-			setIsLoading(true)
 			setSelectedDate(false)
-			fetchData()
+			loadVisitsAsync(currentMonth)
 		}, [])
 	)
 
@@ -183,6 +188,11 @@ export default function CalendaScreen() {
 		},
 	})
 
+	const handleChangeMonth = async month => {
+		setCurrentMonth(month.dateString)
+		loadVisitsAsync(month.dateString)
+	}
+
 	return (
 		<View style={{ flex: 1, backgroundColor: COLORS.main }}>
 			<StatusBar style='dark' />
@@ -209,8 +219,10 @@ export default function CalendaScreen() {
 											<FontAwesome name={'angle-right'} size={18} color={COLORS.main} />
 										)
 									}
+									current={currentMonth}
 									onDayPress={handleDayPress}
 									markedDates={markedDates}
+									onMonthChange={handleChangeMonth}
 									theme={{
 										backgroundColor: 'transparent',
 										calendarBackground: 'transparent',
