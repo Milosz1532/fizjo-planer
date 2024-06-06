@@ -1,49 +1,61 @@
 {
-	"expo": {
-		"name": "Fizjo planer",
-		"slug": "fizjo-planer",
-		"version": "1.0.0",
-		"orientation": "portrait",
-		"icon": "./assets/icon.png",
-		"userInterfaceStyle": "automatic",
-		"splash": {
-			"image": "./assets/splash.png",
-			"resizeMode": "contain",
-			"backgroundColor": "#ffffff"
-		},
-		"assetBundlePatterns": ["**/*"],
-		"ios": {
-			"supportsTablet": true,
-			"usesIcloudStorage": true,
-			"bundleIdentifier": "com.milosz1532.fizjoplaner",
-			"permissions": ["BACKGROUND_FETCH"],
-			"infoPlist": {
-				"UIBackgroundModes": ["location", "fetch", "remote-notification"]
-			}
-		},
-		"android": {
-			"adaptiveIcon": {
-				"foregroundImage": "./assets/adaptive-icon.png",
-				"backgroundColor": "#ffffff"
-			},
-			"permissions": ["NOTIFICATIONS", "WRITE_EXTERNAL_STORAGE", "BACKGROUND_FETCH"],
-			"package": "com.milosz1532.fizjoplaner"
-		},
-		"web": {
-			"favicon": "./assets/favicon.png"
-		},
-		"extra": {
-			"eas": {
-				"projectId": "acaa0265-6f1e-4e66-a4ef-87bafa739638"
-			}
-		},
-		"plugins": [
-			[
-				"expo-document-picker",
-				{
-					"iCloudContainerEnvironment": "Development"
-				}
-			]
-		]
-	}
+  "expo": {
+    "name": "Fizjo planer",
+    "slug": "fizjo-planer",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "usesIcloudStorage": true,
+      "bundleIdentifier": "com.milosz1532.fizjoplaner",
+      "permissions": [
+        "BACKGROUND_FETCH"
+      ],
+      "infoPlist": {
+        "UIBackgroundModes": [
+          "location",
+          "fetch",
+          "remote-notification"
+        ]
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "permissions": [
+        "NOTIFICATIONS",
+        "WRITE_EXTERNAL_STORAGE",
+        "BACKGROUND_FETCH"
+      ],
+      "package": "com.mk_code.fizjoplaner"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "acaa0265-6f1e-4e66-a4ef-87bafa739638"
+      }
+    },
+    "plugins": [
+      [
+        "expo-document-picker",
+        {
+          "iCloudContainerEnvironment": "Development"
+        }
+      ]
+    ]
+  }
 }

@@ -655,9 +655,6 @@ const fetchVisitsForMonth = (month, callback) => {
 	const from = format(startOfMonth(month), 'yyyy-MM-dd')
 	const till = format(endOfMonth(month), 'yyyy-MM-dd')
 
-	console.log(from)
-	console.log(till)
-
 	db.transaction(
 		tx => {
 			tx.executeSql(

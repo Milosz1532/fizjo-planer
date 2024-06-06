@@ -6,6 +6,8 @@ import { Text, View } from 'react-native'
 import ManagePatient from './screens/ManagementScreens/ManagePatient'
 import ManageVisit from './screens/ManagementScreens/ManageVisit'
 
+import LoginPage from './screens/LoginPage'
+
 import { useSettings } from './SettingsContext'
 import AppIntro from './AppIntro'
 import { useNavigation } from '@react-navigation/native'
@@ -59,7 +61,7 @@ export default function Main() {
 	} else {
 		return (
 			<Stack.Navigator>
-				<Stack.Screen
+				{/* <Stack.Screen
 					name='BottomNavigation'
 					options={{ headerShown: false }}
 					component={BottomTabNavigation}
@@ -69,7 +71,8 @@ export default function Main() {
 					options={{ headerShown: false }}
 					component={ManagePatient}
 				/>
-				<Stack.Screen name='manageVisit' options={{ headerShown: false }} component={ManageVisit} />
+				<Stack.Screen name='manageVisit' options={{ headerShown: false }} component={ManageVisit} /> */}
+				<Stack.Screen name='LoginPage' options={{ headerShown: false }} component={LoginPage} />
 			</Stack.Navigator>
 		)
 	}

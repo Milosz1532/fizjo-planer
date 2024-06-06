@@ -11,7 +11,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { StatusBar } from 'expo-status-bar'
 
-import { fetchAllVisits, fetchVisitsForMonth } from '../services/Database'
+import { fetchVisitsForMonth } from '../services/Database'
 
 import moment from 'moment'
 import Timetable from 'react-native-calendar-timetable'
@@ -71,7 +71,6 @@ export default function CalendaScreen() {
 	const [currentMonth, setCurrentMonth] = useState(format(new Date(), 'yyyy-MM-dd'))
 
 	const loadVisitsAsync = async month => {
-		console.log('Selected month:', month)
 		setIsLoading(true)
 		setSelectedDate(false)
 		fetchVisitsForMonth(month, data => {
@@ -234,7 +233,7 @@ export default function CalendaScreen() {
 									}}
 								/>
 							</View>
-							<View style={{ marginTop: 10, paddingStart: 5, marginBottom: 15 }}>
+							<View style={{ marginTop: 10, paddingStart: 1, marginBottom: 15 }}>
 								{selectedDay ? (
 									<>
 										<Timetable
