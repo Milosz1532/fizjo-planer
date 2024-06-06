@@ -61,7 +61,7 @@ export default function Main() {
 	} else {
 		return (
 			<Stack.Navigator>
-				{/* <Stack.Screen
+				<Stack.Screen
 					name='BottomNavigation'
 					options={{ headerShown: false }}
 					component={BottomTabNavigation}
@@ -71,8 +71,8 @@ export default function Main() {
 					options={{ headerShown: false }}
 					component={ManagePatient}
 				/>
-				<Stack.Screen name='manageVisit' options={{ headerShown: false }} component={ManageVisit} /> */}
-				<Stack.Screen name='LoginPage' options={{ headerShown: false }} component={LoginPage} />
+				<Stack.Screen name='manageVisit' options={{ headerShown: false }} component={ManageVisit} />
+				{/* <Stack.Screen name='LoginPage' options={{ headerShown: false }} component={LoginPage} /> */}
 			</Stack.Navigator>
 		)
 	}
