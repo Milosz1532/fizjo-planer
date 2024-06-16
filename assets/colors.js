@@ -30,6 +30,7 @@ export const COLORS = {
 		element_color_4: '#A167FF',
 		element_color_5: '#FC8282',
 		element_color_6: '#565252',
+		element_color_7: '#C65DC2',
 	},
 	dark: {
 		main: '#8388FF',
@@ -60,6 +61,7 @@ export const COLORS = {
 		element_color_4: '#A167FF',
 		element_color_5: '#FC8282',
 		element_color_6: '#565252',
+		element_color_7: '#C65DC2',
 	},
 }
 

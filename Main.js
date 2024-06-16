@@ -6,7 +6,7 @@ import { Text, View } from 'react-native'
 import ManagePatient from './screens/ManagementScreens/ManagePatient'
 import ManageVisit from './screens/ManagementScreens/ManageVisit'
 
-import LoginPage from './screens/LoginPage'
+import LoginPage from './screens/auth/LoginPage'
 
 import { useSettings } from './SettingsContext'
 import AppIntro from './AppIntro'
@@ -14,6 +14,9 @@ import { useNavigation } from '@react-navigation/native'
 
 import * as Notifications from 'expo-notifications'
 import { registerForPushNotificationsAsync } from './services/NotificationService'
+import CreatePinCode from './screens/auth/CreatePinCode'
+import * as SecureStore from 'expo-secure-store'
+import ChangePinCode from './screens/auth/ChangePinCode'
 
 const Stack = createNativeStackNavigator()
 
@@ -58,9 +61,12 @@ export default function Main() {
 
 	if (!settings.user) {
 		return <AppIntro />
+	} else if (!settings.is_pin_code) {
+		return <CreatePinCode />
 	} else {
 		return (
 			<Stack.Navigator>
+				<Stack.Screen name='LoginPage' options={{ headerShown: false }} component={LoginPage} />
 				<Stack.Screen
 					name='BottomNavigation'
 					options={{ headerShown: false }}
@@ -72,7 +78,11 @@ export default function Main() {
 					component={ManagePatient}
 				/>
 				<Stack.Screen name='manageVisit' options={{ headerShown: false }} component={ManageVisit} />
-				{/* <Stack.Screen name='LoginPage' options={{ headerShown: false }} component={LoginPage} /> */}
+				<Stack.Screen
+					name='ChangePinCode'
+					options={{ headerShown: false }}
+					component={ChangePinCode}
+				/>
 			</Stack.Navigator>
 		)
 	}

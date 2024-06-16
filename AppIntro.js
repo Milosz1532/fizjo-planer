@@ -17,11 +17,15 @@ import Slider2 from './components/Introduction/Slider2'
 import Slider3 from './components/Introduction/Slider3'
 import Slider4 from './components/Introduction/Slider4'
 import { useSettings } from './SettingsContext'
+import { useNavigation } from '@react-navigation/native'
 
 const AppIntro = () => {
 	const COLORS = useGlobalColors()
 	const windowWidth = useWindowDimensions().width
 	const scrollViewRef = useRef(null)
+
+	const { navigate } = useNavigation()
+
 	const handleSlideChange = index => {
 		scrollViewRef.current.scrollToIndex({ index, animated: true })
 	}
@@ -63,6 +67,8 @@ const AppIntro = () => {
 			darkMode: false,
 			user: userInput,
 			joinDate: new Date(),
+			is_pin_code: false,
+			biometricLoginEnabled: false,
 		})
 	}
 

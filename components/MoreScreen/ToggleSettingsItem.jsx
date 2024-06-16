@@ -1,10 +1,16 @@
 import React from 'react'
 import { View, Text, StyleSheet } from 'react-native'
 import { FontAwesome } from '@expo/vector-icons'
+import { MaterialCommunityIcons } from '@expo/vector-icons'
 import { useGlobalColors } from '../../assets/colors'
 import ToggleSwitch from 'toggle-switch-react-native'
 
-export default ToggleSettingsItem = ({ icon, label, initialValue, onToggle }) => {
+const iconComponents = {
+	MaterialCommunityIcons: MaterialCommunityIcons,
+	FontAwesome: FontAwesome,
+}
+
+export default ToggleSettingsItem = ({ icon, iconType, label, initialValue, onToggle }) => {
 	const COLORS = useGlobalColors()
 
 	const styles = StyleSheet.create({
@@ -37,11 +43,13 @@ export default ToggleSettingsItem = ({ icon, label, initialValue, onToggle }) =>
 		},
 	})
 
+	const IconComponent = iconComponents[icon.type] || FontAwesome
+
 	return (
 		<View style={styles.toggleSettingsItemContainer}>
 			<View
 				style={[styles.toggleSettingsItemIconContainer, { backgroundColor: icon.backgroundColor }]}>
-				<FontAwesome name={icon.name} style={styles.toggleSettingsItemIcon} />
+				<IconComponent name={icon.name} style={styles.toggleSettingsItemIcon} />
 			</View>
 			<Text style={styles.toggleSettingsItemText}>{label}</Text>
 			<View style={styles.toggleSettingsItemToggleContainer}>

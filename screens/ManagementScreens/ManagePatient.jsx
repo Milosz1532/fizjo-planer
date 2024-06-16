@@ -10,6 +10,7 @@ import {
 	Keyboard,
 	Alert,
 	TouchableWithoutFeedback,
+	Platform,
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { StatusBar } from 'expo-status-bar'
@@ -59,6 +60,8 @@ export default function ManagePatient({ route }) {
 	const styles = generateStyles(COLORS)
 
 	const PATIENT_ID = id
+	let lastAddressId = 0
+	let lastProblemId = 0
 
 	const [patientData, setPatientData] = useState(null)
 	const [fullName, setFullName] = useState('')
@@ -100,8 +103,27 @@ export default function ManagePatient({ route }) {
 				setBirthday(result.date_of_birth ? new Date(result.date_of_birth) : null)
 				setPhoneNumber(result.phone_number)
 				setNote(result.note)
-				setProblemList(result.problems)
-				setLocationList(result.addresses)
+
+				const tempProblems = []
+				result.problems.forEach((el, index) => {
+					const modifiedElement = {
+						...el,
+						tempId: index + 1,
+					}
+					tempProblems.push(modifiedElement)
+				})
+
+				const tempAddresses = []
+				result.addresses.forEach((el, index) => {
+					const modifiedElement = {
+						...el,
+						tempId: index + 1,
+					}
+					tempAddresses.push(modifiedElement)
+				})
+
+				setProblemList(tempProblems)
+				setLocationList(tempAddresses)
 				setIsLoading(false)
 			} else {
 				Dialog.show({
@@ -113,6 +135,7 @@ export default function ManagePatient({ route }) {
 						Dialog.hide()
 						goBack()
 					},
+					closeOnOverlayTap: false,
 				})
 			}
 		} catch (error) {
@@ -125,6 +148,7 @@ export default function ManagePatient({ route }) {
 					Dialog.hide()
 					goBack()
 				},
+				closeOnOverlayTap: false,
 			})
 		}
 	}
@@ -143,7 +167,7 @@ export default function ManagePatient({ route }) {
 			return
 		}
 		const newProblem = {
-			id: problemList.length > 0 ? problemList[problemList.length - 1].id + 1 : 1,
+			tempId: problemList.length > 0 ? problemList[problemList.length - 1].tempId + 1 : 1,
 			text: addProblemValue.trim(),
 		}
 		setProblemList(prevList => [...prevList, newProblem])
@@ -159,7 +183,7 @@ export default function ManagePatient({ route }) {
 			return
 		}
 		const newLocation = {
-			id: locationList.length > 0 ? locationList[locationList.length - 1].id + 1 : 1,
+			tempId: locationList.length > 0 ? locationList[locationList.length - 1].tempId + 1 : 1,
 			text: addLocationValue.trim(),
 		}
 		setLocationList(prevList => [...prevList, newLocation])
@@ -171,12 +195,12 @@ export default function ManagePatient({ route }) {
 
 	const handleRemoveProblem = id => {
 		const prevProblems = problemList
-		setProblemList(prevProblems.filter(problem => problem.id !== id))
+		setProblemList(prevProblems.filter(problem => problem.tempId !== id))
 	}
 
 	const handleRemoveLocation = id => {
 		const prevLocations = locationList
-		setLocationList(prevLocations.filter(location => location.id !== id))
+		setLocationList(prevLocations.filter(location => location.tempId !== id))
 	}
 
 	const handleAddPatient = () => {
@@ -186,6 +210,7 @@ export default function ManagePatient({ route }) {
 				title: 'Problem',
 				textBody: 'Wypełnij poprawnie pola formularza',
 				button: 'OK',
+				closeOnOverlayTap: false,
 			})
 			return
 		}
@@ -210,6 +235,7 @@ export default function ManagePatient({ route }) {
 						Dialog.hide()
 						goBack()
 					},
+					closeOnOverlayTap: false,
 				})
 			} catch (ex) {
 				Dialog.show({
@@ -217,6 +243,7 @@ export default function ManagePatient({ route }) {
 					title: 'Błąd',
 					textBody: 'Wystąpił problem podczas edycji pacjenta. Spróbuj ponownie.',
 					button: 'OK',
+					closeOnOverlayTap: false,
 				})
 			}
 		} else {
@@ -238,6 +265,7 @@ export default function ManagePatient({ route }) {
 						Dialog.hide()
 						goBack()
 					},
+					closeOnOverlayTap: false,
 				})
 			} catch (ex) {
 				Dialog.show({
@@ -245,6 +273,7 @@ export default function ManagePatient({ route }) {
 					title: 'Błąd',
 					textBody: 'Wystąpił problem podczas dodawania pacjenta. Spróbuj ponownie.',
 					button: 'OK',
+					closeOnOverlayTap: false,
 				})
 			}
 		}
@@ -286,6 +315,7 @@ export default function ManagePatient({ route }) {
 										Dialog.hide()
 										goBack()
 									},
+									closeOnOverlayTap: false,
 								})
 							} else {
 								Dialog.show({
@@ -296,6 +326,7 @@ export default function ManagePatient({ route }) {
 									onPressButton: () => {
 										Dialog.hide()
 									},
+									closeOnOverlayTap: false,
 								})
 							}
 						})
@@ -396,8 +427,8 @@ export default function ManagePatient({ route }) {
 											<View>
 												{problemList.map(problem => (
 													<ListItemComponent
-														key={problem.id}
-														id={problem.id}
+														key={problem.tempId}
+														id={problem.tempId}
 														text={problem.text}
 														icon={'warning'}
 														iconColor={COLORS.warning_color}
@@ -439,8 +470,8 @@ export default function ManagePatient({ route }) {
 											<View>
 												{locationList.map(location => (
 													<ListItemComponent
-														key={location.id}
-														id={location.id}
+														key={location.tempId}
+														id={location.tempId}
 														text={location.text}
 														icon={'location-pin'}
 														iconSize={18}

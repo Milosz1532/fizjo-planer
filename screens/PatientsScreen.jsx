@@ -23,6 +23,7 @@ export default function PatientsScreen() {
 	const { navigate } = useNavigation()
 	const [patientList, setPatientList] = useState([])
 	const [isLoading, setIsLoading] = useState(true)
+	const [searchPatientsInput, setSearchPatientsInput] = useState('')
 
 	const fetchData = async () => {
 		setIsLoading(true)
@@ -71,6 +72,11 @@ export default function PatientsScreen() {
 		},
 	})
 
+	// Filtrujemy pacjentów na podstawie wyszukiwania
+	const filteredPatients = patientList.filter(el =>
+		el.full_name.toLowerCase().includes(searchPatientsInput.toLowerCase())
+	)
+
 	return (
 		<View style={{ flex: 1, backgroundColor: COLORS.main }}>
 			<StatusBar style='dark' />
@@ -92,6 +98,8 @@ export default function PatientsScreen() {
 								<TextInput
 									style={styles.searchInput}
 									placeholderTextColor={COLORS.placeholder_color}
+									value={searchPatientsInput}
+									onChangeText={text => setSearchPatientsInput(text)}
 									placeholder='Wyszukaj pacjenta...'
 								/>
 								<FontAwesome name={'search'} size={16} color={COLORS.header_text_gray_color} />
@@ -100,7 +108,7 @@ export default function PatientsScreen() {
 							<View style={{ marginTop: 10 }}>
 								<Text style={globalStyles.containerTitle}>Lista pacjentów</Text>
 
-								{patientList.map(el => (
+								{filteredPatients.map(el => (
 									<PatientComponent
 										key={el.id}
 										fullName={el.full_name}

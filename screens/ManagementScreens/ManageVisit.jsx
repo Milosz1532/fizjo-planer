@@ -299,6 +299,7 @@ export default function ManageVisit({ route }) {
 											Dialog.hide()
 											goBack()
 										},
+										closeOnOverlayTap: false,
 									})
 								} else {
 									if (visit) {
@@ -329,6 +330,7 @@ export default function ManageVisit({ route }) {
 												Dialog.hide()
 												goBack()
 											},
+											closeOnOverlayTap: false,
 										})
 									}
 								}
@@ -437,6 +439,7 @@ export default function ManageVisit({ route }) {
 				onPressButton: () => {
 					Dialog.hide()
 				},
+				closeOnOverlayTap: false,
 			})
 			return
 		}
@@ -462,6 +465,7 @@ export default function ManageVisit({ route }) {
 								Dialog.hide()
 								goBack()
 							},
+							closeOnOverlayTap: false,
 						})
 					} else {
 						Dialog.show({
@@ -472,6 +476,7 @@ export default function ManageVisit({ route }) {
 							onPressButton: () => {
 								Dialog.hide()
 							},
+							closeOnOverlayTap: false,
 						})
 					}
 				}
@@ -501,6 +506,7 @@ export default function ManageVisit({ route }) {
 						Dialog.hide()
 						goBack()
 					},
+					closeOnOverlayTap: false,
 				})
 			} catch (error) {
 				Dialog.show({
@@ -511,6 +517,7 @@ export default function ManageVisit({ route }) {
 					onPressButton: () => {
 						Dialog.hide()
 					},
+					closeOnOverlayTap: false,
 				})
 			}
 		}
@@ -563,6 +570,7 @@ export default function ManageVisit({ route }) {
 										Dialog.hide()
 										goBack()
 									},
+									closeOnOverlayTap: false,
 								})
 							} else {
 								Dialog.show({
@@ -573,6 +581,7 @@ export default function ManageVisit({ route }) {
 									onPressButton: () => {
 										Dialog.hide()
 									},
+									closeOnOverlayTap: false,
 								})
 							}
 						})

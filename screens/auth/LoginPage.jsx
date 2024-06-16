@@ -2,8 +2,9 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { StatusBar } from 'expo-status-bar'
-import { useGlobalColors } from '../assets/colors'
-import { useGlobalStyles } from '../assets/styles'
+import { useGlobalColors } from '../../assets/colors'
+import { useGlobalStyles } from '../../assets/styles'
+import { useSettings } from '../../SettingsContext'
 
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 import { Ionicons } from '@expo/vector-icons'
@@ -17,11 +18,36 @@ import Animated, {
 	withSequence,
 	withTiming,
 } from 'react-native-reanimated'
+import { useNavigation } from '@react-navigation/native'
+
+import LoadingScreen from '../../components/LoadingScreen'
+
+function BiometricButton({ biometricType, settings, onBiometricPress, styles }) {
+	if (!settings.biometricLoginEnabled) {
+		return <View style={styles.numberView}></View>
+	} else {
+		return (
+			<View>
+				{biometricType && (
+					<TouchableOpacity style={styles.numberView} onPress={onBiometricPress}>
+						{biometricType === 'Face ID' ? (
+							<MaterialCommunityIcons name='face-recognition' size={24} color='black' />
+						) : (
+							<Ionicons name='finger-print-outline' size={24} color='black' />
+						)}
+					</TouchableOpacity>
+				)}
+			</View>
+		)
+	}
+}
 
 export default function LoginPage() {
 	const COLORS = useGlobalColors()
 	const globalStyles = useGlobalStyles()
 	const styles = generateStyles(COLORS)
+
+	const [isLoading, setIsLoading] = useState(false)
 
 	const [code, setCode] = useState([])
 	const codeLength = Array(6).fill(0)
@@ -33,7 +59,10 @@ export default function LoginPage() {
 		}
 	})
 
+	const { navigate } = useNavigation()
+
 	const [biometricType, setBiometricType] = useState(null)
+	const { settings } = useSettings()
 
 	useEffect(() => {
 		checkBiometricSupport()
@@ -61,22 +90,31 @@ export default function LoginPage() {
 	}
 
 	const handleNumberPress = number => {
+		if (isLoading) return
 		Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
 		setCode([...code, number])
 	}
 
 	const handleNumberBackspace = () => {
+		if (isLoading) return
 		Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
 		setCode(code.slice(0, -1))
 	}
 
 	const onBiometricPress = async () => {
-		const { success } = await LocalAuthentication.authenticateAsync()
-		if (success) {
-			console.log(`Logujemy`)
-		} else {
-			console.log(`Nie udało się :(`)
-			Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error)
+		if (isLoading) return
+		setIsLoading(true)
+		try {
+			const { success } = await LocalAuthentication.authenticateAsync()
+			if (success) {
+				navigate('BottomNavigation', {})
+			} else {
+				Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error)
+			}
+		} catch (error) {
+			console.error('Error during biometric authentication', error)
+		} finally {
+			setIsLoading(false)
 		}
 	}
 
@@ -84,21 +122,32 @@ export default function LoginPage() {
 	const TIME = 80
 
 	useEffect(() => {
-		if (code.length === 6) {
-			if (code.join('') === '123456') {
-				console.log(`Zalogowany`)
-				setCode([])
-			} else {
-				console.log(`Błędy PIN`)
-				offset.value = withSequence(
-					withTiming(-OFFSET, { duration: TIME / 2 }),
-					withRepeat(withTiming(OFFSET, { duration: TIME }), 4, true),
-					withTiming(0, { duration: TIME / 2 })
-				)
-				Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error)
-				setCode([])
+		const verifyPin = async () => {
+			if (code.length === 6) {
+				setIsLoading(true)
+				try {
+					const savedPin = await SecureStore.getItemAsync('PIN_CODE')
+					if (savedPin && code.join('') === savedPin) {
+						setCode([])
+						navigate('BottomNavigation', {})
+					} else {
+						offset.value = withSequence(
+							withTiming(-OFFSET, { duration: TIME / 2 }),
+							withRepeat(withTiming(OFFSET, { duration: TIME }), 4, true),
+							withTiming(0, { duration: TIME / 2 })
+						)
+						Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error)
+						setCode([])
+					}
+				} catch (error) {
+					console.error('Błąd podczas odczytu PIN-u:', error)
+				} finally {
+					setIsLoading(false)
+				}
 			}
 		}
+
+		verifyPin()
 	}, [code])
 
 	return (
@@ -106,22 +155,32 @@ export default function LoginPage() {
 			<StatusBar style='dark' />
 
 			<View style={styles.container}>
-				<Text style={styles.titleText}>Witaj ponownie</Text>
+				<View></View>
 
-				<Animated.View style={[styles.codeView, style]}>
-					{codeLength.map((_, index) => (
-						<View
-							key={index}
-							style={[
-								styles.codeEmpty,
-								{
-									backgroundColor:
-										code[index] !== undefined ? COLORS.main : COLORS.light_border_color,
-								},
-							]}
-						/>
-					))}
-				</Animated.View>
+				<View>
+					<Text style={styles.titleText}>Witaj ponownie</Text>
+
+					{!isLoading ? (
+						<Animated.View style={[styles.codeView, style]}>
+							{codeLength.map((_, index) => (
+								<View
+									key={index}
+									style={[
+										styles.codeEmpty,
+										{
+											backgroundColor:
+												code[index] !== undefined ? COLORS.main : COLORS.light_border_color,
+										},
+									]}
+								/>
+							))}
+						</Animated.View>
+					) : (
+						<View style={{ paddingTop: 80 }}>
+							<LoadingScreen />
+						</View>
+					)}
+				</View>
 
 				<View style={styles.numbersView}>
 					<View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
@@ -158,15 +217,12 @@ export default function LoginPage() {
 					</View>
 
 					<View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-						{biometricType && (
-							<TouchableOpacity style={styles.numberView} onPress={onBiometricPress}>
-								{biometricType === 'Face ID' ? (
-									<Ionicons name='backspace-outline' size={24} color='black' />
-								) : (
-									<Ionicons name='finger-print-outline' size={24} color='black' />
-								)}
-							</TouchableOpacity>
-						)}
+						<BiometricButton
+							biometricType={biometricType}
+							settings={settings}
+							onBiometricPress={onBiometricPress}
+							styles={styles}
+						/>
 
 						<TouchableOpacity style={styles.numberView} onPress={() => handleNumberPress(0)}>
 							<Text style={styles.number}>0</Text>
@@ -192,7 +248,9 @@ const generateStyles = COLORS =>
 		},
 		container: {
 			marginHorizontal: 30,
-			marginVertical: 90,
+			marginVertical: 40,
+			justifyContent: 'space-between',
+			flex: 1,
 		},
 
 		codeView: {

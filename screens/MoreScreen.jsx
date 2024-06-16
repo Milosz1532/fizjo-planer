@@ -19,6 +19,7 @@ export default function MoreScreen() {
 	const { settings, updateSetting } = useSettings()
 	const [notificationsEnabled, setNotificationsEnabled] = useState(false)
 	const isDarkMode = settings.darkMode || false
+	const isBiometricAuth = settings.biometricLoginEnabled || false
 
 	const appState = useRef(AppState.currentState)
 	const [appStateVisible, setAppStateVisible] = useState(appState.current)
@@ -44,6 +45,11 @@ export default function MoreScreen() {
 	const toggleDarkMode = () => {
 		const newDarkModeValue = !isDarkMode
 		updateSetting('darkMode', newDarkModeValue)
+	}
+
+	const toggleBiometricAuth = () => {
+		const newValue = !isBiometricAuth
+		updateSetting('biometricLoginEnabled', newValue)
 	}
 
 	const COLORS = useGlobalColors()
@@ -112,6 +118,7 @@ export default function MoreScreen() {
 				onPressButton: () => {
 					Dialog.hide()
 				},
+				closeOnOverlayTap: false,
 			})
 		}
 	}
@@ -134,6 +141,21 @@ export default function MoreScreen() {
 							icon={{ name: 'user-circle-o', backgroundColor: COLORS.warning_color }}
 							label='Zmiana danych konta'
 							onPress={() => navigate('ChangePersonalData')}
+						/>
+						<SettingsItem
+							icon={{ name: 'lock', backgroundColor: COLORS.element_color_3 }}
+							label='Zmiana kodu PIN'
+							onPress={() => navigate('ChangePinCode')}
+						/>
+						<ToggleSettingsItem
+							icon={{
+								name: 'face-recognition',
+								type: 'MaterialCommunityIcons',
+								backgroundColor: COLORS.element_color_7,
+							}}
+							label='Logowanie biometryczne'
+							initialValue={isBiometricAuth}
+							onToggle={toggleBiometricAuth}
 						/>
 						<Text style={[globalStyles.containerMediumText, { marginTop: 20 }]}>
 							Ustawienia ogólne

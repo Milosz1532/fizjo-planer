@@ -36,6 +36,7 @@ export default function ChangePersonalDateScreen() {
 				Dialog.hide()
 				goBack()
 			},
+			closeOnOverlayTap: false,
 		})
 	}
 

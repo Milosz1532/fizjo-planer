@@ -252,6 +252,9 @@ const updatePatient = (
 	updatedProblems,
 	updatedAddresses
 ) => {
+	console.log(updatedProblems)
+	console.log(updatedAddresses)
+
 	db.transaction(
 		tx => {
 			tx.executeSql(
@@ -1005,6 +1008,7 @@ const exportDatabase = async () => {
 		onPressButton: () => {
 			Dialog.hide()
 		},
+		closeOnOverlayTap: false,
 	})
 }
 
@@ -1056,6 +1060,7 @@ const importDatabase = async () => {
 		onPressButton: () => {
 			Dialog.hide()
 		},
+		closeOnOverlayTap: false,
 	})
 }
 
