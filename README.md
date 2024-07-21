@@ -27,7 +27,7 @@ environment running
 
 ```
 
-git clone git clone https://github.com/milosz1532/fizjo-planer.git
+git clone https://github.com/milosz1532/fizjo-planer.git
 
 ```
 
