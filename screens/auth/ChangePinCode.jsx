@@ -11,7 +11,6 @@ import { MaterialIcons } from '@expo/vector-icons'
 import * as SecureStore from 'expo-secure-store'
 import * as Haptics from 'expo-haptics'
 
-import backgroundImage from '../../assets/images/app-view-background-01.png'
 import pinCodeIcon from '../../assets/images/see-no-evil-monkey.png'
 
 import Animated, {
